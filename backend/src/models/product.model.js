@@ -1,0 +1,1 @@
+// product model to interact with the database
