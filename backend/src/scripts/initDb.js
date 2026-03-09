@@ -19,17 +19,14 @@ async function runSQLFile(filePath) {
 
 async function initDb() {
     try {
-        // Chạy file tạo bảng trước (Migrations)
-        await runSQLFile('../../database/migrations/01_init_schema.sql');
-
-        // Chạy file chèn dữ liệu mẫu (Seeds)
+        // Only re-seed data (schema is auto-created by Postgres initdb.d on first run)
+        // This is useful when you want to reset data without destroying the volume
         await runSQLFile('../../database/seeds/01_dummy_data.sql');
 
-        console.log('--- Database Initialization Completed Successfully! ---');
+        console.log('--- Seed data loaded successfully! ---');
     } catch (error) {
-        console.error('--- Failed to initialize database ---');
+        console.error('--- Failed to seed database ---', error.message);
     } finally {
-        // Phải exit để terminal không bị treo do connection pool vẫn còn mở
         process.exit(0);
     }
 }
