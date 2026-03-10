@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS PRODUCT (
     stock INTEGER NOT NULL CHECK (stock >= 0),
     description TEXT,
     images TEXT[], -- Array of image URLs
+    supplier TEXT, -- Brand or supplier name
     category_id INTEGER REFERENCES CATEGORY(category_id),
     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP

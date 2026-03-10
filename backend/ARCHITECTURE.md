@@ -92,6 +92,7 @@ erDiagram
         int stock "Số lượng tồn kho (>0)"
         string description "Mô tả"
         string[] images "Mảng chứa URL của tối thiểu 3 hình"
+        string supplier "Thương hiệu / nhà cung cấp"
         int category_id FK "Thuộc Category nào"
         datetime created_time "Tự động thiết lập"
         datetime updated_time "Tự động cập nhật bởi Trigger"

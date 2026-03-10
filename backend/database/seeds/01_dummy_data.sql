@@ -33,17 +33,17 @@ INSERT INTO CUSTOMER (name, phone, address) VALUES
 
 -- 4. Insert Products
 -- Smartphones (category_id = 1)
-INSERT INTO PRODUCT (sku, name, price, stock, description, images, category_id) VALUES
-('IP15PM', 'iPhone 15 Pro Max 256GB', 29000000, 50, 'Apple iPhone 15 Pro Max 2023. Super-light titanium build.', ARRAY['https://picsum.photos/id/1/600/600', 'https://picsum.photos/id/2/600/600', 'https://picsum.photos/id/3/600/600'], 1),
-('SS24U', 'Samsung Galaxy S24 Ultra', 27000000, 30, 'Samsung 2024 AI flagship with built-in S-Pen.', ARRAY['https://picsum.photos/id/4/600/600', 'https://picsum.photos/id/5/600/600', 'https://picsum.photos/id/6/600/600'], 1);
+INSERT INTO PRODUCT (sku, name, price, stock, description, images, supplier, category_id) VALUES
+('IP15PM', 'iPhone 15 Pro Max 256GB', 29000000, 50, 'Apple iPhone 15 Pro Max 2023. Super-light titanium build.', ARRAY['https://picsum.photos/id/1/600/600', 'https://picsum.photos/id/2/600/600', 'https://picsum.photos/id/3/600/600'], 'Apple', 1),
+('SS24U', 'Samsung Galaxy S24 Ultra', 27000000, 30, 'Samsung 2024 AI flagship with built-in S-Pen.', ARRAY['https://picsum.photos/id/4/600/600', 'https://picsum.photos/id/5/600/600', 'https://picsum.photos/id/6/600/600'], 'Samsung', 1);
 
 -- Laptops (category_id = 2)
-INSERT INTO PRODUCT (sku, name, price, stock, description, images, category_id) VALUES
-('MBP14', 'MacBook Pro 14 M3', 35000000, 20, 'Apple M3 chip, latest 2023 model.', ARRAY['https://picsum.photos/id/7/600/600', 'https://picsum.photos/id/8/600/600', 'https://picsum.photos/id/9/600/600'], 2);
+INSERT INTO PRODUCT (sku, name, price, stock, description, images, supplier, category_id) VALUES
+('MBP14', 'MacBook Pro 14 M3', 35000000, 20, 'Apple M3 chip, latest 2023 model.', ARRAY['https://picsum.photos/id/7/600/600', 'https://picsum.photos/id/8/600/600', 'https://picsum.photos/id/9/600/600'], 'Apple', 2);
 
 -- Accessories (category_id = 3)
-INSERT INTO PRODUCT (sku, name, price, stock, description, images, category_id) VALUES
-('AP2', 'AirPods Pro 2', 5500000, 100, 'Wireless earbuds with active noise cancellation.', ARRAY['https://picsum.photos/id/10/600/600', 'https://picsum.photos/id/11/600/600', 'https://picsum.photos/id/12/600/600'], 3);
+INSERT INTO PRODUCT (sku, name, price, stock, description, images, supplier, category_id) VALUES
+('AP2', 'AirPods Pro 2', 5500000, 100, 'Wireless earbuds with active noise cancellation.', ARRAY['https://picsum.photos/id/10/600/600', 'https://picsum.photos/id/11/600/600', 'https://picsum.photos/id/12/600/600'], 'Apple', 3);
 
 -- NOTE: Add more products to reach the minimum of 22 products per category required by the project spec.
 

@@ -13,6 +13,7 @@ const productSchema = `#graphql
     stock: Int!
     description: String
     images: [String]
+    supplier: String
     category: Category
   }
 
