@@ -1,30 +1,44 @@
-﻿<Page x:Class="CSC13001_my_shop_project.Presentation.MainPage"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:local="using:CSC13001_my_shop_project.Presentation"
-      xmlns:uen="using:Uno.Extensions.Navigation.UI"
-      xmlns:utu="using:Uno.Toolkit.UI"
-      xmlns:um="using:Uno.Material"
-      NavigationCacheMode="Required"
-      Background="{ThemeResource BackgroundBrush}">
-  <ScrollViewer IsTabStop="True">
-    <Grid utu:SafeArea.Insets="VisibleBounds">
-      <Grid.RowDefinitions>
-        <RowDefinition Height="Auto" />
-        <RowDefinition />
-      </Grid.RowDefinitions>
-      <utu:NavigationBar Content="{Binding Title}" />
+﻿<Page
+    x:Class="CSC13001_my_shop_project.Presentation.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:CSC13001_my_shop_project.Presentation"
+    xmlns:uen="using:Uno.Extensions.Navigation.UI"
+    xmlns:utu="using:Uno.Toolkit.UI"
+    xmlns:um="using:Uno.Material"
+    NavigationCacheMode="Required"
+    Background="{StaticResource ShellBackgroundBrush}"
+>
+    <ScrollViewer IsTabStop="True">
+        <Grid utu:SafeArea.Insets="VisibleBounds">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <utu:NavigationBar Content="{Binding Title}" />
 
-      <StackPanel Grid.Row="1"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Spacing="16">
-        <TextBox Text="{Binding Name, Mode=TwoWay}"
-            PlaceholderText="Enter your name:" />
-        <Button Content="Go to Second Page"
-            AutomationProperties.AutomationId="SecondPageButton"
-            Command="{Binding GoToSecond}" />
-      </StackPanel>
-    </Grid>
-  </ScrollViewer>
+            <StackPanel
+                Grid.Row="1"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Spacing="16"
+            >
+                <Grid>
+                    <Border Background="Blue">
+                        <TextBox
+                            Text="{Binding Name, Mode=TwoWay}"
+                            PlaceholderText="Enter your name:"
+                            VerticalContentAlignment="Bottom"
+                        />
+                    </Border>
+                </Grid>
+
+                <Button
+                    Content="Go to Second Page"
+                    AutomationProperties.AutomationId="SecondPageButton"
+                    Command="{Binding GoToSecond}"
+                />
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </Page>

@@ -1,0 +1,127 @@
+<UserControl
+    x:Class="CSC13001_my_shop_project.Presentation.Layout.SidebarNavItem"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:utu="using:Uno.Toolkit.UI"
+    mc:Ignorable="d"
+    d:DesignHeight="48"
+    d:DesignWidth="228"
+>
+    <UserControl.Resources>
+        <Style x:Key="NavItemButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="UseSystemFocusVisuals" Value="False" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                        />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Button
+        Style="{StaticResource NavItemButtonStyle}"
+        Height="48"
+        HorizontalContentAlignment="Stretch"
+        Click="OnItemClicked"
+        PointerEntered="OnPointerEntered"
+        PointerExited="OnPointerExited"
+    >
+        <utu:ShadowContainer x:Name="NavShadowContainer">
+            <utu:ShadowContainer.Shadows>
+                <utu:ShadowCollection>
+                    <utu:Shadow
+                        OffsetX="0"
+                        OffsetY="1"
+                        BlurRadius="3"
+                        Spread="0"
+                        Color="#000000"
+                        Opacity="0"
+                    />
+                </utu:ShadowCollection>
+            </utu:ShadowContainer.Shadows>
+            <Border CornerRadius="10">
+                <Grid>
+                    <Border
+                        x:Name="HoverSurface"
+                        CornerRadius="10"
+                        Opacity="0"
+                        Background="{StaticResource ShellNavHoverBackgroundBrush}"
+                    />
+                    <Border x:Name="ActiveSurface" CornerRadius="10" Opacity="0" />
+                    <Border x:Name="ActiveGradient" CornerRadius="10" Opacity="0">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="Transparent" Offset="0" />
+                                <GradientStop Color="White" Offset="1" />
+                            </LinearGradientBrush>
+                        </Border.Background>
+                    </Border>
+                    <Path
+                        x:Name="Marker"
+                        Width="4"
+                        Height="24"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Center"
+                        Data="M0 0C2.20914 0 4 1.79086 4 4V20C4 22.2091 2.20914 24 0 24V0Z"
+                        Fill="{StaticResource ShellAccentBrush}"
+                        Stretch="Fill"
+                        Visibility="Collapsed"
+                    />
+                    <Grid ColumnSpacing="0" Padding="12,0,12,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="14" />
+                        </Grid.ColumnDefinitions>
+                        <Viewbox Grid.Column="0" Width="24" Height="24" VerticalAlignment="Center">
+                            <ContentPresenter x:Name="IconHostPresenter" />
+                        </Viewbox>
+                        <TextBlock
+                            x:Name="LabelText"
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+                            FontSize="16"
+                            Foreground="{StaticResource ShellTextMutedBrush}"
+                        />
+                        <Viewbox
+                            Grid.Column="3"
+                            Width="14"
+                            Height="14"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Right"
+                        >
+                            <Path
+                                x:Name="Chevron"
+                                Data="M0.583333 7.58333L4.08333 4.08333L0.583333 0.583333"
+                                StrokeThickness="1.17"
+                                StrokeStartLineCap="Round"
+                                StrokeEndLineCap="Round"
+                                StrokeLineJoin="Round"
+                                Stroke="{StaticResource ShellAccentBrush}"
+                                Visibility="Collapsed"
+                            />
+                        </Viewbox>
+                    </Grid>
+                </Grid>
+            </Border>
+        </utu:ShadowContainer>
+    </Button>
+</UserControl>

@@ -7,4 +7,3 @@ public sealed partial class SecondPage : Page
         this.InitializeComponent();
     }
 }
-
