@@ -3,42 +3,770 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:CSC13001_my_shop_project.Presentation"
-    xmlns:uen="using:Uno.Extensions.Navigation.UI"
-    xmlns:utu="using:Uno.Toolkit.UI"
-    xmlns:um="using:Uno.Material"
     NavigationCacheMode="Required"
     Background="{StaticResource ShellBackgroundBrush}"
 >
+    <Page.Resources>
+        <SolidColorBrush x:Key="DashboardCardBackgroundBrush" Color="White" />
+        <SolidColorBrush x:Key="DashboardMutedTextBrush" Color="#992C2118" />
+        <SolidColorBrush x:Key="DashboardSubtleTextBrush" Color="#662C2118" />
+        <SolidColorBrush x:Key="DashboardSoftSurfaceBrush" Color="#FFF7F0" />
+
+        <SolidColorBrush x:Key="StatusShippedBackgroundBrush" Color="#1AF3B55C" />
+        <SolidColorBrush x:Key="StatusShippedBorderBrush" Color="#33F3B55C" />
+        <SolidColorBrush x:Key="StatusShippedForegroundBrush" Color="#F3B55C" />
+
+        <SolidColorBrush x:Key="StatusProcessingBackgroundBrush" Color="#FFEFF6FF" />
+        <SolidColorBrush x:Key="StatusProcessingBorderBrush" Color="#FFDBEAFE" />
+        <SolidColorBrush x:Key="StatusProcessingForegroundBrush" Color="#FF155DFC" />
+
+        <SolidColorBrush x:Key="StatusDeliveredBackgroundBrush" Color="#FFECFDF5" />
+        <SolidColorBrush x:Key="StatusDeliveredBorderBrush" Color="#FFD0FAE5" />
+        <SolidColorBrush x:Key="StatusDeliveredForegroundBrush" Color="#FF009966" />
+
+        <Style x:Key="DashboardCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource DashboardCardBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource ShellBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="16" />
+            <Setter Property="Padding" Value="24" />
+        </Style>
+
+        <Style x:Key="KpiLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Foreground" Value="{StaticResource DashboardMutedTextBrush}" />
+        </Style>
+
+        <Style x:Key="KpiValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="30" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Foreground" Value="{StaticResource ShellTextStrongBrush}" />
+        </Style>
+
+        <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{StaticResource ShellTextStrongBrush}" />
+        </Style>
+
+        <Style x:Key="SmallMutedStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{StaticResource DashboardSubtleTextBrush}" />
+        </Style>
+
+        <Style x:Key="PillButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="{StaticResource ShellAccentBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="999" />
+            <Setter Property="Foreground" Value="{StaticResource ShellAccentBrush}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="Medium" />
+            <Setter Property="Padding" Value="12,4" />
+            <Setter Property="MinHeight" Value="26" />
+            <Setter Property="HorizontalAlignment" Value="Right" />
+        </Style>
+    </Page.Resources>
+
     <ScrollViewer IsTabStop="True">
-        <Grid utu:SafeArea.Insets="VisibleBounds">
+        <Grid
+            x:Name="DashboardRoot"
+            Padding="32,32,32,24"
+            RowSpacing="24"
+            MaxWidth="1230"
+        >
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup>
+                    <VisualState x:Name="NarrowLayout">
+                        <VisualState.StateTriggers>
+                            <AdaptiveTrigger MinWindowWidth="0" />
+                        </VisualState.StateTriggers>
+                        <VisualState.Setters>
+                            <Setter Target="PrimaryColumn.(Grid.RowSpan)" Value="1" />
+                            <Setter Target="BestSellingCard.(Grid.Row)" Value="1" />
+                            <Setter Target="BestSellingCard.(Grid.Column)" Value="0" />
+                            <Setter Target="ContentRightColumn.Width" Value="*" />
+                        </VisualState.Setters>
+                    </VisualState>
+
+                    <VisualState x:Name="WideLayout">
+                        <VisualState.StateTriggers>
+                            <AdaptiveTrigger MinWindowWidth="1200" />
+                        </VisualState.StateTriggers>
+                        <VisualState.Setters>
+                            <Setter Target="PrimaryColumn.(Grid.RowSpan)" Value="2" />
+                            <Setter Target="BestSellingCard.(Grid.Row)" Value="0" />
+                            <Setter Target="BestSellingCard.(Grid.Column)" Value="1" />
+                            <Setter Target="ContentRightColumn.Width" Value="280" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
-                <RowDefinition />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <utu:NavigationBar Content="{Binding Title}" />
 
-            <StackPanel
-                Grid.Row="1"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Spacing="16"
-            >
-                <Grid>
-                    <Border Background="Blue">
-                        <TextBox
-                            Text="{Binding Name, Mode=TwoWay}"
-                            PlaceholderText="Enter your name:"
-                            VerticalContentAlignment="Bottom"
-                        />
-                    </Border>
-                </Grid>
-
-                <Button
-                    Content="Go to Second Page"
-                    AutomationProperties.AutomationId="SecondPageButton"
-                    Command="{Binding GoToSecond}"
+            <StackPanel Grid.Row="0" Spacing="4">
+                <TextBlock
+                    Text="DASHBOARD"
+                    FontSize="30"
+                    FontWeight="Bold"
+                    Foreground="{StaticResource ShellTextStrongBrush}"
+                />
+                <TextBlock
+                    Text="Welcome back, Admin. Here's what's happening today."
+                    FontSize="16"
+                    Foreground="{StaticResource DashboardMutedTextBrush}"
                 />
             </StackPanel>
+
+            <Grid Grid.Row="1" ColumnSpacing="24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Style="{StaticResource DashboardCardStyle}" MinHeight="110">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Spacing="4" VerticalAlignment="Center">
+                            <TextBlock Text="TOTAL PRODUCTS" Style="{StaticResource KpiLabelStyle}" />
+                            <TextBlock Text="1,248" Style="{StaticResource KpiValueStyle}" />
+                        </StackPanel>
+                        <Border
+                            Grid.Column="1"
+                            Width="56"
+                            Height="56"
+                            CornerRadius="999"
+                            Background="{StaticResource DashboardSoftSurfaceBrush}"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                        >
+                            <FontIcon
+                                Glyph="&#xE719;"
+                                FontSize="22"
+                                Foreground="{StaticResource ShellAccentBrush}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                            />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="1" Style="{StaticResource DashboardCardStyle}" MinHeight="110">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Spacing="4" VerticalAlignment="Center">
+                            <TextBlock Text="TOTAL ORDERS" Style="{StaticResource KpiLabelStyle}" />
+                            <TextBlock Text="567" Style="{StaticResource KpiValueStyle}" />
+                        </StackPanel>
+                        <Border
+                            Grid.Column="1"
+                            Width="56"
+                            Height="56"
+                            CornerRadius="999"
+                            Background="{StaticResource DashboardSoftSurfaceBrush}"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                        >
+                            <FontIcon
+                                Glyph="&#xE8C7;"
+                                FontSize="22"
+                                Foreground="{StaticResource ShellAccentBrush}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                            />
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Column="2" Style="{StaticResource DashboardCardStyle}" MinHeight="110">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Spacing="4" VerticalAlignment="Center">
+                            <TextBlock Text="TOTAL REVENUE" Style="{StaticResource KpiLabelStyle}" />
+                            <TextBlock Text="$124,560" Style="{StaticResource KpiValueStyle}" />
+                        </StackPanel>
+                        <Border
+                            Grid.Column="1"
+                            Width="56"
+                            Height="56"
+                            CornerRadius="999"
+                            Background="{StaticResource DashboardSoftSurfaceBrush}"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                        >
+                            <FontIcon
+                                Glyph="&#xEAFD;"
+                                FontSize="22"
+                                Foreground="{StaticResource ShellAccentBrush}"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                            />
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Grid Grid.Row="2" x:Name="MainContentGrid" ColumnSpacing="24" RowSpacing="24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition x:Name="ContentRightColumn" Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel x:Name="PrimaryColumn" Grid.Column="0" Grid.Row="0" Spacing="24">
+                    <Border Style="{StaticResource DashboardCardStyle}">
+                        <Grid RowSpacing="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Spacing="2">
+                                    <TextBlock
+                                        Text="Revenue Overview"
+                                        Style="{StaticResource SectionTitleStyle}"
+                                    />
+                                    <TextBlock
+                                        Text="Daily revenue for the current month"
+                                        Style="{StaticResource SmallMutedStyle}"
+                                    />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                    <Border
+                                        Background="{StaticResource DashboardSoftSurfaceBrush}"
+                                        CornerRadius="999"
+                                        Padding="12,4"
+                                    >
+                                        <TextBlock Text="Daily" FontSize="12" FontWeight="Medium" />
+                                    </Border>
+                                    <Border
+                                        BorderBrush="{StaticResource ShellBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="999"
+                                        Padding="12,4"
+                                    >
+                                        <TextBlock
+                                            Text="Weekly"
+                                            FontSize="12"
+                                            Foreground="{StaticResource DashboardMutedTextBrush}"
+                                        />
+                                    </Border>
+                                    <Border
+                                        BorderBrush="{StaticResource ShellBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="999"
+                                        Padding="12,4"
+                                    >
+                                        <TextBlock
+                                            Text="Monthly"
+                                            FontSize="12"
+                                            Foreground="{StaticResource DashboardMutedTextBrush}"
+                                        />
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Grid.Row="1" RowSpacing="10">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <Viewbox Stretch="Fill" Height="232" HorizontalAlignment="Stretch">
+                                    <Canvas Width="820" Height="232">
+                                        <Line X1="60" Y1="20" X2="800" Y2="20" Stroke="{StaticResource ShellBorderBrush}" StrokeThickness="1" />
+                                        <Line X1="60" Y1="68" X2="800" Y2="68" Stroke="{StaticResource ShellBorderBrush}" StrokeThickness="1" />
+                                        <Line X1="60" Y1="116" X2="800" Y2="116" Stroke="{StaticResource ShellBorderBrush}" StrokeThickness="1" />
+                                        <Line X1="60" Y1="164" X2="800" Y2="164" Stroke="{StaticResource ShellBorderBrush}" StrokeThickness="1" />
+                                        <Line X1="60" Y1="212" X2="800" Y2="212" Stroke="{StaticResource ShellBorderBrush}" StrokeThickness="1" />
+
+                                        <Polygon
+                                            Points="60,188 120,176 180,152 240,146 300,130 360,120 420,108 480,95 540,102 600,86 660,74 720,70 780,60 800,212 60,212"
+                                            Fill="#26F3B55C"
+                                        />
+
+                                        <Polyline
+                                            Points="60,188 120,176 180,152 240,146 300,130 360,120 420,108 480,95 540,102 600,86 660,74 720,70 780,60"
+                                            Stroke="{StaticResource ShellAccentBrush}"
+                                            StrokeThickness="3"
+                                            StrokeLineJoin="Round"
+                                            StrokeStartLineCap="Round"
+                                            StrokeEndLineCap="Round"
+                                        />
+
+                                        <TextBlock Text="$8000" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" Canvas.Left="8" Canvas.Top="12" />
+                                        <TextBlock Text="$6000" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" Canvas.Left="8" Canvas.Top="60" />
+                                        <TextBlock Text="$4000" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" Canvas.Left="8" Canvas.Top="108" />
+                                        <TextBlock Text="$2000" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" Canvas.Left="8" Canvas.Top="156" />
+                                        <TextBlock Text="$0" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" Canvas.Left="26" Canvas.Top="204" />
+                                    </Canvas>
+                                </Viewbox>
+
+                                <Grid Grid.Row="1" ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="Jan 1" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="Jan 5" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" Text="Jan 9" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Grid.Column="3" Text="Jan 13" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Grid.Column="4" Text="Jan 17" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Grid.Column="5" Text="Jan 21" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Grid.Column="6" Text="Jan 25" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Grid.Column="7" Text="Jan 31" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Center" />
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <Border Style="{StaticResource DashboardCardStyle}">
+                        <Grid RowSpacing="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    Text="Recent Orders"
+                                    Style="{StaticResource SectionTitleStyle}"
+                                />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Text="View All Orders"
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="{StaticResource DashboardMutedTextBrush}"
+                                    VerticalAlignment="Center"
+                                />
+                            </Grid>
+
+                            <Grid Grid.Row="1" RowSpacing="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*" />
+                                    <ColumnDefinition Width="2.2*" />
+                                    <ColumnDefinition Width="1.8*" />
+                                    <ColumnDefinition Width="1.8*" />
+                                    <ColumnDefinition Width="48" />
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Row="0" Grid.ColumnSpan="5" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="2*" />
+                                            <ColumnDefinition Width="2.2*" />
+                                            <ColumnDefinition Width="1.8*" />
+                                            <ColumnDefinition Width="1.8*" />
+                                            <ColumnDefinition Width="48" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="Order ID" FontSize="12" FontWeight="Medium" Foreground="{StaticResource DashboardSubtleTextBrush}" />
+                                        <TextBlock Grid.Column="1" Text="Customer" FontSize="12" FontWeight="Medium" Foreground="{StaticResource DashboardSubtleTextBrush}" />
+                                        <TextBlock Grid.Column="2" Text="Status" FontSize="12" FontWeight="Medium" Foreground="{StaticResource DashboardSubtleTextBrush}" />
+                                        <TextBlock Grid.Column="3" Text="Total" FontSize="12" FontWeight="Medium" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Right" />
+                                    </Grid>
+                                </Border>
+
+                                <Border Grid.Row="1" Grid.ColumnSpan="5" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="0,0,0,1" Padding="0,11">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="2*" />
+                                            <ColumnDefinition Width="2.2*" />
+                                            <ColumnDefinition Width="1.8*" />
+                                            <ColumnDefinition Width="1.8*" />
+                                            <ColumnDefinition Width="48" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="#ORD-7829" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
+                                        <TextBlock Grid.Column="1" Text="Eleanor Pena" FontSize="14" Foreground="{StaticResource DashboardMutedTextBrush}" />
+                                        <Border Grid.Column="2" Background="{StaticResource StatusShippedBackgroundBrush}" BorderBrush="{StaticResource StatusShippedBorderBrush}" BorderThickness="1" CornerRadius="999" HorizontalAlignment="Left" Padding="8,2">
+                                            <TextBlock Text="Shipped" FontSize="10" FontWeight="Medium" Foreground="{StaticResource StatusShippedForegroundBrush}" />
+                                        </Border>
+                                        <TextBlock Grid.Column="3" Text="$1,248.00" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Right" Foreground="{StaticResource ShellTextStrongBrush}" />
+                                        <Button Grid.Column="4" Width="24" Height="24" HorizontalAlignment="Center" Background="Transparent" BorderThickness="0">
+                                            <FontIcon Glyph="&#xE712;" FontSize="14" Foreground="{StaticResource DashboardMutedTextBrush}" />
+                                        </Button>
+                                    </Grid>
+                                </Border>
+
+                                <Border Grid.Row="2" Grid.ColumnSpan="5" Background="#33F5EDE4" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="0,0,0,1" Padding="0,11">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="2*" />
+                                            <ColumnDefinition Width="2.2*" />
+                                            <ColumnDefinition Width="1.8*" />
+                                            <ColumnDefinition Width="1.8*" />
+                                            <ColumnDefinition Width="48" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="#ORD-7828" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
+                                        <TextBlock Grid.Column="1" Text="Wade Warren" FontSize="14" Foreground="{StaticResource DashboardMutedTextBrush}" />
+                                        <Border Grid.Column="2" Background="{StaticResource StatusProcessingBackgroundBrush}" BorderBrush="{StaticResource StatusProcessingBorderBrush}" BorderThickness="1" CornerRadius="999" HorizontalAlignment="Left" Padding="8,2">
+                                            <TextBlock Text="Processing" FontSize="10" FontWeight="Medium" Foreground="{StaticResource StatusProcessingForegroundBrush}" />
+                                        </Border>
+                                        <TextBlock Grid.Column="3" Text="$854.00" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Right" Foreground="{StaticResource ShellTextStrongBrush}" />
+                                        <Button Grid.Column="4" Width="24" Height="24" HorizontalAlignment="Center" Background="Transparent" BorderThickness="0">
+                                            <FontIcon Glyph="&#xE712;" FontSize="14" Foreground="{StaticResource DashboardMutedTextBrush}" />
+                                        </Button>
+                                    </Grid>
+                                </Border>
+
+                                <Border Grid.Row="3" Grid.ColumnSpan="5" Padding="0,11,0,0">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="2*" />
+                                            <ColumnDefinition Width="2.2*" />
+                                            <ColumnDefinition Width="1.8*" />
+                                            <ColumnDefinition Width="1.8*" />
+                                            <ColumnDefinition Width="48" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="#ORD-7827" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
+                                        <TextBlock Grid.Column="1" Text="Esther Howard" FontSize="14" Foreground="{StaticResource DashboardMutedTextBrush}" />
+                                        <Border Grid.Column="2" Background="{StaticResource StatusDeliveredBackgroundBrush}" BorderBrush="{StaticResource StatusDeliveredBorderBrush}" BorderThickness="1" CornerRadius="999" HorizontalAlignment="Left" Padding="8,2">
+                                            <TextBlock Text="Delivered" FontSize="10" FontWeight="Medium" Foreground="{StaticResource StatusDeliveredForegroundBrush}" />
+                                        </Border>
+                                        <TextBlock Grid.Column="3" Text="$2,450.00" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Right" Foreground="{StaticResource ShellTextStrongBrush}" />
+                                        <Button Grid.Column="4" Width="24" Height="24" HorizontalAlignment="Center" Background="Transparent" BorderThickness="0">
+                                            <FontIcon Glyph="&#xE712;" FontSize="14" Foreground="{StaticResource DashboardMutedTextBrush}" />
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <Border Style="{StaticResource DashboardCardStyle}">
+                        <Grid RowSpacing="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    Text="Low Stock Alert"
+                                    Style="{StaticResource SectionTitleStyle}"
+                                />
+                                <Border
+                                    Grid.Column="1"
+                                    Background="#FFFEF2F2"
+                                    BorderBrush="#FFFFE2E2"
+                                    BorderThickness="1"
+                                    CornerRadius="999"
+                                    Padding="8,4"
+                                    HorizontalAlignment="Right"
+                                >
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <FontIcon Glyph="&#xE7BA;" FontSize="10" Foreground="#FFFB2C36" />
+                                        <TextBlock
+                                            Text="5 Items"
+                                            FontSize="12"
+                                            FontWeight="Medium"
+                                            Foreground="#FFFB2C36"
+                                        />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <StackPanel Grid.Row="1" Spacing="12">
+                                <Border BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1" CornerRadius="14" Padding="8">
+                                    <Grid ColumnSpacing="16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="48" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
+                                            <Image Source="ms-appx:///Assets/Products/teak-coffee-table.png" Stretch="UniformToFill" />
+                                        </Border>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                            <TextBlock Text="Teak Coffee Table" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
+                                            <TextBlock Text="Only 3 left" FontSize="12" FontWeight="Medium" Foreground="#FFFB2C36" />
+                                        </StackPanel>
+                                        <Button Grid.Column="2" Content="Restock" Style="{StaticResource PillButtonStyle}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Border>
+
+                                <Border BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1" CornerRadius="14" Padding="8">
+                                    <Grid ColumnSpacing="16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="48" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
+                                            <Image Source="ms-appx:///Assets/Products/bamboo-floor-lamp.png" Stretch="UniformToFill" />
+                                        </Border>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                            <TextBlock Text="Bamboo Floor Lamp" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
+                                            <TextBlock Text="Only 5 left" FontSize="12" FontWeight="Medium" Foreground="#FFFB2C36" />
+                                        </StackPanel>
+                                        <Button Grid.Column="2" Content="Restock" Style="{StaticResource PillButtonStyle}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Border>
+
+                                <Border BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1" CornerRadius="14" Padding="8">
+                                    <Grid ColumnSpacing="16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="48" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
+                                            <Image Source="ms-appx:///Assets/Products/ceramic-planter.png" Stretch="UniformToFill" />
+                                        </Border>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                            <TextBlock Text="Ceramic Planter" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
+                                            <TextBlock Text="Only 2 left" FontSize="12" FontWeight="Medium" Foreground="#FFFB2C36" />
+                                        </StackPanel>
+                                        <Button Grid.Column="2" Content="Restock" Style="{StaticResource PillButtonStyle}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Border>
+
+                                <Border BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1" CornerRadius="14" Padding="8">
+                                    <Grid ColumnSpacing="16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="48" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
+                                            <Image Source="ms-appx:///Assets/Products/woven-basket.png" Stretch="UniformToFill" />
+                                        </Border>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                            <TextBlock Text="Woven Basket" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
+                                            <TextBlock Text="Only 4 left" FontSize="12" FontWeight="Medium" Foreground="#FFFB2C36" />
+                                        </StackPanel>
+                                        <Button Grid.Column="2" Content="Restock" Style="{StaticResource PillButtonStyle}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Border>
+
+                                <Border BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1" CornerRadius="14" Padding="8">
+                                    <Grid ColumnSpacing="16">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="48" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
+                                            <Image Source="ms-appx:///Assets/Products/oak-side-table.png" Stretch="UniformToFill" />
+                                        </Border>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                            <TextBlock Text="Oak Side Table" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
+                                            <TextBlock Text="Only 1 left" FontSize="12" FontWeight="Medium" Foreground="#FFFB2C36" />
+                                        </StackPanel>
+                                        <Button Grid.Column="2" Content="Restock" Style="{StaticResource PillButtonStyle}" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+
+                <Border
+                    x:Name="BestSellingCard"
+                    Grid.Column="1"
+                    Grid.Row="1"
+                    Style="{StaticResource DashboardCardStyle}"
+                    Padding="24"
+                    Height="486"
+                    VerticalAlignment="Top"
+                >
+                    <Grid RowSpacing="20">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock
+                                Text="Best Selling"
+                                Style="{StaticResource SectionTitleStyle}"
+                            />
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                <TextBlock
+                                    Text="View All"
+                                    FontSize="12"
+                                    FontWeight="Medium"
+                                    Foreground="{StaticResource ShellAccentBrush}"
+                                />
+                                <FontIcon Glyph="&#xE72A;" FontSize="12" Foreground="{StaticResource ShellAccentBrush}" />
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Grid.Row="1" Spacing="16">
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="48" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
+                                    <Image Source="ms-appx:///Assets/Products/teak-coffee-table.png" Stretch="UniformToFill" />
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                    <TextBlock Text="Nordic Lounge Chair" FontSize="14" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="324 sold" FontSize="12" Foreground="{StaticResource DashboardSubtleTextBrush}" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" Text="$249" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            </Grid>
+
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="48" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
+                                    <Image Source="ms-appx:///Assets/Products/bamboo-floor-lamp.png" Stretch="UniformToFill" />
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                    <TextBlock Text="Minimalist Wooden Lamp" FontSize="14" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="212 sold" FontSize="12" Foreground="{StaticResource DashboardSubtleTextBrush}" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" Text="$89" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            </Grid>
+
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="48" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
+                                    <Image Source="ms-appx:///Assets/Products/beige-modular-sofa.png" Stretch="UniformToFill" />
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                    <TextBlock Text="Beige Modular Sofa" FontSize="14" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="156 sold" FontSize="12" Foreground="{StaticResource DashboardSubtleTextBrush}" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" Text="$899" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            </Grid>
+
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="48" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
+                                    <Image Source="ms-appx:///Assets/Products/ceramic-planter.png" Stretch="UniformToFill" />
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                    <TextBlock Text="Ceramic Artisan Vase" FontSize="14" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="98 sold" FontSize="12" Foreground="{StaticResource DashboardSubtleTextBrush}" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" Text="$45" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            </Grid>
+
+                            <Grid ColumnSpacing="12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="48" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
+                                    <Image Source="ms-appx:///Assets/Products/woven-basket.png" Stretch="UniformToFill" />
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
+                                    <TextBlock Text="Linen Woven Rug" FontSize="14" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="74 sold" FontSize="12" Foreground="{StaticResource DashboardSubtleTextBrush}" />
+                                </StackPanel>
+                                <TextBlock Grid.Column="2" Text="$120" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Border
+                Grid.Row="3"
+                BorderBrush="{StaticResource ShellBorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="0,16,0,0"
+            >
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock
+                        Text="© 2026 Lumina Haven Admin"
+                        FontSize="12"
+                        Foreground="{StaticResource DashboardMutedTextBrush}"
+                        VerticalAlignment="Center"
+                    />
+
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="16">
+                        <TextBlock
+                            Text="Support"
+                            FontSize="16"
+                            FontWeight="Medium"
+                            Foreground="{StaticResource DashboardMutedTextBrush}"
+                        />
+                        <TextBlock
+                            Text="Privacy"
+                            FontSize="16"
+                            FontWeight="Medium"
+                            Foreground="{StaticResource DashboardMutedTextBrush}"
+                        />
+                    </StackPanel>
+                </Grid>
+            </Border>
         </Grid>
     </ScrollViewer>
 </Page>
