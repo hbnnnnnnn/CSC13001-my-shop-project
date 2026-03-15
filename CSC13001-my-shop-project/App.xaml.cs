@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using CSC13001_my_shop_project.Presentation.Dashboard;
 using Uno.Resizetizer;
 
 namespace CSC13001_my_shop_project;
@@ -101,8 +102,7 @@ public partial class App : Application
     {
         views.Register(
             new ViewMap(ViewModel: typeof(ShellViewModel)),
-            new ViewMap<MainPage, MainViewModel>(),
-            new DataViewMap<SecondPage, SecondViewModel, Entity>()
+            new ViewMap<DashboardPage, DashboardViewModel>()
         );
 
         routes.Register(
@@ -111,8 +111,7 @@ public partial class App : Application
                 View: views.FindByViewModel<ShellViewModel>(),
                 Nested:
                 [
-                    new("Main", View: views.FindByViewModel<MainViewModel>(), IsDefault: true),
-                    new("Second", View: views.FindByViewModel<SecondViewModel>()),
+                    new RouteMap("Dashboard", View: views.FindByViewModel<DashboardViewModel>(), IsDefault: true),
                 ]
             )
         );

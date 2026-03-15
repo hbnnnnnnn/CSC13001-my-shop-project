@@ -1,5 +1,8 @@
 namespace CSC13001_my_shop_project.Presentation;
 
+using CommunityToolkit.Mvvm.Messaging;
+using CSC13001_my_shop_project.Presentation.Dashboard;
+
 public partial class ShellViewModel : ObservableObject
 {
     [ObservableProperty]
@@ -24,6 +27,12 @@ public partial class ShellViewModel : ObservableObject
             {
                 SelectedSidebarItem = item;
             }
+        });
+
+        // Listen for navigation requests broadcast by child ViewModels (e.g. Dashboard)
+        WeakReferenceMessenger.Default.Register<NavigateToPageMessage>(this, (_, msg) =>
+        {
+            SelectSidebarItemCommand.Execute(msg.PageKey);
         });
     }
 
