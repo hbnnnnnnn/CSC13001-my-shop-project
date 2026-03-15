@@ -72,6 +72,9 @@
         BorderThickness="0,0,0,1"
         Width="260"
     >
+        <Border.RenderTransform>
+            <TranslateTransform x:Name="SidebarTranslate" />
+        </Border.RenderTransform>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="80" />

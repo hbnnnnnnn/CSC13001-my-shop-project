@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
 using PathShape = Microsoft.UI.Xaml.Shapes.Path;
 
 namespace CSC13001_my_shop_project.Presentation.Layout;
@@ -143,11 +144,11 @@ public sealed partial class SidebarNavItem : UserControl
             shadow.Opacity = shadowOpacity;
 
         HoverSurface.Background = hoverBackground;
-        HoverSurface.Opacity = isHovered ? 1d : 0d;
+        AnimateSurface(HoverSurface, isHovered ? 1d : 0d);
 
         ActiveSurface.Background = activeBackground;
-        ActiveSurface.Opacity = IsSelected ? 1d : 0d;
-        ActiveGradient.Opacity = IsSelected ? 1d : 0d;
+        AnimateSurface(ActiveSurface, IsSelected ? 1d : 0d);
+        AnimateSurface(ActiveGradient, IsSelected ? 1d : 0d);
 
         Marker.Visibility = IsSelected ? Visibility.Visible : Visibility.Collapsed;
         Chevron.Visibility = IsSelected && IsExpanded ? Visibility.Visible : Visibility.Collapsed;
@@ -165,5 +166,20 @@ public sealed partial class SidebarNavItem : UserControl
                 path.Stroke = iconStroke;
                 path.StrokeThickness = iconThickness;
             }
+    }
+
+    private static void AnimateSurface(UIElement target, double to, double durationMs = 160)
+    {
+        var anim = new DoubleAnimation
+        {
+            To = to,
+            Duration = new Duration(TimeSpan.FromMilliseconds(durationMs)),
+            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut },
+        };
+        Storyboard.SetTarget(anim, target);
+        Storyboard.SetTargetProperty(anim, "Opacity");
+        var sb = new Storyboard();
+        sb.Children.Add(anim);
+        sb.Begin();
     }
 }
