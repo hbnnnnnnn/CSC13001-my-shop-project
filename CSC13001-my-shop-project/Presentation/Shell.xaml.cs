@@ -5,6 +5,8 @@ public sealed partial class Shell : UserControl, IContentControlProvider
     public Shell()
     {
         this.InitializeComponent();
+        DataContext = new ShellViewModel();
     }
-    public ContentControl ContentControl => Splash;
+
+    public ContentControl ContentControl => MainContent;
 }

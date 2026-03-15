@@ -1,13 +1,37 @@
 namespace CSC13001_my_shop_project.Presentation;
 
-public class ShellViewModel
+public partial class ShellViewModel : ObservableObject
 {
-    private readonly INavigator _navigator;
+    [ObservableProperty]
+    private bool isSidebarExpanded = true;
 
-    public ShellViewModel(
-        INavigator navigator)
+    [ObservableProperty]
+    private string selectedSidebarItem = "Dashboard";
+
+    public ShellViewModel()
     {
-        _navigator = navigator;
-        // Add code here to initialize or attach event handlers to singleton services
+        CloseSidebarCommand = new RelayCommand(() =>
+        {
+            IsSidebarExpanded = false;
+        });
+        OpenSidebarCommand = new RelayCommand(() =>
+        {
+            IsSidebarExpanded = true;
+        });
+        SelectSidebarItemCommand = new RelayCommand<string>(item =>
+        {
+            if (!string.IsNullOrWhiteSpace(item))
+            {
+                SelectedSidebarItem = item;
+            }
+        });
     }
+
+    public IRelayCommand CloseSidebarCommand { get; }
+
+    public IRelayCommand OpenSidebarCommand { get; }
+
+    public IRelayCommand<string> SelectSidebarItemCommand { get; }
+
+    public string TestString { get; set; } = "Hello from ShellViewModel!";
 }

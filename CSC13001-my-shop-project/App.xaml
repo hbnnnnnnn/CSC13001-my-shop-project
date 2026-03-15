@@ -1,29 +1,93 @@
-<Application x:Class="CSC13001_my_shop_project.App"
-       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-       xmlns:utum="using:Uno.Toolkit.UI.Material">
-
-  <Application.Resources>
-    <ResourceDictionary>
-      <ResourceDictionary.MergedDictionaries>
-        <!-- Load WinUI resources -->
-        <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
-        <utum:MaterialToolkitTheme
-          ColorOverrideSource="ms-appx:///Styles/ColorPaletteOverride.xaml">
-          <!-- NOTE: You can override the default Roboto font by providing your font assets here. -->
-          <!-- <utum:MaterialToolkitTheme.FontOverrideDictionary>
+<Application
+    x:Class="CSC13001_my_shop_project.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:utum="using:Uno.Toolkit.UI.Material"
+>
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Load WinUI resources -->
+                <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <utum:MaterialToolkitTheme
+                    ColorOverrideSource="ms-appx:///Styles/ColorPaletteOverride.xaml"
+                >
+                    <!-- NOTE: You can override the default Roboto font by providing your font assets here. -->
+                    <!-- <utum:MaterialToolkitTheme.FontOverrideDictionary>
             <ResourceDictionary>
               <FontFamily x:Key="MaterialLightFontFamily">ms-appx:///Uno.Fonts.Roboto/Fonts/Roboto-Light.ttf#Roboto</FontFamily>
               <FontFamily x:Key="MaterialMediumFontFamily">ms-appx:///Uno.Fonts.Roboto/Fonts/Roboto-Medium.ttf#Roboto</FontFamily>
               <FontFamily x:Key="MaterialRegularFontFamily">ms-appx:///Uno.Fonts.Roboto/Fonts/Roboto-Regular.ttf#Roboto</FontFamily>
             </ResourceDictionary>
           </utum:MaterialToolkitTheme.FontOverrideDictionary> -->
-        </utum:MaterialToolkitTheme>
-      </ResourceDictionary.MergedDictionaries>
+                </utum:MaterialToolkitTheme>
+            </ResourceDictionary.MergedDictionaries>
 
-      <!-- Add resources here -->
+            <!-- Add resources here -->
+            <Color x:Key="AppBackgroundColor">#FAF7F2</Color>
+            <Color x:Key="ShellBorderColor">#F5EDE4</Color>
+            <Color x:Key="ShellTextStrongColor">#2C2118</Color>
+            <Color x:Key="ShellTextMutedColor">#992C2118</Color>
+            <Color x:Key="ShellTextSubtleColor">#802C2118</Color>
+            <Color x:Key="BrandColor">#F3B55C</Color>
+            <Color x:Key="ShellNotificationDotColor">#FF6467</Color>
+            <Color x:Key="SearchTextColor">#662C2118</Color>
 
-    </ResourceDictionary>
-  </Application.Resources>
+            <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="Red" />
+    <SolidColorBrush x:Key="SystemColorControlAccentBrush" Color="Red" />
 
+            <SolidColorBrush
+                x:Key="ShellBackgroundBrush"
+                Color="{StaticResource AppBackgroundColor}"
+            />
+            <SolidColorBrush x:Key="ShellBorderBrush" Color="{StaticResource ShellBorderColor}" />
+            <SolidColorBrush x:Key="ShellHeaderDividerBrush" Color="#80F5EDE4" />
+            <SolidColorBrush
+                x:Key="ShellTextStrongBrush"
+                Color="{StaticResource ShellTextStrongColor}"
+            />
+            <SolidColorBrush
+                x:Key="ShellTextMutedBrush"
+                Color="{StaticResource ShellTextMutedColor}"
+            />
+            <SolidColorBrush
+                x:Key="ShellTextSubtleBrush"
+                Color="{StaticResource ShellTextSubtleColor}"
+            />
+            <SolidColorBrush
+                x:Key="ShellIconMutedBrush"
+                Color="{StaticResource ShellTextMutedColor}"
+            />
+            <SolidColorBrush x:Key="ShellAccentBrush" Color="{StaticResource BrandColor}" />
+
+            <SolidColorBrush
+                x:Key="ShellNotificationDotBrush"
+                Color="{StaticResource ShellNotificationDotColor}"
+            />
+            <SolidColorBrush
+                x:Key="ShellSearchTextBrush"
+                Color="{StaticResource SearchTextColor}"
+            />
+            <SolidColorBrush
+                x:Key="ShellSearchIconBrush"
+                Color="{StaticResource SearchTextColor}"
+            />
+            <SolidColorBrush x:Key="ShellSearchBackgroundBrush" Color="#80F5EDE4" />
+            <SolidColorBrush x:Key="ShellNavHoverBackgroundBrush" Color="#80F5EDE4" />
+            <SolidColorBrush x:Key="ShellAvatarSoftBrush" Color="#F5EDE4" />
+            <SolidColorBrush x:Key="ShellAvatarBorderBrush" Color="#33F3B55C" />
+            <LinearGradientBrush x:Key="ShellAvatarGradientBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#F3B55C" Offset="0" />
+                <GradientStop Color="#E0A045" Offset="1" />
+            </LinearGradientBrush>
+            <LinearGradientBrush
+                x:Key="ShellNavActiveBackgroundBrush"
+                StartPoint="0,0"
+                EndPoint="0,1"
+            >
+                <GradientStop Color="#F5EDE4" Offset="0" />
+                <GradientStop Color="#00F5EDE4" Offset="1" />
+            </LinearGradientBrush>
+        </ResourceDictionary>
+    </Application.Resources>
 </Application>
