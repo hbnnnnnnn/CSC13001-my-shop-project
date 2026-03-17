@@ -1,11 +1,13 @@
 const express = require('express');
 const cors = require('cors');
+const uploadRoute = require("./routes/upload.route.js");
 
 const app = express();
 
 // Global middleware
 app.use(cors());                 // Will be narrowed to /graphql only later if needed
 app.use(express.json());         // Parse JSON bodies for any REST routes
+app.use("/api/upload", uploadRoute);
 
 // REST routes (lightweight, non-GraphQL)
 app.get('/health', (req, res) => {
