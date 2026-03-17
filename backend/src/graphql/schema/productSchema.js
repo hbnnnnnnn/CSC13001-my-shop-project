@@ -15,14 +15,43 @@ const productSchema = `#graphql
     images: [String]
     supplier: String
     category: Category
+    created_time: String
+    updated_time: String
   }
 
-  type Query {
+  input CreateProductInput {
+    sku: String!
+    name: String!
+    price: Int!
+    stock: Int!
+    description: String
+    images: [String]
+    supplier: String
+    category_id: ID!
+  }
+
+  input UpdateProductInput {
+    sku: String
+    name: String
+    price: Int
+    stock: Int
+    description: String
+    images: [String]
+    supplier: String
+    category_id: ID
+  }
+
+
+
+  extend type Query {
     products: [Product!]!
+    product(id: ID!): Product
   }
 
-  type Mutation {
-    _emptyProductMutation: String
+  extend type Mutation { 
+    createProduct(input: CreateProductInput!): Product!
+    updateProduct(id: ID!, input: UpdateProductInput!): Product!
+    deleteProduct(id: ID!): Boolean!
   }
 `;
 

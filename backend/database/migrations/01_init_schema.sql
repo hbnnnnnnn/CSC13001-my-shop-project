@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS PRODUCT (
     description TEXT,
     images TEXT[], -- Array of image URLs
     supplier TEXT, -- Brand or supplier name
-    category_id INTEGER REFERENCES CATEGORY(category_id),
+    category_id INTEGER REFERENCES CATEGORY(category_id) ON DELETE SET NULL,
     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -39,15 +39,15 @@ CREATE TABLE IF NOT EXISTS ORDERS (
     updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     final_price INTEGER NOT NULL,
     status VARCHAR(50) NOT NULL, -- 'Created', 'Paid', 'Cancelled'
-    customer_id INTEGER REFERENCES CUSTOMER(customer_id),
-    account_id INTEGER REFERENCES ACCOUNT(account_id),
+    customer_id INTEGER REFERENCES CUSTOMER(customer_id) ON DELETE SET NULL,
+    account_id INTEGER REFERENCES ACCOUNT(account_id) ON DELETE SET NULL,
     shipping_address TEXT
 );
 
 CREATE TABLE IF NOT EXISTS ORDER_ITEM (
     order_item_id SERIAL PRIMARY KEY,
     order_id INTEGER REFERENCES ORDERS(order_id) ON DELETE CASCADE,
-    product_id INTEGER REFERENCES PRODUCT(product_id),
+    product_id INTEGER REFERENCES PRODUCT(product_id) ON DELETE SET NULL,
     quantity INTEGER NOT NULL,
     unit_sale_price INTEGER NOT NULL,
     total_price INTEGER NOT NULL
