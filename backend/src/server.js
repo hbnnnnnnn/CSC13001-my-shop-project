@@ -6,6 +6,7 @@ const http = require('http');
 const app = require('./app');
 const db = require('./config/db'); // Test DB connection early
 const { typeDefs, resolvers } = require('./graphql');
+const { getUserFromToken } = require('./middleware/auth.middleware');
 
 const PORT = process.env.PORT || 4000;
 
@@ -26,18 +27,15 @@ async function startServer() {
         '/graphql',
         expressMiddleware(server, {
             context: async ({ req }) => {
-                // Here you can check for Authorization headers, verify tokens (e.g., JWT)
-                // and add the logged-in user to the context object so resolvers can access it.
-                // Also injecting the 'db' pool directly into context for resolvers to use.
-                return { db };
+                // Get user from token if Authorization header is provided
+                const user = getUserFromToken(req);
+                
+                // Inject the 'db' pool and 'user' into context for all resolvers
+                return { db, user };
             },
         })
     );
 
-    // 404 handler — must be registered AFTER all routes (including /graphql)
-    app.use((req, res) => {
-        res.status(404).json({ error: `Route ${req.method} ${req.path} not found` });
-    });
     // 404 handler — must be registered AFTER all routes (including /graphql)
     app.use((req, res) => {
         res.status(404).json({ error: `Route ${req.method} ${req.path} not found` });

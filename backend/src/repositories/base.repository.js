@@ -1,7 +1,7 @@
 // chú ý sql injection, dùng $1, $2, ... và pg-format để tránh
-import format from 'pg-format';
+const format = require('pg-format');
 
-export default class BaseRepository {
+class BaseRepository {
   constructor(tableName, idColumn, db) {
     this.tableName = tableName;
     this.idColumn = idColumn;
@@ -73,3 +73,4 @@ export default class BaseRepository {
     return result.rowCount > 0;
   }
 }
+module.exports = BaseRepository;

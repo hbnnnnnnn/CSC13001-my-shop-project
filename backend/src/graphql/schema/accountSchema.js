@@ -6,14 +6,18 @@ const accountSchema = `#graphql
     account_role: String!
   }
 
+  type AuthPayload {
+    token: String!
+    account: Account!
+  }
+
   type Query {
-    # e.g., getAccounts: [Account!]!
-    _emptyAccountQuery: String
+    me: Account
   }
 
   type Mutation {
-    # e.g., login, createAccount
-    _emptyAccountMutation: String
+    login(username: String!, password: String!): AuthPayload!
+    register(username: String!, password: String!, full_name: String!, account_role: String): AuthPayload!
   }
 `;
 

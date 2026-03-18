@@ -1,6 +1,6 @@
 // chú ý sql injection, dùng $1, $2, ... và pg-format để tránh
-import BaseRepository from "./base.repository.js";
-import db from "../config/db.js";
+const BaseRepository = require("./base.repository.js");
+const db = require("../config/db.js");
 
 class ProductRepository extends BaseRepository {
     constructor() {
@@ -26,4 +26,4 @@ class ProductRepository extends BaseRepository {
     }
 }
 
-export default new ProductRepository();
+module.exports = new ProductRepository();
