@@ -8,10 +8,31 @@ class BaseRepository {
     this.db = db;
   }
 
-  async findAll() {
-    const query = format('SELECT * FROM %I', this.tableName);
-    const result = await this.db.query(query);
-    return result.rows;
+  async findAll({ page = 1, limit = 10 } = {}) {
+    const offset = (page - 1) * limit;
+
+    const dataQuery = format(
+      'SELECT * FROM %I LIMIT $1 OFFSET $2',
+      this.tableName
+    );
+
+    const countQuery = format(
+      'SELECT COUNT(*) FROM %I',
+      this.tableName
+    );
+
+    const [dataResult, countResult] = await Promise.all([
+      this.db.query(dataQuery, [limit, offset]),
+      this.db.query(countQuery)
+    ]);
+
+    return {
+      data: dataResult.rows,
+      total: parseInt(countResult.rows[0].count),
+      page,
+      limit,
+      totalPages: Math.ceil(countResult.rows[0].count / limit)
+    };
   }
 
   async findById(id) {
