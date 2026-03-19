@@ -1,5 +1,5 @@
 const accountService = require('../../services/account.service.js');
-const { requireAuth } = require('../../middleware/auth.middleware.js');
+const { requireAuth } = require('../../middlewares/auth.middleware.js');
 
 const accountResolver = {
     Query: {
