@@ -6,7 +6,7 @@ const http = require('http');
 const app = require('./app');
 const db = require('./config/db'); // Test DB connection early
 const { typeDefs, resolvers } = require('./graphql');
-const { getUserFromToken } = require('./middleware/auth.middleware');
+const { getUserFromToken } = require('./middlewares/auth.middleware');
 
 const PORT = process.env.PORT || 4000;
 
@@ -29,7 +29,7 @@ async function startServer() {
             context: async ({ req }) => {
                 // Get user from token if Authorization header is provided
                 const user = getUserFromToken(req);
-                
+
                 // Inject the 'db' pool and 'user' into context for all resolvers
                 return { db, user };
             },
