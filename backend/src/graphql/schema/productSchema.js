@@ -19,6 +19,14 @@ const productSchema = `#graphql
     updated_time: String
   }
 
+  type ProductPage {
+    data: [Product!]!
+    total: Int!
+    page: Int!
+    limit: Int!
+    totalPages: Int!
+  }
+
   input CreateProductInput {
     sku: String!
     name: String!
@@ -41,11 +49,35 @@ const productSchema = `#graphql
     category_id: ID
   }
 
+  input ProductFilter {
+    category_id: ID
+    min_price: Int
+    max_price: Int
+  }
 
+  enum SortField {
+    PRICE
+    NAME
+    STOCK
+    CREATED_AT
+    UPDATED_AT
+  }
+
+  enum SortOrder {
+    ASC
+    DESC
+  }
+
+  input ProductSort {
+    field: SortField!
+    order: SortOrder!
+  }
 
   extend type Query {
-    products: [Product!]!
+    products(page: Int, limit: Int, filter: ProductFilter, sort: ProductSort): ProductPage!
     product(id: ID!): Product
+    topLowStockProducts(limit: Int): [Product!]!
+    topSellingProducts(limit: Int): [Product!]!
   }
 
   extend type Mutation { 
@@ -56,3 +88,4 @@ const productSchema = `#graphql
 `;
 
 module.exports = productSchema;
+
