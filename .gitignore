@@ -3,6 +3,10 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
+# Ignore agent
+.agents/
+.claude/
+
 # dotenv files
 .env
 

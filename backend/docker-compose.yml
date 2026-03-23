@@ -1,0 +1,89 @@
+services:
+  backend:
+    build: .
+    container_name: myshop_backend
+    ports:
+      - "4000:4000" # Change left port if you want expose different port to host
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules # Map node_modules to avoid overwriting from host during dev
+    restart: unless-stopped
+    command: sh -c "node src/scripts/syncElastic.js && npm run dev"
+
+  db:
+    image: postgres:15-alpine
+    container_name: myshop_db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=myshop
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/migrations/01_init_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - ./database/seeds/01_dummy_data.sql:/docker-entrypoint-initdb.d/02_seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d myshop"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: myshop_pgadmin
+    profiles: ["tools"]
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+    ports:
+      - "5050:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  elasticsearch:
+    image: elasticsearch:9.3.2
+    container_name: myshop_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false # disable auth for dev
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m # limit RAM usage
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    healthcheck:
+      test:
+        ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  kibana:
+    image: kibana:9.3.2
+    container_name: myshop_kibana
+    profiles: ["tools"]
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  esdata:
+
