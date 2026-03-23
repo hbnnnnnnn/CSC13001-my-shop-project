@@ -27,6 +27,14 @@ const productSchema = `#graphql
     totalPages: Int!
   }
 
+  type SearchResult {
+    data: [Product!]!
+    total: Int!
+    page: Int!
+    limit: Int!
+    totalPages: Int!
+  }
+
   input CreateProductInput {
     sku: String!
     name: String!
@@ -78,6 +86,7 @@ const productSchema = `#graphql
     product(id: ID!): Product
     topLowStockProducts(limit: Int): [Product!]!
     topSellingProducts(limit: Int): [Product!]!
+    productSearch(query: String!, page: Int, limit: Int, filter: ProductFilter, sort: ProductSort): SearchResult!
   }
 
   extend type Mutation { 
