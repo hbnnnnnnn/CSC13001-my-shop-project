@@ -1,6 +1,6 @@
 # MyShop Backend
 
-Node.js + Express + Apollo GraphQL + PostgreSQL
+Node.js + Express + Apollo GraphQL + PostgreSQL + Elasticsearch
 
 ## Prerequisites
 
@@ -24,11 +24,13 @@ Default values work out of the box for local development.
 docker-compose up -d
 ```
 
-This starts two services:
+This starts three services:
+
 - **backend** — Node.js server with hot-reload (nodemon) at `http://localhost:4000/graphql`
 - **db** — PostgreSQL 15 database
+- **elasticsearch** — Elasticsearch at `http://localhost:9200`
 
-On the first run, the database schema and seed data are created automatically.
+On the first run, the database schema and seed data are created automatically. Elasticsearch index is also created and synced from the database on first run — subsequent restarts skip the sync if the index already exists.
 
 ### 3. Verify
 
@@ -37,13 +39,14 @@ On the first run, the database schema and seed data are created automatically.
 
 ## pgAdmin (Optional Database UI)
 
-Start pgAdmin alongside the other services:
+Start pgAdmin and Kibana alongside the other services:
 
 ```bash
 docker-compose --profile tools up -d
 ```
 
 Open http://localhost:5050 and log in with the credentials from your `.env` file:
+
 - **Email**: `admin@myshop.dev`
 - **Password**: `admin`
 
@@ -51,15 +54,15 @@ Open http://localhost:5050 and log in with the credentials from your `.env` file
 
 Click **Add New Server**, then fill in:
 
-| Field | Value |
-|---|---|
-| **General → Name** | `myshop` |
-| **Connection → Host** | `db` |
-| **Connection → Port** | `5432` |
-| **Connection → Database** | `myshop` |
-| **Connection → Username** | `postgres` |
-| **Connection → Password** | `postgres` |
-| **Connection → Save password** | Yes |
+| Field                          | Value      |
+| ------------------------------ | ---------- |
+| **General → Name**             | `myshop`   |
+| **Connection → Host**          | `db`       |
+| **Connection → Port**          | `5432`     |
+| **Connection → Database**      | `myshop`   |
+| **Connection → Username**      | `postgres` |
+| **Connection → Password**      | `postgres` |
+| **Connection → Save password** | Yes        |
 
 Tables are at: Servers → myshop → Databases → myshop → Schemas → public → Tables
 
@@ -69,18 +72,30 @@ Tables are at: Servers → myshop → Databases → myshop → Schemas → publi
 docker-compose --profile tools stop pgadmin
 ```
 
+## Kibana (Optional Elasticsearch UI)
+
+Kibana runs as part of the `tools` profile at `http://localhost:5601`.
+
+Useful things to do in Kibana:
+
+- **Stack Management → Index Management** — view the `products` index, doc count, health, and mappings
+- **Analytics → Discover** — browse and filter indexed documents interactively
+- **Management → Dev Tools** — run raw Elasticsearch API queries
+
 ## Common Commands
 
-| Command | Description |
-|---|---|
-| `docker-compose up -d` | Start backend + database |
-| `docker-compose up -d --build` | Rebuild and start (after Dockerfile changes) |
-| `docker-compose --profile tools up -d` | Start everything including pgAdmin |
-| `docker-compose exec backend npm run db:seed` | Reset and re-seed sample data |
-| `docker-compose down` | Stop all containers |
-| `docker-compose down -v` | Stop all and **delete database volume** (full reset) |
-| `docker-compose logs -f backend` | Stream backend logs |
-| `docker-compose logs -f db` | Stream database logs |
+| Command                                       | Description                                           |
+| --------------------------------------------- | ----------------------------------------------------- |
+| `docker-compose up -d`                        | Start backend + database + elasticsearch              |
+| `docker-compose up -d --build`                | Rebuild and start (after Dockerfile changes)          |
+| `docker-compose --profile tools up -d`        | Start everything including pgAdmin and Kibana         |
+| `docker-compose exec backend npm run db:seed` | Reset and re-seed sample data                         |
+| `docker-compose down`                         | Stop all containers                                   |
+| `docker-compose down -v`                      | Stop all and **delete all volumes** (full reset)      |
+| `docker volume rm backend_esdata`             | Delete only the Elasticsearch volume (forces re-sync) |
+| `docker-compose logs -f backend`              | Stream backend logs                                   |
+| `docker-compose logs -f db`                   | Stream database logs                                  |
+| `docker-compose logs -f elasticsearch`        | Stream Elasticsearch logs                             |
 
 ## Project Structure
 
@@ -90,12 +105,19 @@ backend/
 │   ├── migrations/          # SQL schema (auto-runs on first DB creation)
 │   └── seeds/               # Sample data (auto-runs on first DB creation)
 ├── src/
-│   ├── config/db.js         # PostgreSQL connection pool
+│   ├── config/
+│   │   ├── db.js            # PostgreSQL connection pool
+│   │   └── elasticsearch.js # Elasticsearch client
 │   ├── graphql/
 │   │   ├── schema/          # GraphQL type definitions
 │   │   ├── resolvers/       # GraphQL resolvers
 │   │   └── index.js         # Auto-merges all schemas and resolvers
-│   ├── scripts/initDb.js    # Manual seed script (npm run db:seed)
+│   ├── scripts/
+│   │   ├── initDb.js        # Manual seed script (npm run db:seed)
+│   │   └── syncElastic.js   # ES sync script (runs on container start)
+│   ├── services/
+│   │   ├── product.service.js  # Product business logic + ES sync on CRUD
+│   │   └── search.service.js   # Elasticsearch index and search operations
 │   ├── app.js               # Express app setup and REST routes
 │   └── server.js            # Entry point: Apollo Server bootstrap
 ├── .env.example             # Environment template (commit this)
@@ -108,5 +130,6 @@ backend/
 ## Notes
 
 - `.env` is gitignored — each team member copies `.env.example` and adjusts if needed.
-- Database data persists in a Docker volume (`pgdata`). To fully reset, run `docker-compose down -v`.
+- Database data persists in a Docker volume (`pgdata` and `esdata`). To fully reset, run `docker-compose down -v`.
 - The backend container mounts the source code, so file changes trigger auto-reload via nodemon.
+

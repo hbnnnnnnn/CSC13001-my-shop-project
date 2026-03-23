@@ -9,11 +9,13 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules # Map node_modules to avoid overwriting from host during dev
     restart: unless-stopped
-    command: npm run dev
+    command: sh -c "node src/scripts/syncElastic.js && npm run dev"
 
   db:
     image: postgres:15-alpine
@@ -49,5 +51,39 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  elasticsearch:
+    image: elasticsearch:9.3.2
+    container_name: myshop_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false # disable auth for dev
+      - ES_JAVA_OPTS=-Xms256m -Xmx256m # limit RAM usage
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    healthcheck:
+      test:
+        ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  kibana:
+    image: kibana:9.3.2
+    container_name: myshop_kibana
+    profiles: ["tools"]
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   pgdata:
+  esdata:
+

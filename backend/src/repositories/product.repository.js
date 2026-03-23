@@ -73,6 +73,18 @@ class ProductRepository extends BaseRepository {
     };
   }
 
+  async findByIdWithCategory(productId) {
+    const result = await db.query(
+      `SELECT p.*, c.name AS category_name 
+      FROM product p
+      LEFT JOIN category c ON p.category_id = c.category_id
+      WHERE p.product_id = $1`,
+      [productId],
+    );
+
+    return result.rows[0];
+  }
+
   async findByCategory(categoryId) {
     const result = await db.query(
       "SELECT * FROM product WHERE category_id = $1",

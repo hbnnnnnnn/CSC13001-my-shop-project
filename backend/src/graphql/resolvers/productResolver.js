@@ -8,6 +8,8 @@ const {
   deleteProduct,
 } = require("../../services/product.service");
 
+const { searchProducts } = require("../../services/search.service");
+
 const { getCategoryById } = require("../../services/category.service");
 
 const productResolver = {
@@ -23,6 +25,9 @@ const productResolver = {
     },
     topSellingProducts: async (_, { limit }) => {
       return await getTopSellingProducts(limit);
+    },
+    productSearch: async (_, { query, page, limit, filter, sort }) => {
+      return await searchProducts(query, page, limit, filter, sort);
     },
   },
   Mutation: {
