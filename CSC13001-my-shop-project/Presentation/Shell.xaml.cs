@@ -1,4 +1,10 @@
-﻿namespace CSC13001_my_shop_project.Presentation;
+namespace CSC13001_my_shop_project.Presentation;
+
+using System;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using CSC13001_my_shop_project.Presentation.Dashboard;
+using CSC13001_my_shop_project.Presentation.OrderList;
 
 public sealed partial class Shell : UserControl, IContentControlProvider
 {
@@ -10,20 +16,33 @@ public sealed partial class Shell : UserControl, IContentControlProvider
         _vm = new ShellViewModel();
         DataContext = _vm;
 
-        // Show content only for the Dashboard tab; hide for all others (not yet implemented)
         _vm.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(ShellViewModel.SelectedSidebarItem))
                 SyncContentVisibility();
         };
+        
+        this.Loaded += (_, _) => SyncContentVisibility();
     }
 
     public ContentControl ContentControl => MainContent;
 
-    private void SyncContentVisibility()
+    private async void SyncContentVisibility()
     {
-        MainContent.Visibility = _vm.SelectedSidebarItem == "Dashboard"
-            ? Visibility.Visible
-            : Visibility.Collapsed;
+        MainContent.Visibility = Visibility.Visible;
+        if (string.IsNullOrEmpty(_vm.SelectedSidebarItem)) return;
+
+        switch (_vm.SelectedSidebarItem)
+        {
+            case "Dashboard":
+                await MainContent.Navigator().NavigateViewModelAsync<DashboardViewModel>(this);
+                break;
+            case "Orders":
+                await MainContent.Navigator().NavigateViewModelAsync<OrderListViewModel>(this);
+                break;
+            default:
+                await MainContent.Navigator().NavigateRouteAsync(this, _vm.SelectedSidebarItem);
+                break;
+        }
     }
 }
