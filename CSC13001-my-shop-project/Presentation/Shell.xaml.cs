@@ -1,4 +1,7 @@
-﻿namespace CSC13001_my_shop_project.Presentation;
+using Microsoft.UI.Xaml;
+using Uno.Extensions.Navigation;
+
+namespace CSC13001_my_shop_project.Presentation;
 
 public sealed partial class Shell : UserControl, IContentControlProvider
 {
@@ -9,21 +12,13 @@ public sealed partial class Shell : UserControl, IContentControlProvider
         this.InitializeComponent();
         _vm = new ShellViewModel();
         DataContext = _vm;
-
-        // Show content only for the Dashboard tab; hide for all others (not yet implemented)
-        _vm.PropertyChanged += (_, e) =>
-        {
-            if (e.PropertyName == nameof(ShellViewModel.SelectedSidebarItem))
-                SyncContentVisibility();
-        };
+        Loaded += OnShellLoaded;
     }
 
     public ContentControl ContentControl => MainContent;
 
-    private void SyncContentVisibility()
+    private void OnShellLoaded(object sender, RoutedEventArgs e)
     {
-        MainContent.Visibility = _vm.SelectedSidebarItem == "Dashboard"
-            ? Visibility.Visible
-            : Visibility.Collapsed;
+        ShellViewModel.AttachNavigatorResolver(() => this.Navigator() ?? MainContent?.Navigator());
     }
 }

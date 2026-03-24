@@ -1,11 +1,14 @@
 using System.Diagnostics.CodeAnalysis;
 using CSC13001_my_shop_project.Presentation.Dashboard;
+using CSC13001_my_shop_project.Presentation.Products;
 using Uno.Resizetizer;
 
 namespace CSC13001_my_shop_project;
 
 public partial class App : Application
 {
+    /// <summary>Host after launch; used by shell view model to resolve <c>INavigator</c>.</summary>
+    internal static IHost? AppHost { get; private set; }
     /// <summary>
     /// Initializes the singleton application object. This is the first line of authored code
     /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -96,13 +99,15 @@ public partial class App : Application
         MainWindow.SetWindowIcon();
 
         Host = await builder.NavigateAsync<Shell>();
+        AppHost = Host;
     }
 
     private static void RegisterRoutes(IViewRegistry views, IRouteRegistry routes)
     {
         views.Register(
             new ViewMap(ViewModel: typeof(ShellViewModel)),
-            new ViewMap<DashboardPage, DashboardViewModel>()
+            new ViewMap<DashboardPage, DashboardViewModel>(),
+            new ViewMap<ProductsPage, ProductsViewModel>()
         );
 
         routes.Register(
@@ -112,6 +117,7 @@ public partial class App : Application
                 Nested:
                 [
                     new RouteMap("Dashboard", View: views.FindByViewModel<DashboardViewModel>(), IsDefault: true),
+                    new RouteMap("Products", View: views.FindByViewModel<ProductsViewModel>()),
                 ]
             )
         );
