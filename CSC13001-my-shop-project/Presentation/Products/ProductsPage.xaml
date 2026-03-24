@@ -15,6 +15,10 @@
         <products:PaginationNumberBackgroundConverter x:Key="PagBg" />
         <products:PaginationNumberForegroundConverter x:Key="PagFg" />
 
+        <SolidColorBrush x:Key="ProductCardSurfaceBrush" Color="#FFFFFFFF" />
+        <SolidColorBrush x:Key="ProductCardHoverBackgroundBrush" Color="#FFF5EDE4" />
+        <SolidColorBrush x:Key="ProductCardHoverBorderBrush" Color="#99F3B55C" />
+
         <Style x:Key="ProductsPrimaryButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="{StaticResource ShellAccentBrush}" />
             <Setter Property="Foreground" Value="White" />
@@ -98,6 +102,34 @@
             <Setter Property="Height" Value="40" />
             <Setter Property="CornerRadius" Value="8" />
             <Setter Property="UseSystemFocusVisuals" Value="False" />
+        </Style>
+
+        <!-- No ListViewItemPresenter / reveal border (avoids extra grey ring around cards). -->
+        <Style x:Key="ProductsGridViewItemChromelessStyle" TargetType="GridViewItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="UseSystemFocusVisuals" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="GridViewItem">
+                        <ContentPresenter
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Margin="{TemplateBinding Padding}"
+                            HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalAlignment}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                        />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Page.Resources>
 
@@ -579,34 +611,46 @@
                 </Grid>
             </Border>
 
-            <!-- Grid view -->
+            <!-- Grid view: tile width from page (four columns, fills available width) -->
             <GridView
+                x:Name="ProductsGridView"
                 ItemsSource="{Binding PagedItems}"
                 SelectionMode="None"
                 IsItemClickEnabled="False"
                 Visibility="{Binding IsGridView, Converter={StaticResource BoolToVis}}"
                 Margin="0,0,0,8"
+                HorizontalAlignment="Stretch"
+                SizeChanged="ProductsGridView_SizeChanged"
+                ItemContainerStyle="{StaticResource ProductsGridViewItemChromelessStyle}"
             >
                 <GridView.ItemTemplate>
                     <DataTemplate>
-                        <utu:ShadowContainer Width="260" Height="408" Margin="0,0,12,16">
+                        <utu:ShadowContainer
+                            Width="{Binding ProductGridTileWidth, ElementName=ProductsRootPage}"
+                            Height="408"
+                            Margin="0"
+                        >
                             <utu:ShadowContainer.Shadows>
                                 <utu:ShadowCollection>
+                                    <!-- Ambient only: downward offset reads as a second grey line under the card. -->
                                     <utu:Shadow
                                         OffsetX="0"
-                                        OffsetY="4"
-                                        BlurRadius="12"
+                                        OffsetY="0"
+                                        BlurRadius="14"
                                         Spread="0"
                                         Color="#000000"
-                                        Opacity="0.06"
+                                        Opacity="0.05"
                                     />
                                 </utu:ShadowCollection>
                             </utu:ShadowContainer.Shadows>
                             <Border
-                                Background="#FFFFFFFF"
+                                Background="{StaticResource ProductCardSurfaceBrush}"
                                 BorderBrush="{StaticResource ShellBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="12"
+                                RenderTransformOrigin="0.5,0.5"
+                                PointerEntered="ProductRow_PointerEntered"
+                                PointerExited="ProductRow_PointerExited"
                             >
                                 <Grid>
                                     <Grid.RowDefinitions>
@@ -736,11 +780,12 @@
                                 </utu:ShadowCollection>
                             </utu:ShadowContainer.Shadows>
                             <Border
-                                Background="#FFFFFFFF"
+                                Background="{StaticResource ProductCardSurfaceBrush}"
                                 BorderBrush="{StaticResource ShellBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="12"
                                 Padding="16"
+                                RenderTransformOrigin="0.5,0.5"
                                 PointerEntered="ProductRow_PointerEntered"
                                 PointerExited="ProductRow_PointerExited"
                             >
