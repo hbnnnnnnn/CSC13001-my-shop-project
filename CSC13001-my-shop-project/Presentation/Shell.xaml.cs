@@ -1,3 +1,6 @@
+using Microsoft.UI.Xaml;
+using Uno.Extensions.Navigation;
+
 namespace CSC13001_my_shop_project.Presentation;
 
 using System;
@@ -27,7 +30,7 @@ public sealed partial class Shell : UserControl, IContentControlProvider
 
     public ContentControl ContentControl => MainContent;
 
-    private async void SyncContentVisibility()
+    private async void OnShellLoaded(object sender, RoutedEventArgs e)
     {
         MainContent.Visibility = Visibility.Visible;
         if (string.IsNullOrEmpty(_vm.SelectedSidebarItem)) return;
