@@ -2,15 +2,32 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
-
 namespace CSC13001_my_shop_project.Presentation.Products;
 
 public sealed partial class ProductsPage : Page
 {
+    private const int ProductGridColumns = 4;
+    private const double ProductGridHorizontalGap = 12;
+
+    public static readonly DependencyProperty ProductGridTileWidthProperty = DependencyProperty.Register(
+        nameof(ProductGridTileWidth),
+        typeof(double),
+        typeof(ProductsPage),
+        new PropertyMetadata(232.0)
+    );
+
+    public double ProductGridTileWidth
+    {
+        get => (double)GetValue(ProductGridTileWidthProperty);
+        set => SetValue(ProductGridTileWidthProperty, value);
+    }
+
     public ProductsPage()
     {
         this.InitializeComponent();
         DataContextChanged += OnDataContextChanged;
+        Loaded += (_, _) => UpdateProductGridTileWidth(ProductsGridView.ActualWidth);
+        ProductsGridView.ContainerContentChanging += ProductsGridView_ContainerContentChanging;
     }
 
     private ProductsViewModel? VM => DataContext as ProductsViewModel;
@@ -48,6 +65,44 @@ public sealed partial class ProductsPage : Page
         }
     }
 
+    private void ProductsGridView_SizeChanged(object sender, SizeChangedEventArgs e) =>
+        UpdateProductGridTileWidth(e.NewSize.Width);
+
+    private void UpdateProductGridTileWidth(double gridWidth)
+    {
+        if (gridWidth <= 1)
+            return;
+        var gapsBetweenColumns = (ProductGridColumns - 1) * ProductGridHorizontalGap;
+        var tile = (gridWidth - gapsBetweenColumns) / ProductGridColumns;
+        if (tile < 120)
+            tile = 120;
+        if (System.Math.Abs(tile - ProductGridTileWidth) > 0.5)
+            ProductGridTileWidth = tile;
+    }
+
+    private void ProductsGridView_ContainerContentChanging(
+        ListViewBase sender,
+        ContainerContentChangingEventArgs args
+    )
+    {
+        if (args.ItemContainer is not GridViewItem item)
+            return;
+
+        if (args.InRecycleQueue)
+        {
+            item.Margin = new Thickness(0);
+            return;
+        }
+
+        if (args.ItemIndex < 0)
+            return;
+
+        var isLastInRow = (args.ItemIndex % ProductGridColumns) == ProductGridColumns - 1;
+        item.Margin = isLastInRow
+            ? new Thickness(0, 0, 0, 16)
+            : new Thickness(0, 0, ProductGridHorizontalGap, 16);
+    }
+
     private void SearchBox_GotFocus(object sender, RoutedEventArgs e) =>
         ToolbarSearchFocusRing.BorderBrush = Application.Current.Resources["ShellAccentBrush"] as Brush;
 
@@ -56,13 +111,23 @@ public sealed partial class ProductsPage : Page
 
     private void ProductRow_PointerEntered(object sender, PointerRoutedEventArgs e)
     {
-        if (sender is Border b)
-            b.Background = Application.Current.Resources["ShellNavHoverBackgroundBrush"] as Brush;
+        if (sender is not Border b)
+            return;
+
+        b.Background = (Brush)Resources["ProductCardHoverBackgroundBrush"];
+        b.BorderBrush = (Brush)Resources["ProductCardHoverBorderBrush"];
+        b.BorderThickness = new Thickness(1);
+        b.RenderTransform = new TranslateTransform { Y = -2 };
     }
 
     private void ProductRow_PointerExited(object sender, PointerRoutedEventArgs e)
     {
-        if (sender is Border b)
-            b.Background = null;
+        if (sender is not Border b)
+            return;
+
+        b.Background = (Brush)Resources["ProductCardSurfaceBrush"];
+        b.BorderBrush = (Brush)Application.Current.Resources["ShellBorderBrush"];
+        b.BorderThickness = new Thickness(1);
+        b.RenderTransform = null;
     }
 }
