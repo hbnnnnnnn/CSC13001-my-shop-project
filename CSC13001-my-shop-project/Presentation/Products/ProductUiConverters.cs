@@ -19,6 +19,23 @@ public sealed class BoolToVisibilityConverter : IValueConverter
         throw new NotSupportedException();
 }
 
+public sealed class ViewModeSegmentIconBrushConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, string language)
+    {
+        var isGridView = value is true;
+        var segment = parameter as string;
+        var isGridSegment = string.Equals(segment, "grid", StringComparison.OrdinalIgnoreCase);
+        var active = isGridView == isGridSegment;
+        return active
+            ? new SolidColorBrush(Color.FromArgb(0xFF, 0xD4, 0xA0, 0x56))
+            : new SolidColorBrush(Color.FromArgb(0xFF, 0x9E, 0x9E, 0x9E));
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, string language) =>
+        throw new NotSupportedException();
+}
+
 public sealed class BoolToToggleChromeBackgroundConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)

@@ -11,6 +11,7 @@
     <Page.Resources>
         <products:BoolToVisibilityConverter x:Key="BoolToVis" />
         <products:BoolToToggleChromeBackgroundConverter x:Key="BoolToToggleBg" />
+        <products:ViewModeSegmentIconBrushConverter x:Key="ViewModeIconFg" />
         <products:PaginationNumberBackgroundConverter x:Key="PagBg" />
         <products:PaginationNumberForegroundConverter x:Key="PagFg" />
 
@@ -31,6 +32,63 @@
             <Setter Property="Padding" Value="10,8" />
             <Setter Property="CornerRadius" Value="8" />
             <Setter Property="UseSystemFocusVisuals" Value="False" />
+        </Style>
+
+        <Style x:Key="ProductsViewSegmentButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="UseSystemFocusVisuals" Value="False" />
+        </Style>
+
+        <Style x:Key="FilterDropdownButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#80F5EDE4" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="UseSystemFocusVisuals" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="RootBorder"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Padding="{TemplateBinding Padding}"
+                            BorderThickness="0"
+                        >
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter Target="RootBorder.Background" Value="#B0F0E4D8" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter Target="RootBorder.Background" Value="#C0EDE0D4" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <ContentPresenter
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style x:Key="ProductsPaginationChevronStyle" TargetType="Button">
@@ -320,103 +378,204 @@
             >
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*" MinWidth="200" />
-                        <ColumnDefinition Width="*" MinWidth="120" />
-                        <ColumnDefinition Width="*" MinWidth="120" />
-                        <ColumnDefinition Width="*" MinWidth="140" />
+                        <ColumnDefinition Width="*" MinWidth="360" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <Grid Grid.Column="0" Height="44" VerticalAlignment="Center">
+                    <Grid
+                        Grid.Column="0"
+                        MinWidth="360"
+                        Height="44"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Stretch"
+                    >
                         <TextBox
+                            Style="{StaticResource ShellSearchTextBoxStyle}"
+                            CornerRadius="10"
                             Text="{Binding SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             PlaceholderText="Search products..."
-                            CornerRadius="22"
-                            Padding="44,10,16,10"
-                            BorderThickness="0"
-                            Background="#80F5EDE4"
-                            Foreground="{StaticResource ShellTextStrongBrush}"
-                            VerticalContentAlignment="Center"
+                            PlaceholderForeground="{StaticResource ShellSearchTextBrush}"
+                            GotFocus="SearchBox_GotFocus"
+                            LostFocus="SearchBox_LostFocus"
+                        >
+                            <TextBox.Resources>
+                                <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#80F5EDE4" />
+                                <SolidColorBrush
+                                    x:Key="TextControlBackgroundPointerOver"
+                                    Color="#80F5EDE4"
+                                />
+                                <SolidColorBrush
+                                    x:Key="TextControlSelectionHighlightColor"
+                                    Color="#CC2C2118"
+                                />
+                                <SolidColorBrush x:Key="TextControlForegroundFocused" Color="#FF2C2118" />
+                                <SolidColorBrush x:Key="TextControlCaretBrush" Color="#FF2C2118" />
+                                <SolidColorBrush x:Key="TextControlButtonForeground" Color="Transparent" />
+                                <SolidColorBrush x:Key="TextControlButtonForegroundPointerOver" Color="Transparent" />
+                                <SolidColorBrush x:Key="TextControlButtonForegroundPressed" Color="Transparent" />
+                                <SolidColorBrush x:Key="TextControlButtonBackground" Color="Transparent" />
+                                <SolidColorBrush x:Key="TextControlButtonBackgroundPointerOver" Color="Transparent" />
+                                <SolidColorBrush x:Key="TextControlButtonBackgroundPressed" Color="Transparent" />
+                                <SolidColorBrush x:Key="TextControlButtonBorderBrush" Color="Transparent" />
+                                <SolidColorBrush x:Key="TextControlButtonBorderBrushPointerOver" Color="Transparent" />
+                                <SolidColorBrush x:Key="TextControlButtonBorderBrushPressed" Color="Transparent" />
+                            </TextBox.Resources>
+                        </TextBox>
+
+                        <Border
+                            x:Name="ToolbarSearchFocusRing"
+                            CornerRadius="10"
+                            BorderThickness="1"
+                            BorderBrush="Transparent"
+                            IsHitTestVisible="False"
                         />
+
                         <Viewbox
                             Width="18"
                             Height="18"
-                            Margin="16,0,0,0"
-                            HorizontalAlignment="Left"
                             VerticalAlignment="Center"
+                            HorizontalAlignment="Left"
+                            Margin="16,0,0,0"
                             IsHitTestVisible="False"
                         >
                             <Canvas Width="18" Height="18">
                                 <Path
                                     Data="M8.25 14.25C11.5637 14.25 14.25 11.5637 14.25 8.25C14.25 4.93629 11.5637 2.25 8.25 2.25C4.93629 2.25 2.25 4.93629 2.25 8.25C2.25 11.5637 4.93629 14.25 8.25 14.25Z"
-                                    Stroke="#662C2118"
+                                    Stroke="{StaticResource ShellSearchIconBrush}"
                                     StrokeThickness="1.5"
                                 />
                                 <Path
                                     Data="M15.75 15.7504L12.525 12.5254"
-                                    Stroke="#662C2118"
+                                    Stroke="{StaticResource ShellSearchIconBrush}"
                                     StrokeThickness="1.5"
                                 />
                             </Canvas>
                         </Viewbox>
                     </Grid>
 
-                    <ComboBox
+                    <!-- Category filter -->
+                    <Button
                         Grid.Column="1"
-                        ItemsSource="{Binding CategoryOptions}"
-                        SelectedItem="{Binding SelectedCategory, Mode=TwoWay}"
-                        PlaceholderText="Category"
+                        Height="44"
                         VerticalAlignment="Center"
-                        CornerRadius="10"
-                    />
-                    <ComboBox
-                        Grid.Column="2"
-                        ItemsSource="{Binding StatusFilterOptions}"
-                        SelectedItem="{Binding SelectedStatusFilter, Mode=TwoWay}"
-                        PlaceholderText="Status"
-                        VerticalAlignment="Center"
-                        CornerRadius="10"
-                    />
-                    <ComboBox
-                        Grid.Column="3"
-                        ItemsSource="{Binding SortOptions}"
-                        SelectedItem="{Binding SelectedSort, Mode=TwoWay}"
-                        PlaceholderText="Sort"
-                        VerticalAlignment="Center"
-                        CornerRadius="10"
-                    />
-
-                    <StackPanel
-                        Grid.Column="4"
-                        Orientation="Horizontal"
-                        Spacing="4"
-                        VerticalAlignment="Center"
+                        Style="{StaticResource FilterDropdownButtonStyle}"
                     >
-                        <Border
-                            CornerRadius="8"
-                            Background="{Binding IsGridView, Converter={StaticResource BoolToToggleBg}}"
-                        >
-                            <Button
-                                Style="{StaticResource ProductsIconGhostButtonStyle}"
-                                Command="{Binding ToggleGridViewCommand}"
-                                AutomationProperties.Name="Grid view"
-                            >
-                                <FontIcon Glyph="&#xE80A;" FontSize="18" Foreground="{StaticResource ShellTextStrongBrush}" />
-                            </Button>
-                        </Border>
-                        <Border
-                            CornerRadius="8"
-                            Background="{Binding IsGridView, Converter={StaticResource BoolToToggleBg}, ConverterParameter=invert}"
-                        >
-                            <Button
-                                Style="{StaticResource ProductsIconGhostButtonStyle}"
-                                Command="{Binding ToggleListViewCommand}"
-                                AutomationProperties.Name="List view"
-                            >
-                                <FontIcon Glyph="&#xE8FD;" FontSize="18" Foreground="{StaticResource ShellTextStrongBrush}" />
-                            </Button>
-                        </Border>
-                    </StackPanel>
+                        <Button.Flyout>
+                            <MenuFlyout x:Name="CategoryMenuFlyout" Placement="BottomEdgeAlignedLeft" />
+                        </Button.Flyout>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE71C;" FontSize="13" Foreground="#992C2118" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding SelectedCategory}" FontSize="14" Foreground="#FF2C2118" VerticalAlignment="Center" />
+                            <FontIcon Glyph="&#xE70D;" FontSize="10" Foreground="#992C2118" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Status filter -->
+                    <Button
+                        Grid.Column="2"
+                        Height="44"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource FilterDropdownButtonStyle}"
+                    >
+                        <Button.Flyout>
+                            <MenuFlyout x:Name="StatusMenuFlyout" Placement="BottomEdgeAlignedLeft" />
+                        </Button.Flyout>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{Binding SelectedStatusFilter}" FontSize="14" Foreground="#FF2C2118" VerticalAlignment="Center" />
+                            <FontIcon Glyph="&#xE70D;" FontSize="10" Foreground="#992C2118" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Sort filter -->
+                    <Button
+                        Grid.Column="3"
+                        Height="44"
+                        VerticalAlignment="Center"
+                        Style="{StaticResource FilterDropdownButtonStyle}"
+                    >
+                        <Button.Flyout>
+                            <MenuFlyout x:Name="SortMenuFlyout" Placement="BottomEdgeAlignedLeft" />
+                        </Button.Flyout>
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE8CB;" FontSize="13" Foreground="#992C2118" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding SelectedSort}" FontSize="14" Foreground="#FF2C2118" VerticalAlignment="Center" />
+                            <FontIcon Glyph="&#xE70D;" FontSize="10" Foreground="#992C2118" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Border
+                        Grid.Column="4"
+                        VerticalAlignment="Center"
+                        Background="#FFF9F7F2"
+                        CornerRadius="10"
+                        Padding="5,4,5,4"
+                    >
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <Grid Width="40" Height="32" VerticalAlignment="Center">
+                                <utu:ShadowContainer Visibility="{Binding IsGridView, Converter={StaticResource BoolToVis}}">
+                                    <utu:ShadowContainer.Shadows>
+                                        <utu:ShadowCollection>
+                                            <utu:Shadow
+                                                OffsetX="0"
+                                                OffsetY="2"
+                                                BlurRadius="8"
+                                                Spread="0"
+                                                Color="#000000"
+                                                Opacity="0.12"
+                                            />
+                                        </utu:ShadowCollection>
+                                    </utu:ShadowContainer.Shadows>
+                                    <Border Background="#FFFFFFFF" CornerRadius="8" />
+                                </utu:ShadowContainer>
+                                <Button
+                                    Style="{StaticResource ProductsViewSegmentButtonStyle}"
+                                    Command="{Binding ToggleGridViewCommand}"
+                                    AutomationProperties.Name="Grid view"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                >
+                                    <FontIcon
+                                        Glyph="&#xE80A;"
+                                        FontSize="18"
+                                        Foreground="{Binding IsGridView, Converter={StaticResource ViewModeIconFg}, ConverterParameter=grid}"
+                                    />
+                                </Button>
+                            </Grid>
+                            <Grid Width="40" Height="32" VerticalAlignment="Center">
+                                <utu:ShadowContainer Visibility="{Binding IsGridView, Converter={StaticResource BoolToVis}, ConverterParameter=invert}">
+                                    <utu:ShadowContainer.Shadows>
+                                        <utu:ShadowCollection>
+                                            <utu:Shadow
+                                                OffsetX="0"
+                                                OffsetY="2"
+                                                BlurRadius="8"
+                                                Spread="0"
+                                                Color="#000000"
+                                                Opacity="0.12"
+                                            />
+                                        </utu:ShadowCollection>
+                                    </utu:ShadowContainer.Shadows>
+                                    <Border Background="#FFFFFFFF" CornerRadius="8" />
+                                </utu:ShadowContainer>
+                                <Button
+                                    Style="{StaticResource ProductsViewSegmentButtonStyle}"
+                                    Command="{Binding ToggleListViewCommand}"
+                                    AutomationProperties.Name="List view"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                >
+                                    <FontIcon
+                                        Glyph="&#xE8FD;"
+                                        FontSize="18"
+                                        Foreground="{Binding IsGridView, Converter={StaticResource ViewModeIconFg}, ConverterParameter=list}"
+                                    />
+                                </Button>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
                 </Grid>
             </Border>
 
