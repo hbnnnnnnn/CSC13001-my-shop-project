@@ -86,6 +86,23 @@
             />
             <SolidColorBrush x:Key="ShellSearchBackgroundBrush" Color="#80F5EDE4" />
 
+            <Style x:Key="ShellSearchTextBoxStyle" TargetType="TextBox">
+                <Setter Property="Background" Value="{StaticResource ShellSearchBackgroundBrush}" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="CornerRadius" Value="22" />
+                <Setter Property="Padding" Value="46,13,16,13" />
+                <Setter Property="UseSystemFocusVisuals" Value="False" />
+                <Setter Property="VerticalContentAlignment" Value="Center" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                <Setter Property="Foreground" Value="{StaticResource ShellTextStrongBrush}" />
+                <Setter
+                    Property="PlaceholderForeground"
+                    Value="{StaticResource ShellSearchTextBrush}"
+                />
+                <Setter Property="SelectionHighlightColor" Value="{StaticResource ShellAccentBrush}" />
+            </Style>
+
             <!-- Order Status Badge Brushes -->
             <!-- Processing: amber filled -->
             <SolidColorBrush x:Key="StatusProcessingBgBrush" Color="#F3B55C" />
