@@ -616,7 +616,8 @@
                 x:Name="ProductsGridView"
                 ItemsSource="{Binding PagedItems}"
                 SelectionMode="None"
-                IsItemClickEnabled="False"
+                IsItemClickEnabled="True"
+                ItemClick="ProductsGridView_ItemClick"
                 Visibility="{Binding IsGridView, Converter={StaticResource BoolToVis}}"
                 Margin="0,0,0,8"
                 HorizontalAlignment="Stretch"
@@ -788,6 +789,7 @@
                                 RenderTransformOrigin="0.5,0.5"
                                 PointerEntered="ProductRow_PointerEntered"
                                 PointerExited="ProductRow_PointerExited"
+                                Tapped="ProductListRow_Tapped"
                             >
                                 <Grid ColumnSpacing="16">
                                     <Grid.ColumnDefinitions>

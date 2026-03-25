@@ -1,7 +1,11 @@
+using CSC13001_my_shop_project.Models;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Uno.Extensions.Navigation;
+using Uno.Extensions.Navigation.UI;
+
 namespace CSC13001_my_shop_project.Presentation.Products;
 
 public sealed partial class ProductsPage : Page
@@ -129,5 +133,25 @@ public sealed partial class ProductsPage : Page
         b.BorderBrush = (Brush)Application.Current.Resources["ShellBorderBrush"];
         b.BorderThickness = new Thickness(1);
         b.RenderTransform = null;
+    }
+
+    private async void ProductsGridView_ItemClick(object sender, ItemClickEventArgs e)
+    {
+        if (e.ClickedItem is not ProductListItem item)
+            return;
+        var nav = this.Navigator();
+        if (nav is null)
+            return;
+        await nav.NavigateRouteAsync(this, "ProductDetail", data: new ProductDetailArgs(item.Id));
+    }
+
+    private async void ProductListRow_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+        if ((sender as FrameworkElement)?.DataContext is not ProductListItem item)
+            return;
+        var nav = this.Navigator();
+        if (nav is null)
+            return;
+        await nav.NavigateRouteAsync(this, "ProductDetail", data: new ProductDetailArgs(item.Id));
     }
 }

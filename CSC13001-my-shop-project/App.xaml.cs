@@ -1,6 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
+using CSC13001_my_shop_project.Models;
 using CSC13001_my_shop_project.Presentation.Dashboard;
 using CSC13001_my_shop_project.Presentation.Products;
+using Uno.Extensions.Navigation;
 using CSC13001_my_shop_project.Presentation.OrderList;
 using Uno.Resizetizer;
 
@@ -84,12 +86,7 @@ public partial class App : Application
 #endif
                         }
                     )
-                    .ConfigureServices(
-                        (context, services) => {
-                            // TODO: Register your services
-                            //services.AddSingleton<IMyService, MyService>();
-                        }
-                    )
+                    .ConfigureServices((context, services) => services.AddTransient<ProductDetailViewModel>())
                     .UseNavigation(RegisterRoutes)
             );
         MainWindow = builder.Window;
@@ -109,6 +106,7 @@ public partial class App : Application
             new ViewMap(ViewModel: typeof(ShellViewModel)),
             new ViewMap<DashboardPage, DashboardViewModel>(),
             new ViewMap<ProductsPage, ProductsViewModel>(),
+            new DataViewMap<ProductDetailPage, ProductDetailViewModel, ProductDetailArgs>(),
                 new ViewMap<OrderListPage, OrderListViewModel>()
         );
 
@@ -119,7 +117,17 @@ public partial class App : Application
                 Nested:
                 [
                     new RouteMap("Dashboard", View: views.FindByViewModel<DashboardViewModel>(), IsDefault: true),
-                    new RouteMap("Products", View: views.FindByViewModel<ProductsViewModel>()),
+                    new RouteMap(
+                        "Products",
+                        View: views.FindByViewModel<ProductsViewModel>(),
+                        Nested:
+                        [
+                            new RouteMap(
+                                "ProductDetail",
+                                View: views.FindByViewModel<ProductDetailViewModel>()
+                            ),
+                        ]
+                    ),
                     new RouteMap("Orders", View: views.FindByViewModel<OrderListViewModel>()),
                 ]
             )
