@@ -8,7 +8,8 @@ class BaseRepository {
     this.db = db;
   }
 
-  async findAll({ page = 1, limit = 10 } = {}) {
+  async findAll({ page = 1, limit = 10 } = {}, client) {
+    const db = client || this.db;
     const offset = (page - 1) * limit;
 
     const dataQuery = format(
@@ -22,8 +23,8 @@ class BaseRepository {
     );
 
     const [dataResult, countResult] = await Promise.all([
-      this.db.query(dataQuery, [limit, offset]),
-      this.db.query(countQuery)
+      db.query(dataQuery, [limit, offset]),
+      db.query(countQuery)
     ]);
 
     return {
@@ -35,21 +36,21 @@ class BaseRepository {
     };
   }
 
-  async findById(id) {
+  async findById(id, client) {
+    const db = client || this.db;
     const query = format('SELECT * FROM %I WHERE %I = $1', this.tableName, this.idColumn);
-    const result = await this.db.query(query, [id]);
+    const result = await db.query(query, [id]);
     return result.rows[0];
   }
 
-  async create(data) {
+  async create(data, client) {
+    const db = client || this.db;
     const keys = Object.keys(data);
     const values = Object.values(data);
 
     const columns = keys.map((key) => format('%I', key)).join(', ');
     const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ');
 
-    // %I escapes array of column names safely (e.g. "col1", "col2")
-    // %L escapes array of values as literals (e.g. 'val1', 2, 'val3')
     const query = format(
       'INSERT INTO %I (%s) VALUES (%s) RETURNING *',
       this.tableName,
@@ -57,15 +58,15 @@ class BaseRepository {
       placeholders
     );
 
-    const result = await this.db.query(query, values);
+    const result = await db.query(query, values);
     return result.rows[0];
   }
 
-  async update(id, data) {
+  async update(id, data, client) {
+    const db = client || this.db;
     const keys = Object.keys(data);
     const values = Object.values(data);
 
-    // "name" = $1, "price" = $2
     const setClause = keys
       .map((key, i) => format('%I = $%s', key, i + 1))
       .join(', ');
@@ -78,18 +79,19 @@ class BaseRepository {
       keys.length + 1
     );
 
-    const result = await this.db.query(query, [...values, id]);
+    const result = await db.query(query, [...values, id]);
     return result.rows[0];
   }
 
-  async delete(id) {
+  async delete(id, client) {
+    const db = client || this.db;
     const query = format(
       'DELETE FROM %I WHERE %I = $1 RETURNING *',
       this.tableName,
       this.idColumn
     );
 
-    const result = await this.db.query(query, [id]);
+    const result = await db.query(query, [id]);
 
     return result.rowCount > 0;
   }

@@ -12,34 +12,35 @@ const getProducts = async ({
   limit = 10,
   filter = {},
   sort = {},
-} = {}) => {
+} = {}, client) => {
   try {
     const products = await productRepository.findAllFiltered({
       page,
       limit,
       filter,
       sort,
-    });
+    }, client);
     return products;
   } catch (error) {
     throw error;
   }
 };
 
-const getProductById = async (id) => {
+const getProductById = async (id, client) => {
   try {
-    const product = await productRepository.findById(id);
+    const product = await productRepository.findById(id, client);
     return product;
   } catch (error) {
     throw error;
   }
 };
 
-const createProduct = async (product) => {
+const createProduct = async (product, client) => {
   try {
-    const newProduct = await productRepository.create(product);
+    const newProduct = await productRepository.create(product, client);
     const productWithCategory = await productRepository.findByIdWithCategory(
       newProduct.product_id,
+      client
     );
     await indexProduct(productWithCategory);
 
@@ -49,11 +50,12 @@ const createProduct = async (product) => {
   }
 };
 
-const updateProduct = async (id, product) => {
+const updateProduct = async (id, product, client) => {
   try {
-    const updatedProduct = await productRepository.update(id, product);
+    const updatedProduct = await productRepository.update(id, product, client);
     const productWithCategory = await productRepository.findByIdWithCategory(
       updatedProduct.product_id,
+      client
     );
     await indexUpdateProduct(id, productWithCategory);
 
@@ -63,9 +65,9 @@ const updateProduct = async (id, product) => {
   }
 };
 
-const deleteProduct = async (id) => {
+const deleteProduct = async (id, client) => {
   try {
-    const deletedProduct = await productRepository.delete(id);
+    const deletedProduct = await productRepository.delete(id, client);
     await indexDeleteProduct(id);
 
     return deletedProduct;
@@ -74,18 +76,34 @@ const deleteProduct = async (id) => {
   }
 };
 
-const getTopLowStockProducts = async (limit = 5) => {
+const updateProductStock = async (productId, newStock, client) => {
   try {
-    const products = await productRepository.findTopLowStockProducts(limit);
+    const updatedProduct = await productRepository.updateStock(productId, newStock, client);
+    const productWithCategory = await productRepository.findByIdWithCategory(
+      productId,
+      client
+    );
+    // Note: If calling from a transaction, ES sync should be handled by the caller after commit
+    // But for standalone calls, we can sync here. 
+    // We'll return the full product data so the caller can choose to sync.
+    return productWithCategory;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getTopLowStockProducts = async (limit = 5, client) => {
+  try {
+    const products = await productRepository.findTopLowStockProducts(limit, client);
     return products;
   } catch (error) {
     throw error;
   }
 };
 
-const getTopSellingProducts = async (limit = 5) => {
+const getTopSellingProducts = async (limit = 5, client) => {
   try {
-    const products = await productRepository.findTopSellingProducts(limit);
+    const products = await productRepository.findTopSellingProducts(limit, client);
     return products;
   } catch (error) {
     throw error;
@@ -98,6 +116,7 @@ module.exports = {
   createProduct,
   updateProduct,
   deleteProduct,
+  updateProductStock,
   getTopLowStockProducts,
   getTopSellingProducts,
 };
