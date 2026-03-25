@@ -88,13 +88,34 @@ public partial class ProductsViewModel : ObservableObject
 
     public bool CanGoNext => CurrentPage < TotalPages;
 
-    partial void OnSearchQueryChanged(string value) => ApplyFilters();
+    private bool _suppressFilters;
 
-    partial void OnSelectedCategoryChanged(string value) => ApplyFilters();
+    partial void OnSearchQueryChanged(string value) { if (!_suppressFilters) ApplyFilters(); }
 
-    partial void OnSelectedStatusFilterChanged(string value) => ApplyFilters();
+    partial void OnSelectedCategoryChanged(string value) { if (!_suppressFilters) ApplyFilters(); }
 
-    partial void OnSelectedSortChanged(string value) => ApplyFilters();
+    partial void OnSelectedStatusFilterChanged(string value) { if (!_suppressFilters) ApplyFilters(); }
+
+    partial void OnSelectedSortChanged(string value) { if (!_suppressFilters) ApplyFilters(); }
+
+    public void BulkRestoreState(string? search, string? category, string? statusFilter, string? sort, int page, bool gridView)
+    {
+        _suppressFilters = true;
+        SearchQuery = search ?? string.Empty;
+        SelectedCategory = category ?? CategoryOptions[0];
+        SelectedStatusFilter = statusFilter ?? StatusFilterOptions[0];
+        SelectedSort = sort ?? SortOptions[0];
+        IsGridView = gridView;
+        _suppressFilters = false;
+
+        ApplyFilters();
+
+        if (page >= 1 && page <= TotalPages)
+        {
+            CurrentPage = page;
+            RebuildCurrentPage();
+        }
+    }
 
     [RelayCommand]
     private void ToggleGridView()
