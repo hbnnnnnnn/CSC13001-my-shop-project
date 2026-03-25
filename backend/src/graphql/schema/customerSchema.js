@@ -17,6 +17,7 @@ const customerSchema = `#graphql
   type Query {
     customers(page: Int, limit: Int): CustomerList!
     customer(id: ID!): Customer
+    customerByPhone(phone: String!): Customer
   }
 
   type Mutation {
