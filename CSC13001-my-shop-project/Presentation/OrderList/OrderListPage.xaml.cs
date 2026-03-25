@@ -145,4 +145,24 @@ public sealed partial class OrderListPage : Page
 
         return new SolidColorBrush(fallbackColor);
     }
+
+    // ─── Page Size selector ───
+    private void PageSizeList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is ListView lv && lv.SelectedItem is int size && DataContext is OrderListViewModel vm)
+        {
+            vm.PageSize = size;
+            PageSizeButton.Flyout?.Hide();
+        }
+    }
+
+    // ─── Page Number selector ───
+    private void PageSelectorList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is ListView lv && lv.SelectedItem is int page && DataContext is OrderListViewModel vm)
+        {
+            vm.CurrentPage = page;
+            PageSelectorButton.Flyout?.Hide();
+        }
+    }
 }

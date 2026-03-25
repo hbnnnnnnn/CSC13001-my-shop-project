@@ -31,6 +31,9 @@ public partial class OrderListViewModel : ObservableObject
     private int _totalPages = 1;
 
     [ObservableProperty]
+    private ObservableCollection<int> _pageOptions = new() { 1 };
+
+    [ObservableProperty]
     private DateTimeOffset? _fromDate;
 
     [ObservableProperty]
@@ -220,6 +223,11 @@ public partial class OrderListViewModel : ObservableObject
 
         var filtered = query.ToList();
         TotalPages = Math.Max(1, (int)Math.Ceiling(filtered.Count / (double)PageSize));
+
+        // Rebuild page options for ComboBox
+        PageOptions.Clear();
+        for (int i = 1; i <= TotalPages; i++)
+            PageOptions.Add(i);
 
         if (CurrentPage > TotalPages)
             CurrentPage = TotalPages;

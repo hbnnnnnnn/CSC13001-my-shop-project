@@ -623,24 +623,67 @@
                                 <!-- Show N per page -->
                                 <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
                                     <TextBlock Text="Show" FontSize="14" Foreground="#992C2118" VerticalAlignment="Center" />
-                                    <ComboBox
-                                        SelectedItem="{Binding PageSize, Mode=TwoWay}"
-                                        Width="62" Height="34"
-                                        Background="{StaticResource ShellBackgroundBrush}"
-                                        BorderBrush="{StaticResource ShellBorderBrush}"
-                                        BorderThickness="1"
-                                        CornerRadius="10"
-                                        FontSize="14"
-                                        Foreground="{StaticResource ShellTextStrongBrush}"
-                                    >
-                                        <x:Int32>5</x:Int32>
-                                        <x:Int32>10</x:Int32>
-                                        <x:Int32>20</x:Int32>
-                                    </ComboBox>
+                                    <Border Background="#FAF7F2" BorderBrush="#F5EDE4" BorderThickness="1" CornerRadius="10" Height="34" Width="62">
+                                        <Button
+                                            x:Name="PageSizeButton"
+                                            Style="{StaticResource GhostButtonStyle}"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Stretch"
+                                            Padding="12,0,8,0"
+                                        >
+                                            <Button.Flyout>
+                                                <Flyout Placement="Top">
+                                                    <Flyout.FlyoutPresenterStyle>
+                                                        <Style TargetType="FlyoutPresenter">
+                                                            <Setter Property="Background" Value="White" />
+                                                            <Setter Property="BorderBrush" Value="#F5EDE4" />
+                                                            <Setter Property="BorderThickness" Value="1" />
+                                                            <Setter Property="CornerRadius" Value="10" />
+                                                            <Setter Property="Padding" Value="4" />
+                                                            <Setter Property="MinWidth" Value="62" />
+                                                            <Setter Property="MaxWidth" Value="62" />
+                                                        </Style>
+                                                    </Flyout.FlyoutPresenterStyle>
+                                                    <ListView
+                                                        x:Name="PageSizeList"
+                                                        SelectionChanged="PageSizeList_SelectionChanged"
+                                                        Background="Transparent"
+                                                        BorderThickness="0"
+                                                        Padding="0"
+                                                        SelectionMode="Single"
+                                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                    >
+                                                        <ListView.ItemContainerStyle>
+                                                            <Style TargetType="ListViewItem">
+                                                                <Setter Property="Padding" Value="6,5" />
+                                                                <Setter Property="MinHeight" Value="0" />
+                                                                <Setter Property="MinWidth" Value="0" />
+                                                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                                                <Setter Property="CornerRadius" Value="8" />
+                                                                <Setter Property="Margin" Value="0,1" />
+                                                            </Style>
+                                                        </ListView.ItemContainerStyle>
+                                                        <ListView.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <TextBlock Text="{Binding}" FontSize="14" FontWeight="Medium" Foreground="#FF2C2118" TextAlignment="Center" HorizontalAlignment="Stretch" />
+                                                            </DataTemplate>
+                                                        </ListView.ItemTemplate>
+                                                        <x:Int32>5</x:Int32>
+                                                        <x:Int32>10</x:Int32>
+                                                        <x:Int32>20</x:Int32>
+                                                    </ListView>
+                                                </Flyout>
+                                            </Button.Flyout>
+                                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                <TextBlock x:Name="PageSizeText" Text="{Binding PageSize}" FontSize="14" FontWeight="Medium" Foreground="#FF2C2118" VerticalAlignment="Center" />
+                                                <FontIcon Glyph="&#xE70D;" FontSize="10" Foreground="#992C2118" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Border>
                                     <TextBlock Text="per page" FontSize="14" Foreground="#992C2118" VerticalAlignment="Center" />
                                 </StackPanel>
 
-                                <!-- Prev / Page Numbers / Next -->
+                                <!-- Prev / Page Selector / Next -->
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                     <Button
                                         Style="{StaticResource GhostButtonStyle}"
@@ -650,36 +693,62 @@
                                         <TextBlock Text="Prev" FontSize="14" FontWeight="Medium" Foreground="#992C2118" />
                                     </Button>
 
-                                    <!-- Page 1 button (active highlight) -->
-                                    <utu:ShadowContainer>
-                                        <utu:ShadowContainer.Shadows>
-                                            <utu:ShadowCollection>
-                                                <utu:Shadow OffsetX="0" OffsetY="4" BlurRadius="6" Spread="0" Color="#F3B55C" Opacity="0.2" />
-                                            </utu:ShadowCollection>
-                                        </utu:ShadowContainer.Shadows>
-                                        <Border
-                                            Background="{StaticResource ShellAccentBrush}"
-                                            CornerRadius="10"
-                                            Width="36" Height="36"
+                                    <!-- Page selector: Button + Flyout -->
+                                    <Border Background="#FAF7F2" BorderBrush="#F5EDE4" BorderThickness="1" CornerRadius="10" Height="34" Width="62">
+                                        <Button
+                                            x:Name="PageSelectorButton"
+                                            Style="{StaticResource GhostButtonStyle}"
+                                            HorizontalAlignment="Stretch"
+                                            VerticalAlignment="Stretch"
+                                            Padding="12,0,8,0"
                                         >
-                                            <TextBlock
-                                                Text="1"
-                                                FontSize="14" FontWeight="Bold"
-                                                Foreground="White"
-                                                HorizontalAlignment="Center"
-                                                VerticalAlignment="Center"
-                                            />
-                                        </Border>
-                                    </utu:ShadowContainer>
-
-                                    <Button Style="{StaticResource GhostButtonStyle}" Padding="8" Width="36" Height="36">
-                                        <TextBlock Text="2" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
-                                    </Button>
-                                    <Button Style="{StaticResource GhostButtonStyle}" Padding="8" Width="36" Height="36">
-                                        <TextBlock Text="3" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
-                                    </Button>
-
-                                    <TextBlock Text="..." FontSize="16" Foreground="#662C2118" VerticalAlignment="Center" Margin="4,0" />
+                                            <Button.Flyout>
+                                                <Flyout Placement="Top">
+                                                    <Flyout.FlyoutPresenterStyle>
+                                                        <Style TargetType="FlyoutPresenter">
+                                                            <Setter Property="Background" Value="White" />
+                                                            <Setter Property="BorderBrush" Value="#F5EDE4" />
+                                                            <Setter Property="BorderThickness" Value="1" />
+                                                            <Setter Property="CornerRadius" Value="10" />
+                                                            <Setter Property="Padding" Value="4" />
+                                                            <Setter Property="MinWidth" Value="62" />
+                                                            <Setter Property="MaxWidth" Value="62" />
+                                                        </Style>
+                                                    </Flyout.FlyoutPresenterStyle>
+                                                    <ListView
+                                                        x:Name="PageSelectorList"
+                                                        ItemsSource="{Binding PageOptions}"
+                                                        SelectionChanged="PageSelectorList_SelectionChanged"
+                                                        Background="Transparent"
+                                                        BorderThickness="0"
+                                                        Padding="0"
+                                                        SelectionMode="Single"
+                                                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                    >
+                                                        <ListView.ItemContainerStyle>
+                                                            <Style TargetType="ListViewItem">
+                                                                <Setter Property="Padding" Value="6,5" />
+                                                                <Setter Property="MinHeight" Value="0" />
+                                                                <Setter Property="MinWidth" Value="0" />
+                                                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                                                <Setter Property="CornerRadius" Value="8" />
+                                                                <Setter Property="Margin" Value="0,1" />
+                                                            </Style>
+                                                        </ListView.ItemContainerStyle>
+                                                        <ListView.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <TextBlock Text="{Binding}" FontSize="14" FontWeight="Medium" Foreground="#FF2C2118" TextAlignment="Center" HorizontalAlignment="Stretch" />
+                                                            </DataTemplate>
+                                                        </ListView.ItemTemplate>
+                                                    </ListView>
+                                                </Flyout>
+                                            </Button.Flyout>
+                                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                <TextBlock x:Name="PageSelectorText" Text="{Binding CurrentPage}" FontSize="14" FontWeight="Medium" Foreground="#FF2C2118" VerticalAlignment="Center" />
+                                                <FontIcon Glyph="&#xE70D;" FontSize="10" Foreground="#992C2118" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </Border>
 
                                     <Button
                                         Style="{StaticResource GhostButtonStyle}"
