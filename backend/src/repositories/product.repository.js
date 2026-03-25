@@ -17,7 +17,8 @@ class ProductRepository extends BaseRepository {
     super("product", "product_id", db);
   }
 
-  async findAllFiltered({ page = 1, limit = 10, filter = {}, sort = {} } = {}) {
+  async findAllFiltered({ page = 1, limit = 10, filter = {}, sort = {} } = {}, client) {
+    const db = client || this.db;
     const offset = (page - 1) * limit;
     const conditions = [];
     const params = [];
@@ -44,7 +45,6 @@ class ProductRepository extends BaseRepository {
     if (sort && sort.field && sort.order) {
       const column = SORT_FIELD_MAP[sort.field];
       if (column) {
-        // pg-format %I safely escapes the column name, %s for ASC/DESC
         orderClause = format("ORDER BY %I %s", column, sort.order);
       }
     }
@@ -58,8 +58,8 @@ class ProductRepository extends BaseRepository {
       format("SELECT COUNT(*) FROM %I", this.tableName) + ` ${whereClause}`;
 
     const [dataResult, countResult] = await Promise.all([
-      this.db.query(dataQuery, [...params, limit, offset]),
-      this.db.query(countQuery, params),
+      db.query(dataQuery, [...params, limit, offset]),
+      db.query(countQuery, params),
     ]);
 
     const total = parseInt(countResult.rows[0].count);
@@ -73,7 +73,8 @@ class ProductRepository extends BaseRepository {
     };
   }
 
-  async findByIdWithCategory(productId) {
+  async findByIdWithCategory(productId, client) {
+    const db = client || this.db;
     const result = await db.query(
       `SELECT p.*, c.name AS category_name 
       FROM product p
@@ -85,7 +86,8 @@ class ProductRepository extends BaseRepository {
     return result.rows[0];
   }
 
-  async findByCategory(categoryId) {
+  async findByCategory(categoryId, client) {
+    const db = client || this.db;
     const result = await db.query(
       "SELECT * FROM product WHERE category_id = $1",
       [categoryId],
@@ -94,7 +96,8 @@ class ProductRepository extends BaseRepository {
     return result.rows;
   }
 
-  async updateStock(productId, quantity) {
+  async updateStock(productId, quantity, client) {
+    const db = client || this.db;
     const result = await db.query(
       `UPDATE product SET stock = $1 WHERE product_id = $2 RETURNING *`,
       [quantity, productId],
@@ -103,7 +106,8 @@ class ProductRepository extends BaseRepository {
     return result.rows[0];
   }
 
-  async findTopLowStockProducts(limit = 5) {
+  async findTopLowStockProducts(limit = 5, client) {
+    const db = client || this.db;
     const result = await db.query(
       `SELECT * FROM product ORDER BY stock ASC LIMIT $1`,
       [limit],
@@ -112,7 +116,8 @@ class ProductRepository extends BaseRepository {
     return result.rows;
   }
 
-  async findTopSellingProducts(limit = 5) {
+  async findTopSellingProducts(limit = 5, client) {
+    const db = client || this.db;
     const result = await db.query(
       `SELECT p.*, SUM(oi.quantity) as total_sold
             FROM product p
