@@ -58,14 +58,4 @@ public sealed partial class TopBarControl : UserControl
             ? Visibility.Collapsed
             : Visibility.Visible;
     }
-
-    private void OnSearchFocused(object sender, RoutedEventArgs e)
-    {
-        SearchFocusRing.BorderBrush = Application.Current.Resources["ShellAccentBrush"] as Brush;
-    }
-
-    private void OnSearchUnfocused(object sender, RoutedEventArgs e)
-    {
-        SearchFocusRing.BorderBrush = new SolidColorBrush(Microsoft.UI.Colors.Transparent);
-    }
 }

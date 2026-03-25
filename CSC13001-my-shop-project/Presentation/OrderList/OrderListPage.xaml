@@ -22,19 +22,11 @@
                     <SolidColorBrush x:Key="TextControlBorderBrushDisabled" Color="Transparent" />
                     <Thickness x:Key="TextControlBorderThemeThickness">0</Thickness>
                     <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
-                    <!-- Remove borders on focus/hover/press for ComboBox -->
-                    <SolidColorBrush x:Key="ComboBoxBackground" Color="White" />
-                    <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver" Color="#FFFBF7F2" />
-                    <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver" Color="#FFF5EDE4" />
-                    <SolidColorBrush x:Key="ComboBoxBackgroundFocused" Color="#FFFBF7F2" />
-                    <SolidColorBrush x:Key="ComboBoxBorderBrushFocused" Color="#FFF3B55C" />
-                    <SolidColorBrush x:Key="ComboBoxDropDownBackground" Color="White" />
-                    <SolidColorBrush x:Key="ComboBoxDropDownBackgroundPointerOver" Color="#FFFBF7F2" />
-                    <SolidColorBrush x:Key="ComboBoxBackgroundPressed" Color="#FFF8F0E5" />
-                    <SolidColorBrush x:Key="ComboBoxBorderBrushPressed" Color="#FFF3B55C" />
-                    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected" Color="#26F3B55C" />
-                    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="#38F3B55C" />
-                    <SolidColorBrush x:Key="ComboBoxItemForegroundSelected" Color="#2C2118" />
+                    <!-- Focus visual suppression -->
+                    <SolidColorBrush x:Key="SystemControlFocusVisualPrimaryBrush" Color="Transparent" />
+                    <SolidColorBrush x:Key="SystemControlFocusVisualSecondaryBrush" Color="Transparent" />
+                    <SolidColorBrush x:Key="FocusVisualPrimaryBrush" Color="Transparent" />
+                    <SolidColorBrush x:Key="FocusVisualSecondaryBrush" Color="Transparent" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
 
@@ -204,7 +196,7 @@
                             <utu:Shadow OffsetX="0" OffsetY="4" BlurRadius="14" Spread="0" Color="#F3B55C" Opacity="0.39" />
                         </utu:ShadowCollection>
                     </utu:ShadowContainer.Shadows>
-                    <Button Style="{StaticResource AccentButtonStyle}" VerticalAlignment="Center">
+                    <Button Style="{StaticResource AccentButtonStyle}" VerticalAlignment="Center" Click="NewOrderButton_Click">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE710;" FontSize="16" Foreground="White" VerticalAlignment="Center" />
                             <TextBlock Text="New Order" FontSize="16" FontWeight="Medium" Foreground="White" VerticalAlignment="Center" />
@@ -219,7 +211,7 @@
             <Grid Margin="0,0,0,24" ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="160" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="140" />
                     <ColumnDefinition Width="140" />
                 </Grid.ColumnDefinitions>
@@ -232,37 +224,45 @@
                         </utu:ShadowCollection>
                     </utu:ShadowContainer.Shadows>
                     <Border
+                        x:Name="SearchBoxBorder"
                         Background="White"
-                        BorderBrush="{StaticResource ShellBorderBrush}"
-                        BorderThickness="1"
+                        BorderBrush="Transparent"
+                        BorderThickness="2"
                         CornerRadius="14"
                         Height="50"
                     >
                         <Grid>
                             <FontIcon Glyph="&#xE721;" FontSize="18" Foreground="{StaticResource ShellSearchIconBrush}" Margin="16,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" />
                             <TextBox
-                                Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                PlaceholderText="Search orders"
-                                FontSize="16"
-                                Foreground="{StaticResource ShellTextStrongBrush}"
-                                BorderThickness="0"
-                                BorderBrush="Transparent"
-                                Background="Transparent"
-                                Padding="48,12,16,12"
-                                UseSystemFocusVisuals="False"
-                                VerticalAlignment="Center"
-                            >
-                                <TextBox.Resources>
-                                    <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="Transparent" />
-                                    <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent" />
-                                    <SolidColorBrush x:Key="TextControlBorderBrush" Color="Transparent" />
-                                    <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent" />
-                                    <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent" />
-                                    <SolidColorBrush x:Key="TextControlBorderBrushPointerOverFocused" Color="Transparent" />
-                                    <Thickness x:Key="TextControlBorderThemeThickness">0</Thickness>
-                                    <Thickness x:Key="TextControlBorderThemeThicknessFocused">0</Thickness>
-                                </TextBox.Resources>
-                            </TextBox>
+                            Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            PlaceholderText="Search orders"
+                            FontSize="16"
+                            Foreground="{StaticResource ShellTextStrongBrush}"
+                            Padding="48,12,16,12"
+                            VerticalAlignment="Center"
+                            UseSystemFocusVisuals="False"
+                            GotFocus="SearchBox_GotFocus"
+                            LostFocus="SearchBox_LostFocus">
+                            
+                            <TextBox.Template>
+                                <ControlTemplate TargetType="TextBox">
+                                    <Grid Background="Transparent">
+                                        <TextBlock
+                                            x:Name="PlaceholderTextContentPresenter"
+                                            Text="{TemplateBinding PlaceholderText}"
+                                            Foreground="{StaticResource ShellTextMutedBrush}"
+                                            Margin="{TemplateBinding Padding}"
+                                            VerticalAlignment="{TemplateBinding VerticalAlignment}"
+                                            IsHitTestVisible="False" />
+                                        
+                                        <ScrollViewer
+                                            x:Name="ContentElement"
+                                            Margin="{TemplateBinding Padding}"
+                                            VerticalAlignment="{TemplateBinding VerticalAlignment}" />
+                                    </Grid>
+                                </ControlTemplate>
+                            </TextBox.Template>
+                        </TextBox>
                         </Grid>
                     </Border>
                 </utu:ShadowContainer>
@@ -274,21 +274,85 @@
                             <utu:Shadow OffsetX="0" OffsetY="1" BlurRadius="3" Spread="0" Color="#000000" Opacity="0.1" />
                         </utu:ShadowCollection>
                     </utu:ShadowContainer.Shadows>
-                    <ComboBox
-                        ItemsSource="{Binding StatusFilterOptions}"
-                        SelectedItem="{Binding SelectedStatusFilter, Mode=TwoWay}"
-                        Height="50"
-                        HorizontalAlignment="Stretch"
+                    <Border
                         Background="White"
-                        BorderBrush="{StaticResource ShellBorderBrush}"
-                        BorderThickness="1"
+                        BorderBrush="Transparent"
+                        BorderThickness="0"
                         CornerRadius="14"
-                        FontSize="14"
-                        FontWeight="Medium"
-                        Padding="14,0"
-                        UseSystemFocusVisuals="False"
-                        Foreground="{StaticResource ShellTextStrongBrush}"
-                    />
+                        Height="50"
+                    >
+                        <Button
+                            x:Name="StatusFilterButton"
+                            Style="{StaticResource GhostButtonStyle}"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            Padding="16,0,12,0"
+                        >
+                            <Button.Flyout>
+                                <Flyout Placement="Bottom">
+                                    <Flyout.FlyoutPresenterStyle>
+                                        <Style TargetType="FlyoutPresenter">
+                                            <Setter Property="Background" Value="White" />
+                                            <Setter Property="BorderBrush" Value="{StaticResource ShellBorderBrush}" />
+                                            <Setter Property="BorderThickness" Value="1" />
+                                            <Setter Property="CornerRadius" Value="12" />
+                                            <Setter Property="Padding" Value="6" />
+                                            <Setter Property="MinWidth" Value="160" />
+                                            <Setter Property="MaxWidth" Value="160" />
+                                        </Style>
+                                    </Flyout.FlyoutPresenterStyle>
+                                    <ListView
+                                        x:Name="StatusFilterList"
+                                        ItemsSource="{Binding StatusFilterOptions}"
+                                        SelectedItem="{Binding SelectedStatusFilter, Mode=TwoWay}"
+                                        SelectionChanged="StatusFilterList_SelectionChanged"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Padding="0"
+                                        SelectionMode="Single"
+                                    >
+                                        <ListView.ItemContainerStyle>
+                                            <Style TargetType="ListViewItem">
+                                                <Setter Property="Padding" Value="12,10" />
+                                                <Setter Property="MinHeight" Value="0" />
+                                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                                <Setter Property="CornerRadius" Value="8" />
+                                                <Setter Property="Margin" Value="0,1" />
+                                            </Style>
+                                        </ListView.ItemContainerStyle>
+                                        <ListView.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock
+                                                    Text="{Binding}"
+                                                    FontSize="14"
+                                                    FontWeight="Medium"
+                                                    Foreground="{StaticResource ShellTextStrongBrush}"
+                                                    VerticalAlignment="Center"
+                                                />
+                                            </DataTemplate>
+                                        </ListView.ItemTemplate>
+                                    </ListView>
+                                </Flyout>
+                            </Button.Flyout>
+                            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                <TextBlock
+                                    x:Name="StatusFilterText"
+                                    Text="{Binding SelectedStatusFilter}"
+                                    FontSize="14"
+                                    FontWeight="Medium"
+                                    Foreground="{StaticResource ShellTextStrongBrush}"
+                                    VerticalAlignment="Center"
+                                />
+                                <FontIcon
+                                    Glyph="&#xE70D;"
+                                    FontSize="12"
+                                    Foreground="{StaticResource ShellTextMutedBrush}"
+                                    VerticalAlignment="Center"
+                                />
+                            </StackPanel>
+                        </Button>
+                    </Border>
                 </utu:ShadowContainer>
 
                 <!-- From Date -->
@@ -315,8 +379,13 @@
                             VerticalAlignment="Stretch"
                             HorizontalContentAlignment="Center"
                             Style="{StaticResource GhostButtonStyle}"
-                            Click="FromDateButton_Click"
                         >
+                            <Button.Flyout>
+                                <DatePickerFlyout
+                                    x:Name="FromDateFlyout"
+                                    DatePicked="FromDateFlyout_DatePicked"
+                                />
+                            </Button.Flyout>
                             <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <FontIcon Glyph="&#xE787;" FontSize="16" Foreground="{StaticResource ShellAccentBrush}" VerticalAlignment="Center" />
                                 <TextBlock
@@ -356,8 +425,13 @@
                             VerticalAlignment="Stretch"
                             HorizontalContentAlignment="Center"
                             Style="{StaticResource GhostButtonStyle}"
-                            Click="ToDateButton_Click"
                         >
+                            <Button.Flyout>
+                                <DatePickerFlyout
+                                    x:Name="ToDateFlyout"
+                                    DatePicked="ToDateFlyout_DatePicked"
+                                />
+                            </Button.Flyout>
                             <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center">
                                 <FontIcon Glyph="&#xE787;" FontSize="16" Foreground="{StaticResource ShellAccentBrush}" VerticalAlignment="Center" />
                                 <TextBlock
@@ -510,12 +584,12 @@
                                                 </Canvas>
                                                 <Button.Flyout>
                                                     <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                                        <MenuFlyoutItem Text="View">
+                                                        <MenuFlyoutItem Text="View" Click="ViewOrder_Click">
                                                             <MenuFlyoutItem.Icon>
                                                                 <FontIcon Glyph="&#xE7B3;" FontSize="14" />
                                                             </MenuFlyoutItem.Icon>
                                                         </MenuFlyoutItem>
-                                                        <MenuFlyoutItem Text="Edit">
+                                                        <MenuFlyoutItem Text="Edit" Click="EditOrder_Click">
                                                             <MenuFlyoutItem.Icon>
                                                                 <FontIcon Glyph="&#xE70F;" FontSize="14" />
                                                             </MenuFlyoutItem.Icon>
