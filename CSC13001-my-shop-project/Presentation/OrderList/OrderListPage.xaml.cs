@@ -5,7 +5,6 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI;
 using System;
 using System.Globalization;
-using System.Threading.Tasks;
 
 namespace CSC13001_my_shop_project.Presentation.OrderList;
 
@@ -28,6 +27,45 @@ public sealed partial class OrderListPage : Page
         };
     }
 
+    private async void NewOrderButton_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new CreateOrderDialog
+        {
+            XamlRoot = this.XamlRoot,
+            DataContext = new CreateOrderViewModel()
+        };
+
+        await dialog.ShowAsync();
+    }
+
+    private async void ViewOrder_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuFlyoutItem item && item.DataContext is OrderItem order)
+        {
+            var dialog = new OrderDetailDialog
+            {
+                XamlRoot = this.XamlRoot,
+                DataContext = new OrderDetailViewModel(order)
+            };
+
+            await dialog.ShowAsync();
+        }
+    }
+
+    private async void EditOrder_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuFlyoutItem item && item.DataContext is OrderItem order)
+        {
+            var dialog = new CreateOrderDialog
+            {
+                XamlRoot = this.XamlRoot,
+                DataContext = new CreateOrderViewModel(order)
+            };
+
+            await dialog.ShowAsync();
+        }
+    }
+
     private void RowBorder_PointerEntered(object sender, PointerRoutedEventArgs e)
     {
         if (sender is Border border)
@@ -44,66 +82,45 @@ public sealed partial class OrderListPage : Page
         }
     }
 
-    private async void FromDateButton_Click(object sender, RoutedEventArgs e)
+    private void SearchBox_GotFocus(object sender, RoutedEventArgs e)
+    {
+        SearchBoxBorder.BorderBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(0xFF, 0xF3, 0xB5, 0x5C));
+    }
+
+    private void SearchBox_LostFocus(object sender, RoutedEventArgs e)
+    {
+        SearchBoxBorder.BorderBrush = new SolidColorBrush(Colors.Transparent);
+    }
+
+    // Đóng flyout và cập nhật text khi chọn status
+    private void StatusFilterList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (StatusFilterButton.Flyout is Flyout flyout)
+        {
+            flyout.Hide();
+        }
+    }
+
+    private void FromDateFlyout_DatePicked(DatePickerFlyout sender, DatePickedEventArgs args)
     {
         if (DataContext is not OrderListViewModel vm)
         {
             return;
         }
 
-        var selectedDate = await PickDateAsync("Select from date", vm.FromDate);
-        if (!selectedDate.HasValue)
-        {
-            return;
-        }
-
-        vm.FromDate = selectedDate.Value;
+        vm.FromDate = args.NewDate;
         SetDateLabel(FromDateText, vm.FromDate, FromDatePlaceholder);
-        FromDateBorder.BorderBrush = ResolveBrush("ShellAccentBrush", Colors.Orange);
-        FromDateBorder.Background = ResolveBrush("ShellNavHoverBackgroundBrush", Colors.Transparent);
     }
 
-    private async void ToDateButton_Click(object sender, RoutedEventArgs e)
+    private void ToDateFlyout_DatePicked(DatePickerFlyout sender, DatePickedEventArgs args)
     {
         if (DataContext is not OrderListViewModel vm)
         {
             return;
         }
 
-        var selectedDate = await PickDateAsync("Select to date", vm.ToDate);
-        if (!selectedDate.HasValue)
-        {
-            return;
-        }
-
-        vm.ToDate = selectedDate.Value;
+        vm.ToDate = args.NewDate;
         SetDateLabel(ToDateText, vm.ToDate, ToDatePlaceholder);
-        ToDateBorder.BorderBrush = ResolveBrush("ShellAccentBrush", Colors.Orange);
-        ToDateBorder.Background = ResolveBrush("ShellNavHoverBackgroundBrush", Colors.Transparent);
-    }
-
-    private async Task<DateTimeOffset?> PickDateAsync(string title, DateTimeOffset? currentDate)
-    {
-        var picker = new DatePicker
-        {
-            Date = currentDate ?? DateTimeOffset.Now,
-            DayVisible = true,
-            MonthVisible = true,
-            YearVisible = true
-        };
-
-        var dialog = new ContentDialog
-        {
-            XamlRoot = this.XamlRoot,
-            Title = title,
-            PrimaryButtonText = "Apply",
-            CloseButtonText = "Cancel",
-            DefaultButton = ContentDialogButton.Primary,
-            Content = picker
-        };
-
-        var result = await dialog.ShowAsync();
-        return result == ContentDialogResult.Primary ? picker.Date : null;
     }
 
     private void SetDateLabel(TextBlock textBlock, DateTimeOffset? value, string placeholder)
