@@ -2,6 +2,10 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const accountRepository = require('../repositories/account.repository.js');
+const cacheService = require('./cache.service.js');
+
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_MINUTES = 1;
 
 const generateToken = (account) => {
     const payload = {
@@ -18,15 +22,30 @@ const generateToken = (account) => {
 const login = async (username, password) => {
     const repo = accountRepository;
 
+    // 1. Check Rate Limiter
+    const rateLimitKey = `ratelimit:login:${username}`;
+    let attempts = await cacheService.get(rateLimitKey) || 0;
+
+    if (attempts >= MAX_LOGIN_ATTEMPTS) {
+        throw new Error(`Too many attempts, please try again in ${LOCKOUT_MINUTES} minutes`);
+    }
+
     const account = await repo.findByUsername(username);
     if (!account) {
+        // Increment failed attempts even if username doesn't exist to prevent enumeration
+        await cacheService.set(rateLimitKey, attempts + 1, LOCKOUT_MINUTES * 60);
         throw new Error('Invalid username');
     }
 
     const isValid = await bcrypt.compare(password, account.password_hash);
     if (!isValid) {
+        // Increment failed attempts
+        await cacheService.set(rateLimitKey, attempts + 1, LOCKOUT_MINUTES * 60);
         throw new Error('Invalid password');
     }
+
+    // Success! Reset attempts.
+    await cacheService.del(rateLimitKey);
 
     const token = generateToken(account);
     return {

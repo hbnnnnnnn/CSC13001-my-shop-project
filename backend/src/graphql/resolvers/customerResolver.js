@@ -8,6 +8,9 @@ const customerResolver = {
         },
         customer: async (_, { id }) => {
             return await customerService.getCustomerById(id);
+        },
+        customerByPhone: async (_, { phone }) => {
+            return await customerService.getCustomerByPhone(phone);
         }
     },
     Mutation: {

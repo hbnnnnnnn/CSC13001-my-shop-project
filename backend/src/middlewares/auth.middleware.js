@@ -1,5 +1,6 @@
 // auth middleware to protect routes that require authentication
 const jwt = require('jsonwebtoken');
+const cacheService = require('../services/cache.service');
 
 const verifyToken = (token) => {
     try {
@@ -11,13 +12,22 @@ const verifyToken = (token) => {
     }
 };
 
-const getUserFromToken = (req) => {
+const getUserFromToken = async (req) => {
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.split(' ')[1];
-        return verifyToken(token);
+        
+        // 1. Check if token is in the Redis Blacklist
+        const isBlacklisted = await cacheService.get(`blacklist:${token}`);
+        if (isBlacklisted) {
+            return { user: null, token: null };
+        }
+
+        // 2. Verify Token
+        const user = verifyToken(token);
+        return { user, token };
     }
-    return null;
+    return { user: null, token: null };
 };
 
 // Wrapper bắt buộc phải đăng nhập mới được xài Resolver
