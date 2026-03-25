@@ -201,6 +201,12 @@ public partial class OrderListViewModel : ObservableObject
             CurrentPage++;
     }
 
+    public void DeleteOrder(OrderItem order)
+    {
+        _allOrders.Remove(order);
+        ApplyFilters();
+    }
+
     private void ApplyFilters()
     {
         var query = _allOrders.AsEnumerable();

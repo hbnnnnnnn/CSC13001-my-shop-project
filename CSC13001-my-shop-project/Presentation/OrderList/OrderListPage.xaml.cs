@@ -66,6 +66,53 @@ public sealed partial class OrderListPage : Page
         }
     }
 
+    private async void DeleteOrder_Click(object sender, RoutedEventArgs e)
+    {
+        OrderItem? order = null;
+
+        // Try to get OrderItem from MenuFlyoutItem DataContext
+        if (sender is MenuFlyoutItem item)
+        {
+            order = item.DataContext as OrderItem;
+        }
+
+        if (order == null) return;
+
+        try
+        {
+            // Show delete confirmation dialog
+            var confirmDialog = new DeleteOrderDialog
+            {
+                XamlRoot = this.XamlRoot
+            };
+            confirmDialog.SetOrderId(order.Id);
+
+            await confirmDialog.ShowAsync();
+
+            if (confirmDialog.IsConfirmed)
+            {
+                // Delete the order from ViewModel
+                if (DataContext is OrderListViewModel vm)
+                {
+                    vm.DeleteOrder(order);
+                }
+
+                // Show success dialog
+                var successDialog = new DeleteSuccessDialog
+                {
+                    XamlRoot = this.XamlRoot
+                };
+                successDialog.SetOrderId(order.Id);
+
+                await successDialog.ShowAsync();
+            }
+        }
+        catch (System.Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"DeleteOrder error: {ex.Message}");
+        }
+    }
+
     private void RowBorder_PointerEntered(object sender, PointerRoutedEventArgs e)
     {
         if (sender is Border border)
