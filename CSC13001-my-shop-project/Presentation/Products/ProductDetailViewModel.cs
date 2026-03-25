@@ -16,6 +16,12 @@ public partial class ProductDetailViewModel : ObservableObject
         Product = p;
         foreach (var o in orders)
             RecentOrders.Add(o);
+
+        Breadcrumbs =
+        [
+            new BreadcrumbItem { Label = "All Products", IsClickable = true },
+            new BreadcrumbItem { Label = p.Name, IsClickable = false },
+        ];
     }
 
     [ObservableProperty]
@@ -23,12 +29,12 @@ public partial class ProductDetailViewModel : ObservableObject
 
     public ObservableCollection<OrderModel> RecentOrders { get; } = new();
 
+    public List<BreadcrumbItem> Breadcrumbs { get; }
+
     [RelayCommand]
-    private async Task GoBackAsync(object? navigationSender)
+    private async Task GoBackAsync()
     {
-        if (navigationSender is null)
-            return;
-        await _navigator.NavigateBackAsync(navigationSender);
+        await _navigator.NavigateRouteAsync(this, "Products");
     }
 
     [RelayCommand]

@@ -1,4 +1,5 @@
 using CSC13001_my_shop_project.Models;
+using CSC13001_my_shop_project.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -12,6 +13,10 @@ public sealed partial class ProductsPage : Page
 {
     private const int ProductGridColumns = 4;
     private const double ProductGridHorizontalGap = 12;
+    private const string StateKey = "ProductsPage";
+
+    private NavigationStateStore? _stateStore;
+    private double _pendingScrollOffset = -1;
 
     public static readonly DependencyProperty ProductGridTileWidthProperty = DependencyProperty.Register(
         nameof(ProductGridTileWidth),
@@ -30,16 +35,101 @@ public sealed partial class ProductsPage : Page
     {
         this.InitializeComponent();
         DataContextChanged += OnDataContextChanged;
-        Loaded += (_, _) => UpdateProductGridTileWidth(ProductsGridView.ActualWidth);
+        Loaded += OnLoaded;
         ProductsGridView.ContainerContentChanging += ProductsGridView_ContainerContentChanging;
+    }
+
+    private void OnLoaded(object sender, RoutedEventArgs e)
+    {
+        UpdateProductGridTileWidth(ProductsGridView.ActualWidth);
+        ApplyPendingScrollOffset();
+    }
+
+    private async void ApplyPendingScrollOffset()
+    {
+        if (_pendingScrollOffset <= 0)
+            return;
+
+        var offset = _pendingScrollOffset;
+        _pendingScrollOffset = -1;
+
+        // Give the GridView/StackPanel time to realize items and complete layout.
+        // Each iteration yields to the UI thread so layout can run between checks.
+        for (var attempt = 0; attempt < 10; attempt++)
+        {
+            await Task.Delay(30);
+
+            if (ProductsScrollViewer.ScrollableHeight >= offset)
+            {
+                ProductsScrollViewer.ChangeView(null, offset, null, disableAnimation: true);
+                return;
+            }
+        }
+
+        // Best-effort: scroll as far as possible
+        if (ProductsScrollViewer.ScrollableHeight > 0)
+            ProductsScrollViewer.ChangeView(null, Math.Min(offset, ProductsScrollViewer.ScrollableHeight), null, disableAnimation: true);
     }
 
     private ProductsViewModel? VM => DataContext as ProductsViewModel;
 
+    private NavigationStateStore StateStore
+    {
+        get
+        {
+            _stateStore ??= (App.AppHost?.Services.GetService(typeof(NavigationStateStore)) as NavigationStateStore)!;
+            return _stateStore;
+        }
+    }
+
+    private void SaveCurrentState()
+    {
+        if (VM is null)
+            return;
+
+        StateStore.Save(StateKey, new ProductListNavigationState
+        {
+            ScrollOffsetY = ProductsScrollViewer.VerticalOffset,
+            SearchQuery = VM.SearchQuery,
+            SelectedCategory = VM.SelectedCategory,
+            SelectedStatusFilter = VM.SelectedStatusFilter,
+            SelectedSort = VM.SelectedSort,
+            CurrentPage = VM.CurrentPage,
+            IsGridView = VM.IsGridView,
+        });
+    }
+
+    private void RestoreState(ProductsViewModel vm)
+    {
+        var state = StateStore.Restore<ProductListNavigationState>(StateKey);
+        if (state is null)
+            return;
+
+        vm.BulkRestoreState(
+            state.SearchQuery,
+            state.SelectedCategory,
+            state.SelectedStatusFilter,
+            state.SelectedSort,
+            state.CurrentPage,
+            state.IsGridView
+        );
+
+        if (state.ScrollOffsetY > 0)
+        {
+            _pendingScrollOffset = state.ScrollOffsetY;
+            ApplyPendingScrollOffset();
+        }
+
+        StateStore.Clear(StateKey);
+    }
+
     private void OnDataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
     {
         if (args.NewValue is ProductsViewModel vm)
+        {
+            RestoreState(vm);
             BuildMenuFlyouts(vm);
+        }
     }
 
     private void BuildMenuFlyouts(ProductsViewModel vm)
@@ -142,6 +232,7 @@ public sealed partial class ProductsPage : Page
         var nav = this.Navigator();
         if (nav is null)
             return;
+        SaveCurrentState();
         await nav.NavigateRouteAsync(this, "ProductDetail", data: new ProductDetailArgs(item.Id));
     }
 
@@ -152,6 +243,7 @@ public sealed partial class ProductsPage : Page
         var nav = this.Navigator();
         if (nav is null)
             return;
+        SaveCurrentState();
         await nav.NavigateRouteAsync(this, "ProductDetail", data: new ProductDetailArgs(item.Id));
     }
 }

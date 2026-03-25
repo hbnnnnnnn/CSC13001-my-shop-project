@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using CSC13001_my_shop_project.Models;
 using CSC13001_my_shop_project.Presentation.Dashboard;
 using CSC13001_my_shop_project.Presentation.Products;
+using CSC13001_my_shop_project.Services;
 using Uno.Extensions.Navigation;
 using CSC13001_my_shop_project.Presentation.OrderList;
 using Uno.Resizetizer;
@@ -86,7 +87,11 @@ public partial class App : Application
 #endif
                         }
                     )
-                    .ConfigureServices((context, services) => services.AddTransient<ProductDetailViewModel>())
+                    .ConfigureServices((context, services) =>
+                    {
+                        services.AddSingleton<NavigationStateStore>();
+                        services.AddTransient<ProductDetailViewModel>();
+                    })
                     .UseNavigation(RegisterRoutes)
             );
         MainWindow = builder.Window;
