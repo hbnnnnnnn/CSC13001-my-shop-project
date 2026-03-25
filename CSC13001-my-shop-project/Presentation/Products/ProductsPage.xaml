@@ -133,7 +133,7 @@
         </Style>
     </Page.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer x:Name="ProductsScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Padding="32,24,32,32" Spacing="0">
             <!-- Header -->
             <Grid Margin="0,0,0,20">
@@ -616,7 +616,8 @@
                 x:Name="ProductsGridView"
                 ItemsSource="{Binding PagedItems}"
                 SelectionMode="None"
-                IsItemClickEnabled="False"
+                IsItemClickEnabled="True"
+                ItemClick="ProductsGridView_ItemClick"
                 Visibility="{Binding IsGridView, Converter={StaticResource BoolToVis}}"
                 Margin="0,0,0,8"
                 HorizontalAlignment="Stretch"
@@ -788,6 +789,7 @@
                                 RenderTransformOrigin="0.5,0.5"
                                 PointerEntered="ProductRow_PointerEntered"
                                 PointerExited="ProductRow_PointerExited"
+                                Tapped="ProductListRow_Tapped"
                             >
                                 <Grid ColumnSpacing="16">
                                     <Grid.ColumnDefinitions>
