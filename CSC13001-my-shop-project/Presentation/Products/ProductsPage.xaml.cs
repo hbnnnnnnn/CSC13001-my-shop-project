@@ -1,9 +1,11 @@
 using CSC13001_my_shop_project.Models;
 using CSC13001_my_shop_project.Services;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Navigation;
 using Uno.Extensions.Navigation;
 using Uno.Extensions.Navigation.UI;
 
@@ -43,6 +45,30 @@ public sealed partial class ProductsPage : Page
     {
         UpdateProductGridTileWidth(ProductsGridView.ActualWidth);
         ApplyPendingScrollOffset();
+        if (VM is not null)
+            ArmCreateDialogAfterLayout(VM);
+    }
+
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+        if (VM is not null)
+            ArmCreateDialogAfterLayout(VM);
+    }
+
+    /// <summary>
+    /// Blocks "Add New Product" until after navigation/layout settles so a pointer-up from the sidebar
+    /// cannot trigger the command. Also keeps the overlay hidden when bindings are not yet active.
+    /// </summary>
+    private void ArmCreateDialogAfterLayout(ProductsViewModel vm)
+    {
+        vm.IsReadyForCreateDialog = false;
+        var dq = DispatcherQueue.GetForCurrentThread();
+        dq?.TryEnqueue(DispatcherQueuePriority.Low, () =>
+        {
+            if (DataContext == vm)
+                vm.IsReadyForCreateDialog = true;
+        });
     }
 
     private async void ApplyPendingScrollOffset()
@@ -129,6 +155,7 @@ public sealed partial class ProductsPage : Page
         {
             RestoreState(vm);
             BuildMenuFlyouts(vm);
+            ArmCreateDialogAfterLayout(vm);
         }
     }
 
@@ -245,5 +272,11 @@ public sealed partial class ProductsPage : Page
             return;
         SaveCurrentState();
         await nav.NavigateRouteAsync(this, "ProductDetail", data: new ProductDetailArgs(item.Id));
+    }
+
+    private void CreateBackdrop_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+        if (VM?.CreateDialogViewModel is { } dlg)
+            dlg.CancelCommand.Execute(null);
     }
 }

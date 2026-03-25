@@ -1,0 +1,25 @@
+<UserControl
+    x:Name="Root"
+    x:Class="CSC13001_my_shop_project.Presentation.Products.Controls.SectionHeaderControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:CSC13001_my_shop_project.Presentation.Products.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+>
+    <StackPanel Spacing="0">
+        <TextBlock
+            FontSize="16"
+            FontWeight="SemiBold"
+            Foreground="#FF1A1A1A"
+            Text="{Binding Title, ElementName=Root, Mode=OneWay}"
+        />
+        <Rectangle
+            Height="1"
+            Margin="0,8,0,16"
+            Fill="#FFF0EDE8"
+            HorizontalAlignment="Stretch"
+        />
+    </StackPanel>
+</UserControl>

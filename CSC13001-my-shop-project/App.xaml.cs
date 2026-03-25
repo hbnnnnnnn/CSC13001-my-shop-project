@@ -3,6 +3,7 @@ using CSC13001_my_shop_project.Models;
 using CSC13001_my_shop_project.Presentation.Dashboard;
 using CSC13001_my_shop_project.Presentation.Products;
 using CSC13001_my_shop_project.Services;
+using Microsoft.Extensions.Options;
 using Uno.Extensions.Navigation;
 using Uno.Resizetizer;
 
@@ -89,6 +90,22 @@ public partial class App : Application
                     .ConfigureServices((context, services) =>
                     {
                         services.AddSingleton<NavigationStateStore>();
+                        services.AddSingleton<ITokenService, TokenService>();
+                        services.AddHttpClient<GraphQlClient>((sp, http) =>
+                        {
+                            var ep = sp.GetRequiredService<IOptions<AppConfig>>().Value.GraphQlEndpoint
+                                ?? "http://localhost:4000/graphql";
+                            http.BaseAddress = new Uri(ep.TrimEnd('/') + "/");
+                        });
+                        services.AddTransient<IProductService, ProductService>();
+                        services.AddHttpClient<IImageUploadService, ImageUploadService>((sp, http) =>
+                        {
+                            var ep = sp.GetRequiredService<IOptions<AppConfig>>().Value.GraphQlEndpoint
+                                ?? "http://localhost:4000/graphql";
+                            var u = new Uri(ep);
+                            http.BaseAddress = new Uri($"{u.Scheme}://{u.Authority}/");
+                        });
+                        services.AddTransient<ProductsViewModel>();
                         services.AddTransient<ProductDetailViewModel>();
                     })
                     .UseNavigation(RegisterRoutes)

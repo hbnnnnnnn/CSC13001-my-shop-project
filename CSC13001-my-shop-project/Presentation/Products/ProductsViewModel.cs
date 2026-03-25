@@ -1,5 +1,10 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CSC13001_my_shop_project.Models;
+using CSC13001_my_shop_project.Services;
+using Microsoft.UI.Dispatching;
 
 namespace CSC13001_my_shop_project.Presentation.Products;
 
@@ -9,17 +14,20 @@ public partial class ProductsViewModel : ObservableObject
 {
     private const int DefaultPageSize = 8;
 
-    private readonly IReadOnlyList<ProductListItem> _catalog;
+    private readonly IProductService _productService;
+    private readonly IImageUploadService _imageUpload;
+    private List<ProductListItem> _catalog = [];
     private List<ProductListItem> _filtered = [];
 
-    public ProductsViewModel()
+    public ProductsViewModel(IProductService productService, IImageUploadService imageUpload)
     {
-        _catalog = ProductCatalogData.Items;
-        CategoryOptions = new ObservableCollection<string>(
-            new[] { "All categories" }.Concat(
-                _catalog.Select(p => p.Category).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(c => c)
-            )
-        );
+        _productService = productService;
+        _imageUpload = imageUpload;
+        _catalog = ProductCatalogData.Items.ToList();
+
+        foreach (var c in BuildCategoryOptionNames(_catalog))
+            CategoryOptions.Add(c);
+
         StatusFilterOptions = new ObservableCollection<string>(
             ["All status", "Active", "Low Stock", "Out of Stock"]
         );
@@ -39,11 +47,25 @@ public partial class ProductsViewModel : ObservableObject
 
         UpdateStats();
         ApplyFilters();
+        _ = ReloadCatalogFromApiAsync();
     }
 
-    public ObservableCollection<string> CategoryOptions { get; }
+    public ObservableCollection<string> CategoryOptions { get; } = new();
     public ObservableCollection<string> StatusFilterOptions { get; }
     public ObservableCollection<string> SortOptions { get; }
+
+    [ObservableProperty]
+    private bool isCreateDialogOpen;
+
+    [ObservableProperty]
+    private CreateProductViewModel? createDialogViewModel;
+
+    /// <summary>
+    /// When false, <see cref="OpenCreateProductDialogCommand"/> cannot run — avoids pointer carry-over
+    /// from sidebar navigation opening the modal on the first frame.
+    /// </summary>
+    [ObservableProperty]
+    private bool isReadyForCreateDialog;
 
     [ObservableProperty]
     private string searchQuery = string.Empty;
@@ -98,6 +120,12 @@ public partial class ProductsViewModel : ObservableObject
 
     partial void OnSelectedSortChanged(string value) { if (!_suppressFilters) ApplyFilters(); }
 
+    partial void OnIsReadyForCreateDialogChanged(bool value) =>
+        OpenCreateProductDialogCommand.NotifyCanExecuteChanged();
+
+    partial void OnIsCreateDialogOpenChanged(bool value) =>
+        OpenCreateProductDialogCommand.NotifyCanExecuteChanged();
+
     public void BulkRestoreState(string? search, string? category, string? statusFilter, string? sort, int page, bool gridView)
     {
         _suppressFilters = true;
@@ -115,6 +143,69 @@ public partial class ProductsViewModel : ObservableObject
             CurrentPage = page;
             RebuildCurrentPage();
         }
+    }
+
+    private static IEnumerable<string> BuildCategoryOptionNames(List<ProductListItem> items)
+    {
+        yield return "All categories";
+        foreach (var name in items.Select(p => p.Category).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(c => c))
+            yield return name;
+    }
+
+    private void RebuildCategoryOptions()
+    {
+        CategoryOptions.Clear();
+        foreach (var c in BuildCategoryOptionNames(_catalog))
+            CategoryOptions.Add(c);
+        if (!CategoryOptions.Contains(SelectedCategory))
+            SelectedCategory = CategoryOptions[0];
+    }
+
+    private async Task ReloadCatalogFromApiAsync()
+    {
+        try
+        {
+            var sort = new ProductSortInput("CREATED_AT", "DESC");
+            var page = await _productService.GetProductsAsync(1, 500, null, sort).ConfigureAwait(false);
+            var data = page.Data ?? [];
+            var list = data.ConvertAll(ProductDtoMapping.ToListItem);
+            var dq = DispatcherQueue.GetForCurrentThread();
+            if (dq is not null)
+                dq.TryEnqueue(() => ApplyCatalogFromApi(list));
+            else
+                ApplyCatalogFromApi(list);
+        }
+        catch
+        {
+            /* keep existing catalog (mock or last good fetch) */
+        }
+    }
+
+    private void ApplyCatalogFromApi(List<ProductListItem> list)
+    {
+        _catalog = list;
+        RebuildCategoryOptions();
+        UpdateStats();
+        ApplyFilters();
+    }
+
+    private bool CanOpenCreateProductDialog() => IsReadyForCreateDialog && !IsCreateDialogOpen;
+
+    [RelayCommand(CanExecute = nameof(CanOpenCreateProductDialog))]
+    private async Task OpenCreateProductDialogAsync()
+    {
+        var vm = new CreateProductViewModel(
+            _productService,
+            _imageUpload,
+            () =>
+            {
+                IsCreateDialogOpen = false;
+                CreateDialogViewModel = null;
+            },
+            ReloadCatalogFromApiAsync);
+        CreateDialogViewModel = vm;
+        IsCreateDialogOpen = true;
+        await vm.InitializeAsync();
     }
 
     [RelayCommand]
@@ -161,12 +252,6 @@ public partial class ProductsViewModel : ObservableObject
             return;
         CurrentPage = page;
         RebuildCurrentPage();
-    }
-
-    [RelayCommand]
-    private void AddNewProduct()
-    {
-        // Placeholder for future create-product flow
     }
 
     private void UpdateStats()
@@ -244,5 +329,4 @@ public partial class ProductsViewModel : ObservableObject
         OnPropertyChanged(nameof(CanGoPrevious));
         OnPropertyChanged(nameof(CanGoNext));
     }
-
 }
