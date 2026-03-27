@@ -32,7 +32,11 @@
             <Setter Property="FontWeight" Value="SemiBold" />
         </Style>
 
-        <Style x:Key="DetailDeleteOutlineButtonStyle" TargetType="Button" BasedOn="{StaticResource DetailOutlineButtonStyle}">
+        <Style
+            x:Key="DetailDeleteOutlineButtonStyle"
+            TargetType="Button"
+            BasedOn="{StaticResource DetailOutlineButtonStyle}"
+        >
             <Setter Property="Foreground" Value="#FFEF4444" />
             <Setter Property="BorderBrush" Value="#FFEF4444" />
         </Style>
@@ -126,13 +130,19 @@
                     Spacing="12"
                     VerticalAlignment="Center"
                 >
-                    <Button Command="{Binding EditProductCommand}" Style="{StaticResource DetailOutlineButtonStyle}">
+                    <Button
+                        Command="{Binding EditProductCommand}"
+                        Style="{StaticResource DetailOutlineButtonStyle}"
+                    >
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE70F;" FontSize="16" />
                             <TextBlock Text="Edit Product" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
-                    <Button Command="{Binding DeleteProductCommand}" Style="{StaticResource DetailDeleteOutlineButtonStyle}">
+                    <Button
+                        Command="{Binding DeleteProductCommand}"
+                        Style="{StaticResource DetailDeleteOutlineButtonStyle}"
+                    >
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <FontIcon Glyph="&#xE74D;" FontSize="16" />
                             <TextBlock Text="Delete" VerticalAlignment="Center" />
@@ -248,7 +258,11 @@
                                         />
                                     </Button>
                                     <StackPanel Spacing="8" Margin="0,8,0,0">
-                                        <FontIcon Glyph="&#xE719;" FontSize="22" Foreground="#FFF3B55C" />
+                                        <FontIcon
+                                            Glyph="&#xE719;"
+                                            FontSize="22"
+                                            Foreground="#FFF3B55C"
+                                        />
                                         <TextBlock
                                             FontSize="12"
                                             Foreground="{StaticResource DetailMutedTextBrush}"
@@ -301,7 +315,11 @@
                                         />
                                     </Button>
                                     <StackPanel Spacing="8" Margin="0,8,0,0">
-                                        <FontIcon Glyph="&#xE9A6;" FontSize="22" Foreground="#FF22C55E" />
+                                        <FontIcon
+                                            Glyph="&#xE9A6;"
+                                            FontSize="22"
+                                            Foreground="#FF22C55E"
+                                        />
                                         <TextBlock
                                             FontSize="12"
                                             Foreground="{StaticResource DetailMutedTextBrush}"
@@ -354,7 +372,11 @@
                                         />
                                     </Button>
                                     <StackPanel Spacing="8" Margin="0,8,0,0">
-                                        <FontIcon Glyph="&#xE73E;" FontSize="22" Foreground="#FF14B8A6" />
+                                        <FontIcon
+                                            Glyph="&#xE73E;"
+                                            FontSize="22"
+                                            Foreground="#FF14B8A6"
+                                        />
                                         <TextBlock
                                             FontSize="12"
                                             Foreground="{StaticResource DetailMutedTextBrush}"
@@ -429,7 +451,11 @@
                                     Foreground="{StaticResource DetailMutedTextBrush}"
                                     Text="{Binding Product.CostMarginLine, Mode=OneWay}"
                                 />
-                                <Border Height="1" Background="{StaticResource DetailDividerBrush}" Margin="0,4,0,4" />
+                                <Border
+                                    Height="1"
+                                    Background="{StaticResource DetailDividerBrush}"
+                                    Margin="0,4,0,4"
+                                />
                                 <TextBlock
                                     FontSize="11"
                                     FontWeight="SemiBold"
@@ -506,13 +532,20 @@
                                     Text="Product Details"
                                     Margin="0,0,0,16"
                                 />
-                                <Grid Padding="0,12" BorderBrush="{StaticResource DetailDividerBrush}" BorderThickness="0,0,0,1">
+                                <Grid
+                                    Padding="0,12"
+                                    BorderBrush="{StaticResource DetailDividerBrush}"
+                                    BorderThickness="0,0,0,1"
+                                >
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="140" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Foreground="{StaticResource DetailMutedTextBrush}" Text="SKU" />
+                                    <TextBlock
+                                        Foreground="{StaticResource DetailMutedTextBrush}"
+                                        Text="SKU"
+                                    />
                                     <TextBlock
                                         Grid.Column="1"
                                         FontWeight="SemiBold"
@@ -534,13 +567,20 @@
                                         />
                                     </Button>
                                 </Grid>
-                                <Grid Padding="0,12" BorderBrush="{StaticResource DetailDividerBrush}" BorderThickness="0,0,0,1">
+                                <Grid
+                                    Padding="0,12"
+                                    BorderBrush="{StaticResource DetailDividerBrush}"
+                                    BorderThickness="0,0,0,1"
+                                >
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="140" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Foreground="{StaticResource DetailMutedTextBrush}" Text="Barcode" />
+                                    <TextBlock
+                                        Foreground="{StaticResource DetailMutedTextBrush}"
+                                        Text="Barcode"
+                                    />
                                     <TextBlock
                                         Grid.Column="1"
                                         FontWeight="SemiBold"
@@ -562,12 +602,19 @@
                                         />
                                     </Button>
                                 </Grid>
-                                <Grid Padding="0,12" BorderBrush="{StaticResource DetailDividerBrush}" BorderThickness="0,0,0,1">
+                                <Grid
+                                    Padding="0,12"
+                                    BorderBrush="{StaticResource DetailDividerBrush}"
+                                    BorderThickness="0,0,0,1"
+                                >
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="140" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Foreground="{StaticResource DetailMutedTextBrush}" Text="Weight" />
+                                    <TextBlock
+                                        Foreground="{StaticResource DetailMutedTextBrush}"
+                                        Text="Weight"
+                                    />
                                     <TextBlock
                                         Grid.Column="1"
                                         FontWeight="SemiBold"
@@ -575,12 +622,19 @@
                                         Text="{Binding Product.Weight, Mode=OneWay}"
                                     />
                                 </Grid>
-                                <Grid Padding="0,12" BorderBrush="{StaticResource DetailDividerBrush}" BorderThickness="0,0,0,1">
+                                <Grid
+                                    Padding="0,12"
+                                    BorderBrush="{StaticResource DetailDividerBrush}"
+                                    BorderThickness="0,0,0,1"
+                                >
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="140" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Foreground="{StaticResource DetailMutedTextBrush}" Text="Dimensions" />
+                                    <TextBlock
+                                        Foreground="{StaticResource DetailMutedTextBrush}"
+                                        Text="Dimensions"
+                                    />
                                     <TextBlock
                                         Grid.Column="1"
                                         FontWeight="SemiBold"
@@ -593,7 +647,10 @@
                                         <ColumnDefinition Width="140" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Foreground="{StaticResource DetailMutedTextBrush}" Text="Date Added" />
+                                    <TextBlock
+                                        Foreground="{StaticResource DetailMutedTextBrush}"
+                                        Text="Date Added"
+                                    />
                                     <TextBlock
                                         Grid.Column="1"
                                         FontWeight="SemiBold"

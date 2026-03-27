@@ -59,8 +59,7 @@ public sealed class ProductListItem
 
     public string PriceText => $"${Price:0}";
 
-    public string? CompareAtText =>
-        CompareAtPrice is { } c && c > Price ? $"${c:0}" : null;
+    public string? CompareAtText => CompareAtPrice is { } c && c > Price ? $"${c:0}" : null;
 
     public bool ShowCompareAt => CompareAtText is not null;
 
@@ -78,27 +77,45 @@ public sealed class ProductListItem
     public SolidColorBrush StatusDotBrush =>
         Status switch
         {
-            ProductShelfStatus.Active => new SolidColorBrush(Color.FromArgb(0xFF, 0x22, 0xC5, 0x5E)),
-            ProductShelfStatus.LowStock => new SolidColorBrush(Color.FromArgb(0xFF, 0xF5, 0x9E, 0x0B)),
-            ProductShelfStatus.OutOfStock => new SolidColorBrush(Color.FromArgb(0xFF, 0xEF, 0x44, 0x44)),
+            ProductShelfStatus.Active => new SolidColorBrush(
+                Color.FromArgb(0xFF, 0x22, 0xC5, 0x5E)
+            ),
+            ProductShelfStatus.LowStock => new SolidColorBrush(
+                Color.FromArgb(0xFF, 0xF5, 0x9E, 0x0B)
+            ),
+            ProductShelfStatus.OutOfStock => new SolidColorBrush(
+                Color.FromArgb(0xFF, 0xEF, 0x44, 0x44)
+            ),
             _ => new SolidColorBrush(Color.FromArgb(0xFF, 0x9C, 0xA3, 0xAF)),
         };
 
     public SolidColorBrush StatusBadgeBg =>
         Status switch
         {
-            ProductShelfStatus.Active => new SolidColorBrush(Color.FromArgb(0xE6, 0xFF, 0xFF, 0xFF)),
-            ProductShelfStatus.LowStock => new SolidColorBrush(Color.FromArgb(0xE6, 0xFF, 0xFB, 0xEB)),
-            ProductShelfStatus.OutOfStock => new SolidColorBrush(Color.FromArgb(0xE6, 0xFE, 0xF2, 0xF2)),
+            ProductShelfStatus.Active => new SolidColorBrush(
+                Color.FromArgb(0xE6, 0xFF, 0xFF, 0xFF)
+            ),
+            ProductShelfStatus.LowStock => new SolidColorBrush(
+                Color.FromArgb(0xE6, 0xFF, 0xFB, 0xEB)
+            ),
+            ProductShelfStatus.OutOfStock => new SolidColorBrush(
+                Color.FromArgb(0xE6, 0xFE, 0xF2, 0xF2)
+            ),
             _ => new SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF)),
         };
 
     public SolidColorBrush StatusBadgeFg =>
         Status switch
         {
-            ProductShelfStatus.Active => new SolidColorBrush(Color.FromArgb(0xFF, 0x16, 0xA3, 0x4A)),
-            ProductShelfStatus.LowStock => new SolidColorBrush(Color.FromArgb(0xFF, 0xD9, 0x77, 0x06)),
-            ProductShelfStatus.OutOfStock => new SolidColorBrush(Color.FromArgb(0xFF, 0xDC, 0x26, 0x26)),
+            ProductShelfStatus.Active => new SolidColorBrush(
+                Color.FromArgb(0xFF, 0x16, 0xA3, 0x4A)
+            ),
+            ProductShelfStatus.LowStock => new SolidColorBrush(
+                Color.FromArgb(0xFF, 0xD9, 0x77, 0x06)
+            ),
+            ProductShelfStatus.OutOfStock => new SolidColorBrush(
+                Color.FromArgb(0xFF, 0xDC, 0x26, 0x26)
+            ),
             _ => new SolidColorBrush(Color.FromArgb(0xFF, 0x9C, 0xA3, 0xAF)),
         };
 
