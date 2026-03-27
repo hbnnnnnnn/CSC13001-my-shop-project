@@ -1,0 +1,430 @@
+<Page
+    x:Class="CSC13001_my_shop_project.Presentation.ServerConfiguration.ServerConfigurationPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:CSC13001_my_shop_project.Presentation.Controls"
+    mc:Ignorable="d"
+    Background="{StaticResource AuthPanelBackgroundBrush}"
+>
+    <Page.Resources>
+        <Style x:Key="AuthFieldTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0,6,0,0" />
+            <Setter Property="Foreground" Value="{StaticResource AuthTextInputBrush}" />
+            <Setter Property="PlaceholderForeground" Value="{StaticResource AuthTextInputBrush}" />
+            <Setter Property="SelectionHighlightColor" Value="{StaticResource BrandColor}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Height" Value="32" />
+        </Style>
+
+        <Style x:Key="AuthFlatButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="UseSystemFocusVisuals" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                        />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1.08*" x:Name="LeftColumn" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Column="0" MinWidth="480" x:Name="HeroPanel">
+            <Image Source="ms-appx:///Assets/Auth/lumina-hero.png" Stretch="UniformToFill" VerticalAlignment="Bottom"/>
+            <Rectangle Fill="{StaticResource AuthHeroOverlayBrush}" />
+
+            <Grid Margin="40">
+                <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="22">
+                    <Run Text="LUMINA " Foreground="White" FontWeight="Bold" />
+                    <Run Text="HAVEN" Foreground="{StaticResource BrandColor}" FontWeight="Light" />
+                </TextBlock>
+
+                <StackPanel VerticalAlignment="Bottom" Spacing="16">
+                    <TextBlock
+                        Foreground="{StaticResource AuthTextOnHeroBrush}"
+                        FontSize="42"
+                        LineHeight="52"
+                        Style="{x:Null}"
+                        HorizontalAlignment="Left"
+                        CharacterSpacing="-30"
+                        TextWrapping="WrapWholeWords"
+                        MaxWidth="520"
+                    >
+                        "Configure your backend connection settings."
+                    </TextBlock>
+                    <TextBlock
+                        Text="Server Configuration — connect to your database securely."
+                        Foreground="{StaticResource AuthTextOnHeroMutedBrush}"
+                        FontSize="13"
+                    />
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Column="1" MinWidth="460">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel
+                    Width="480"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Padding="0,48"
+                    Spacing="20"     
+                    x:Name="FormStackPanel"   
+                >
+                    <Button
+                        HorizontalAlignment="Left"
+                        Style="{StaticResource AuthFlatButtonStyle}"
+                        Command="{Binding BackToLogin}"
+                    >
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Canvas Width="16" Height="16" VerticalAlignment="Center">
+                                <Path
+                                    Data="M8 12.6667L3.33333 8L8 3.33333"
+                                    Stroke="{StaticResource AuthTextLabelBrush}"
+                                    StrokeThickness="1.33"
+                                    StrokeStartLineCap="Round"
+                                    StrokeEndLineCap="Round"
+                                    StrokeLineJoin="Round"
+                                />
+                                <Path
+                                    Data="M12.6667 8H3.33333"
+                                    Stroke="{StaticResource AuthTextLabelBrush}"
+                                    StrokeThickness="1.33"
+                                    StrokeStartLineCap="Round"
+                                    StrokeEndLineCap="Round"
+                                    StrokeLineJoin="Round"
+                                />
+                            </Canvas>
+                            <TextBlock
+                                Text="Back to login"
+                                VerticalAlignment="Center"
+                                Foreground="{StaticResource AuthTextLabelBrush}"
+                                FontSize="13"
+                                FontWeight="Medium"
+                            />
+                        </StackPanel>
+                    </Button>
+
+                    <StackPanel Spacing="6">
+                        <TextBlock
+                            Text="Server Configuration"
+                            FontSize="28"
+                            LineHeight="42"
+                            CharacterSpacing="-35"
+                            FontWeight="Bold"
+                            Style="{x:Null}"
+                            Foreground="{StaticResource AuthTextStrongBrush}"
+                        />
+                        <TextBlock
+                            Text="Configure your backend database connection"
+                            FontSize="14"
+                            Foreground="{StaticResource AuthTextMutedBrush}"
+                        />
+                    </StackPanel>
+
+                    <StackPanel Spacing="16">
+                        <StackPanel Spacing="6">
+                            <TextBlock
+                                Text="SERVER URL / IP ADDRESS"
+                                FontSize="11"
+                                FontWeight="SemiBold"
+                                CharacterSpacing="120"
+                                Foreground="{StaticResource AuthTextLabelBrush}"
+                            />
+                            <Border
+                                Height="50"
+                                CornerRadius="12"
+                                Background="{StaticResource AuthInputBackgroundBrush}"
+                                BorderBrush="{StaticResource AuthInputBorderBrush}"
+                                BorderThickness="1"
+                                Padding="16,0"
+                            >
+                                <TextBox
+                                    Style="{StaticResource AuthFieldTextBoxStyle}"
+                                    VerticalAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    Text="{Binding ServerUrl, Mode=TwoWay}"
+                                />
+                            </Border>
+                        </StackPanel>
+
+                        <Grid ColumnSpacing="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0" Spacing="6">
+                                <TextBlock
+                                    Text="PORT"
+                                    FontSize="11"
+                                    FontWeight="SemiBold"
+                                    CharacterSpacing="120"
+                                    Foreground="{StaticResource AuthTextLabelBrush}"
+                                />
+                                <Border
+                                    Height="50"
+                                    CornerRadius="12"
+                                    Background="{StaticResource AuthInputBackgroundBrush}"
+                                    BorderBrush="{StaticResource AuthInputBorderBrush}"
+                                    BorderThickness="1"
+                                    Padding="16,0"
+                                >
+                                    <TextBox
+                                        Style="{StaticResource AuthFieldTextBoxStyle}"
+                                        VerticalAlignment="Center"
+                                        VerticalContentAlignment="Center"
+                                        Text="{Binding Port, Mode=TwoWay}"
+                                    />
+                                </Border>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Spacing="6">
+                                <TextBlock
+                                    Text="DATABASE"
+                                    FontSize="11"
+                                    FontWeight="SemiBold"
+                                    CharacterSpacing="120"
+                                    Foreground="{StaticResource AuthTextLabelBrush}"
+                                />
+                                <Border
+                                    Height="50"
+                                    CornerRadius="12"
+                                    Background="{StaticResource AuthInputBackgroundBrush}"
+                                    BorderBrush="{StaticResource AuthInputBorderBrush}"
+                                    BorderThickness="1"
+                                    Padding="16,0"
+                                >
+                                    <TextBox
+                                        Style="{StaticResource AuthFieldTextBoxStyle}"
+                                        VerticalAlignment="Center"
+                                        VerticalContentAlignment="Center"
+                                        Text="{Binding Database, Mode=TwoWay}"
+                                    />
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock
+                                Text="USERNAME"
+                                FontSize="11"
+                                FontWeight="SemiBold"
+                                CharacterSpacing="120"
+                                Foreground="{StaticResource AuthTextLabelBrush}"
+                            />
+                            <Border
+                                Height="50"
+                                CornerRadius="12"
+                                Background="{StaticResource AuthInputBackgroundBrush}"
+                                BorderBrush="{StaticResource AuthInputBorderBrush}"
+                                BorderThickness="1"
+                                Padding="16,0"
+                            >
+                                <TextBox
+                                    Style="{StaticResource AuthFieldTextBoxStyle}"
+                                    VerticalAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    Text="{Binding Username, Mode=TwoWay}"
+                                />
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Spacing="6">
+                            <TextBlock
+                                Text="PASSWORD"
+                                FontSize="11"
+                                FontWeight="SemiBold"
+                                CharacterSpacing="120"
+                                Foreground="{StaticResource AuthTextLabelBrush}"
+                            />
+                            <Border
+                                Height="50"
+                                CornerRadius="12"
+                                Background="{StaticResource AuthInputBackgroundBrush}"
+                                BorderBrush="{StaticResource AuthInputBorderBrush}"
+                                BorderThickness="1"
+                                Padding="16,0,12,0"
+                            >
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox
+                                        Style="{StaticResource AuthFieldTextBoxStyle}"
+                                        VerticalAlignment="Center"
+                                        VerticalContentAlignment="Center"
+                                        PlaceholderText="••••••••"
+                                        Text="{Binding Password, Mode=TwoWay}"
+                                    />
+
+                                    <Button
+                                        Grid.Column="1"
+                                        Style="{StaticResource AuthFlatButtonStyle}"
+                                        Width="28"
+                                        Height="28"
+                                    >
+                                        <Canvas Width="16" Height="16">
+                                            <Path
+                                                Data="M0.708337 5.56492C0.652777 5.41525 0.652777 5.2506 0.708337 5.10092C1.24947 3.78883 2.16801 2.66695 3.34752 1.87752C4.52702 1.08809 5.91437 0.666667 7.33367 0.666667C8.75297 0.666667 10.1403 1.08809 11.3198 1.87752C12.4993 2.66695 13.4179 3.78883 13.959 5.10092C14.0146 5.2506 14.0146 5.41525 13.959 5.56492C13.4179 6.87702 12.4993 7.9989 11.3198 8.78832C10.1403 9.57775 8.75297 9.99918 7.33367 9.99918C5.91437 9.99918 4.52702 9.57775 3.34752 8.78832C2.16801 7.9989 1.24947 6.87702 0.708337 5.56492Z"
+                                                Stroke="{StaticResource AuthTextInputBrush}"
+                                                StrokeThickness="1.33"
+                                                StrokeStartLineCap="Round"
+                                                StrokeEndLineCap="Round"
+                                                StrokeLineJoin="Round"
+                                            />
+                                            <Path
+                                                Data="M2.66667 4.66667C3.77124 4.66667 4.66667 3.77124 4.66667 2.66667C4.66667 1.5621 3.77124 0.666667 2.66667 0.666667C1.5621 0.666667 0.666667 1.5621 0.666667 2.66667C0.666667 3.77124 1.5621 4.66667 2.66667 4.66667Z"
+                                                Stroke="{StaticResource AuthTextInputBrush}"
+                                                StrokeThickness="1.33"
+                                                StrokeStartLineCap="Round"
+                                                StrokeEndLineCap="Round"
+                                                StrokeLineJoin="Round"
+                                                RenderTransformOrigin="0,0"
+                                            >
+                                                <Path.RenderTransform>
+                                                    <TranslateTransform X="4.667" Y="2.667" />
+                                                </Path.RenderTransform>
+                                            </Path>
+                                        </Canvas>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+
+                        <controls:CustomCheckBox 
+                        Content="Enable SSL connection" />
+
+                        <Border
+                            Background="{StaticResource AuthNoteBackgroundBrush}"
+                            BorderBrush="{StaticResource AuthNoteBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="16"
+                        >
+                            <TextBlock TextWrapping="Wrap">
+                                <Run
+                                    Text="Note:"
+                                    Foreground="{StaticResource AuthTextStrongBrush}"
+                                    FontWeight="SemiBold"
+                                    FontSize="12"
+                                />
+                                <Run
+                                    Text=" These settings will be saved locally in your browser. Ensure your database server is accessible from this application."
+                                    Foreground="{StaticResource AuthTextMutedBrush}"
+                                    FontSize="12"
+                                />
+                            </TextBlock>
+                        </Border>
+
+                        <Grid ColumnSpacing="12" Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="100" />
+                            </Grid.ColumnDefinitions>
+
+                            <Button
+                                Grid.Column="0"
+                                Height="50"
+                                Command="{Binding SaveConfiguration}"
+                                Background="{StaticResource AuthPrimaryButtonBrush}"
+                                BorderThickness="0"
+                                CornerRadius="14"
+                                Foreground="White"
+                                FontSize="15"
+                                FontWeight="SemiBold"
+                                HorizontalAlignment="Stretch"
+                            >
+                                <Grid Width="168" HorizontalAlignment="Center">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="20" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Canvas
+                                        Grid.Column="0"
+                                        Width="16"
+                                        Height="16"
+                                        VerticalAlignment="Center"
+                                    >
+                                        <Path
+                                            Data="M10.1333 2C10.485 2.00501 10.8205 2.14878 11.0667 2.4L13.6 4.93333C13.8512 5.17951 13.995 5.51497 14 5.86667V12.6667C14 13.0203 13.8595 13.3594 13.6095 13.6095C13.3594 13.8595 13.0203 14 12.6667 14H3.33333C2.97971 14 2.64057 13.8595 2.39052 13.6095C2.14048 13.3594 2 13.0203 2 12.6667V3.33333C2 2.97971 2.14048 2.64057 2.39052 2.39052C2.64057 2.14048 2.97971 2 3.33333 2H10.1333Z"
+                                            Stroke="White"
+                                            StrokeThickness="1.33"
+                                            StrokeStartLineCap="Round"
+                                            StrokeEndLineCap="Round"
+                                            StrokeLineJoin="Round"
+                                        />
+                                        <Path
+                                            Data="M11.3333 14V9.33333C11.3333 9.15652 11.2631 8.98695 11.1381 8.86193C11.013 8.73691 10.8435 8.66667 10.6667 8.66667H5.33333C5.15652 8.66667 4.98695 8.73691 4.86193 8.86193C4.7369 8.98695 4.66667 9.15652 4.66667 9.33333V14"
+                                            Stroke="White"
+                                            StrokeThickness="1.33"
+                                            StrokeStartLineCap="Round"
+                                            StrokeEndLineCap="Round"
+                                            StrokeLineJoin="Round"
+                                        />
+                                        <Path
+                                            Data="M4.66667 2V4.66667C4.66667 4.84348 4.7369 5.01305 4.86193 5.13807C4.98695 5.2631 5.15652 5.33333 5.33333 5.33333H10"
+                                            Stroke="White"
+                                            StrokeThickness="1.33"
+                                            StrokeStartLineCap="Round"
+                                            StrokeEndLineCap="Round"
+                                            StrokeLineJoin="Round"
+                                        />
+                                    </Canvas>
+
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Text="Save Configuration"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                    />
+                                </Grid>
+                            </Button>
+
+                            <Button
+                                Grid.Column="1"
+                                Height="50"
+                                Command="{Binding Cancel}"
+                                Background="White"
+                                BorderBrush="{StaticResource AuthInputBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="14"
+                                Foreground="{StaticResource AuthTextStrongBrush}"
+                                FontSize="15"
+                                FontWeight="SemiBold"
+                                Content="Cancel"
+                            />
+                        </Grid>
+                    </StackPanel>
+
+                    <TextBlock
+                        Text="© 2026 Lumina Haven · All rights reserved"
+                        FontSize="12"
+                        Foreground="{StaticResource AuthTextInputBrush}"
+                        HorizontalAlignment="Center"
+                    />
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Page>

@@ -1,3 +1,5 @@
+using CommunityToolkit.Mvvm.Messaging;
+using CSC13001_my_shop_project.Presentation.Dashboard;
 using Microsoft.UI.Xaml;
 using Uno.Extensions.Navigation;
 
@@ -13,6 +15,17 @@ public sealed partial class Shell : UserControl, IContentControlProvider
         _vm = new ShellViewModel();
         DataContext = _vm;
         Loaded += OnShellLoaded;
+
+        // Listen for chrome visibility messages from pages.
+        WeakReferenceMessenger.Default.Register<ChromeVisibilityMessage>(
+            this,
+            (r, msg) =>
+            {
+                var visibility = msg.ShowChrome ? Visibility.Visible : Visibility.Collapsed;
+                Sidebar.Visibility = visibility;
+                TopBar.Visibility = visibility;
+            }
+        );
     }
 
     public ContentControl ContentControl => MainContent;

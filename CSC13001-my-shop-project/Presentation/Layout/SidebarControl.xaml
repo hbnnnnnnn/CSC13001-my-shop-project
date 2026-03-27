@@ -134,7 +134,6 @@
                             VerticalAlignment="Top"
                             HorizontalAlignment="Stretch"
                         />
-                       
                     </Grid>
                 </Button>
             </Grid>

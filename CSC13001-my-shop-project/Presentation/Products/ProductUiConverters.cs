@@ -56,9 +56,11 @@ public sealed class PaginationNumberBackgroundConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {
-        if (value is true
+        if (
+            value is true
             && Application.Current.Resources.ContainsKey("ShellAccentBrush")
-            && Application.Current.Resources["ShellAccentBrush"] is Brush a)
+            && Application.Current.Resources["ShellAccentBrush"] is Brush a
+        )
             return a;
         return new SolidColorBrush(Color.FromArgb(0x01, 0xFF, 0xFF, 0xFF));
     }
@@ -73,8 +75,10 @@ public sealed class PaginationNumberForegroundConverter : IValueConverter
     {
         if (value is true)
             return new SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF));
-        if (Application.Current.Resources.ContainsKey("ShellTextStrongBrush")
-            && Application.Current.Resources["ShellTextStrongBrush"] is Brush b)
+        if (
+            Application.Current.Resources.ContainsKey("ShellTextStrongBrush")
+            && Application.Current.Resources["ShellTextStrongBrush"] is Brush b
+        )
             return b;
         return new SolidColorBrush(Color.FromArgb(0xFF, 0x2C, 0x21, 0x18));
     }
