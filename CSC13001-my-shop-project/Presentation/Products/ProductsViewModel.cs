@@ -17,21 +17,25 @@ public partial class ProductsViewModel : ObservableObject
         _catalog = ProductCatalogData.Items;
         CategoryOptions = new ObservableCollection<string>(
             new[] { "All categories" }.Concat(
-                _catalog.Select(p => p.Category).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(c => c)
+                _catalog
+                    .Select(p => p.Category)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(c => c)
             )
         );
-        StatusFilterOptions = new ObservableCollection<string>(
-            ["All status", "Active", "Low Stock", "Out of Stock"]
-        );
-        SortOptions = new ObservableCollection<string>(
-            [
-                "Newest First",
-                "Name: A to Z",
-                "Name: Z to A",
-                "Price: Low to High",
-                "Price: High to Low",
-            ]
-        );
+        StatusFilterOptions = new ObservableCollection<string>([
+            "All status",
+            "Active",
+            "Low Stock",
+            "Out of Stock",
+        ]);
+        SortOptions = new ObservableCollection<string>([
+            "Newest First",
+            "Name: A to Z",
+            "Name: Z to A",
+            "Price: Low to High",
+            "Price: High to Low",
+        ]);
 
         SelectedCategory = CategoryOptions[0];
         SelectedStatusFilter = StatusFilterOptions[0];
@@ -90,15 +94,38 @@ public partial class ProductsViewModel : ObservableObject
 
     private bool _suppressFilters;
 
-    partial void OnSearchQueryChanged(string value) { if (!_suppressFilters) ApplyFilters(); }
+    partial void OnSearchQueryChanged(string value)
+    {
+        if (!_suppressFilters)
+            ApplyFilters();
+    }
 
-    partial void OnSelectedCategoryChanged(string value) { if (!_suppressFilters) ApplyFilters(); }
+    partial void OnSelectedCategoryChanged(string value)
+    {
+        if (!_suppressFilters)
+            ApplyFilters();
+    }
 
-    partial void OnSelectedStatusFilterChanged(string value) { if (!_suppressFilters) ApplyFilters(); }
+    partial void OnSelectedStatusFilterChanged(string value)
+    {
+        if (!_suppressFilters)
+            ApplyFilters();
+    }
 
-    partial void OnSelectedSortChanged(string value) { if (!_suppressFilters) ApplyFilters(); }
+    partial void OnSelectedSortChanged(string value)
+    {
+        if (!_suppressFilters)
+            ApplyFilters();
+    }
 
-    public void BulkRestoreState(string? search, string? category, string? statusFilter, string? sort, int page, bool gridView)
+    public void BulkRestoreState(
+        string? search,
+        string? category,
+        string? statusFilter,
+        string? sort,
+        int page,
+        bool gridView
+    )
     {
         _suppressFilters = true;
         SearchQuery = search ?? string.Empty;
@@ -154,7 +181,13 @@ public partial class ProductsViewModel : ObservableObject
         {
             int i => i,
             long l => (int)l,
-            string s when int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out var n) => n,
+            string s
+                when int.TryParse(
+                    s,
+                    NumberStyles.Integer,
+                    CultureInfo.InvariantCulture,
+                    out var n
+                ) => n,
             _ => 0,
         };
         if (page < 1 || page > TotalPages)
@@ -172,9 +205,15 @@ public partial class ProductsViewModel : ObservableObject
     private void UpdateStats()
     {
         TotalProductsStat = _catalog.Count.ToString(CultureInfo.InvariantCulture);
-        ActiveStat = _catalog.Count(p => p.Status == ProductShelfStatus.Active).ToString(CultureInfo.InvariantCulture);
-        OutOfStockStat = _catalog.Count(p => p.Status == ProductShelfStatus.OutOfStock).ToString(CultureInfo.InvariantCulture);
-        LowStockStat = _catalog.Count(p => p.Status == ProductShelfStatus.LowStock).ToString(CultureInfo.InvariantCulture);
+        ActiveStat = _catalog
+            .Count(p => p.Status == ProductShelfStatus.Active)
+            .ToString(CultureInfo.InvariantCulture);
+        OutOfStockStat = _catalog
+            .Count(p => p.Status == ProductShelfStatus.OutOfStock)
+            .ToString(CultureInfo.InvariantCulture);
+        LowStockStat = _catalog
+            .Count(p => p.Status == ProductShelfStatus.LowStock)
+            .ToString(CultureInfo.InvariantCulture);
     }
 
     private void ApplyFilters()
@@ -192,7 +231,9 @@ public partial class ProductsViewModel : ObservableObject
         }
 
         if (!string.IsNullOrEmpty(SelectedCategory) && SelectedCategory != "All categories")
-            q = q.Where(p => string.Equals(p.Category, SelectedCategory, StringComparison.OrdinalIgnoreCase));
+            q = q.Where(p =>
+                string.Equals(p.Category, SelectedCategory, StringComparison.OrdinalIgnoreCase)
+            );
 
         if (!string.IsNullOrEmpty(SelectedStatusFilter) && SelectedStatusFilter != "All status")
         {
@@ -244,5 +285,4 @@ public partial class ProductsViewModel : ObservableObject
         OnPropertyChanged(nameof(CanGoPrevious));
         OnPropertyChanged(nameof(CanGoNext));
     }
-
 }

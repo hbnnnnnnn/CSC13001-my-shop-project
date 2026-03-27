@@ -8,12 +8,11 @@ public sealed class NavigationStateStore
 {
     private readonly Dictionary<string, object> _cache = new();
 
-    public void Save<T>(string key, T state) where T : class
-        => _cache[key] = state;
+    public void Save<T>(string key, T state)
+        where T : class => _cache[key] = state;
 
-    public T? Restore<T>(string key) where T : class
-        => _cache.TryGetValue(key, out var value) ? value as T : null;
+    public T? Restore<T>(string key)
+        where T : class => _cache.TryGetValue(key, out var value) ? value as T : null;
 
-    public void Clear(string key)
-        => _cache.Remove(key);
+    public void Clear(string key) => _cache.Remove(key);
 }

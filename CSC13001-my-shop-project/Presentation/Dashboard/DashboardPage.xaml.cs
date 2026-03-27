@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
@@ -9,6 +10,7 @@ public sealed partial class DashboardPage : Page
     public DashboardPage()
     {
         this.InitializeComponent();
+        Loaded += (_, _) => WeakReferenceMessenger.Default.Send(new ChromeVisibilityMessage(true));
     }
 
     // ── Stat-card float animation ─────────────────────────────────────────
@@ -28,14 +30,23 @@ public sealed partial class DashboardPage : Page
         sb.Begin();
     }
 
-    private void ProductsCard_PointerEntered(object sender, PointerRoutedEventArgs e) => FloatCard(ProductsCardTransform, -5);
-    private void ProductsCard_PointerExited(object sender, PointerRoutedEventArgs e)  => FloatCard(ProductsCardTransform, 0);
+    private void ProductsCard_PointerEntered(object sender, PointerRoutedEventArgs e) =>
+        FloatCard(ProductsCardTransform, -5);
 
-    private void OrdersCard_PointerEntered(object sender, PointerRoutedEventArgs e)   => FloatCard(OrdersCardTransform, -5);
-    private void OrdersCard_PointerExited(object sender, PointerRoutedEventArgs e)    => FloatCard(OrdersCardTransform, 0);
+    private void ProductsCard_PointerExited(object sender, PointerRoutedEventArgs e) =>
+        FloatCard(ProductsCardTransform, 0);
 
-    private void RevenueCard_PointerEntered(object sender, PointerRoutedEventArgs e)  => FloatCard(RevenueCardTransform, -5);
-    private void RevenueCard_PointerExited(object sender, PointerRoutedEventArgs e)   => FloatCard(RevenueCardTransform, 0);
+    private void OrdersCard_PointerEntered(object sender, PointerRoutedEventArgs e) =>
+        FloatCard(OrdersCardTransform, -5);
+
+    private void OrdersCard_PointerExited(object sender, PointerRoutedEventArgs e) =>
+        FloatCard(OrdersCardTransform, 0);
+
+    private void RevenueCard_PointerEntered(object sender, PointerRoutedEventArgs e) =>
+        FloatCard(RevenueCardTransform, -5);
+
+    private void RevenueCard_PointerExited(object sender, PointerRoutedEventArgs e) =>
+        FloatCard(RevenueCardTransform, 0);
 
     // ── Navigation shortcuts ──────────────────────────────────────────────
 
@@ -58,30 +69,30 @@ public sealed partial class DashboardPage : Page
 
     private static readonly (double X, double Y, string Date, string Value)[] ChartPoints =
     [
-        ( 52, 158, "Mar 1",  "$2,385"),
-        ( 79, 130, "Mar 2",  "$3,460"),
-        (106, 108, "Mar 3",  "$4,310"),
-        (133,  80, "Mar 4",  "$5,385"),
-        (160,  46, "Mar 5",  "$6,690"),
-        (187,  64, "Mar 6",  "$6,000"),
-        (214,  96, "Mar 7",  "$4,770"),
-        (241, 116, "Mar 8",  "$4,000"),
-        (268, 136, "Mar 9",  "$3,230"),
-        (295,  86, "Mar 10", "$5,150"),
-        (322,  56, "Mar 11", "$6,310"),
-        (349,  86, "Mar 12", "$5,150"),
+        (52, 158, "Mar 1", "$2,385"),
+        (79, 130, "Mar 2", "$3,460"),
+        (106, 108, "Mar 3", "$4,310"),
+        (133, 80, "Mar 4", "$5,385"),
+        (160, 46, "Mar 5", "$6,690"),
+        (187, 64, "Mar 6", "$6,000"),
+        (214, 96, "Mar 7", "$4,770"),
+        (241, 116, "Mar 8", "$4,000"),
+        (268, 136, "Mar 9", "$3,230"),
+        (295, 86, "Mar 10", "$5,150"),
+        (322, 56, "Mar 11", "$6,310"),
+        (349, 86, "Mar 12", "$5,150"),
         (376, 124, "Mar 13", "$3,690"),
         (403, 104, "Mar 14", "$4,460"),
         (430, 124, "Mar 15", "$3,690"),
         (457, 148, "Mar 16", "$2,770"),
         (484, 112, "Mar 17", "$4,150"),
-        (511,  78, "Mar 18", "$5,460"),
-        (538,  96, "Mar 19", "$4,770"),
-        (565,  68, "Mar 20", "$5,850"),
-        (592,  44, "Mar 21", "$7,480"),
-        (619,  72, "Mar 22", "$5,690"),
+        (511, 78, "Mar 18", "$5,460"),
+        (538, 96, "Mar 19", "$4,770"),
+        (565, 68, "Mar 20", "$5,850"),
+        (592, 44, "Mar 21", "$7,480"),
+        (619, 72, "Mar 22", "$5,690"),
         (646, 108, "Mar 23", "$4,310"),
-        (673,  88, "Mar 24", "$5,080"),
+        (673, 88, "Mar 24", "$5,080"),
         (700, 116, "Mar 25", "$4,000"),
         (727, 104, "Mar 26", "$4,460"),
         (754, 128, "Mar 27", "$3,540"),
@@ -96,24 +107,30 @@ public sealed partial class DashboardPage : Page
         var pos = e.GetCurrentPoint(ChartCanvas).Position;
 
         // Only respond within a generous hit area around the plot
-        if (pos.X < 40 || pos.X > 888) return;
+        if (pos.X < 40 || pos.X > 888)
+            return;
 
         // Find nearest data point by X distance
         var nearest = ChartPoints[0];
-        var minDist  = double.MaxValue;
+        var minDist = double.MaxValue;
         foreach (var pt in ChartPoints)
         {
             var dist = Math.Abs(pt.X - pos.X);
-            if (dist < minDist) { minDist = dist; nearest = pt; }
+            if (dist < minDist)
+            {
+                minDist = dist;
+                nearest = pt;
+            }
         }
 
         // Update tooltip text (two lines: date + value)
         ChartTooltipText.Text = $"{nearest.Date}\n{nearest.Value}";
 
         // Keep tooltip centered above the point, clamped inside Canvas
-        const double ttW = 72, ttH = 40;
+        const double ttW = 72,
+            ttH = 40;
         var ttLeft = Math.Clamp(nearest.X - ttW / 2.0, 52, 876 - ttW);
-        var ttTop  = Math.Max(nearest.Y - ttH - 12, 0);
+        var ttTop = Math.Max(nearest.Y - ttH - 12, 0);
         Canvas.SetLeft(ChartTooltip, ttLeft);
         Canvas.SetTop(ChartTooltip, ttTop);
 
@@ -123,14 +140,14 @@ public sealed partial class DashboardPage : Page
         Canvas.SetLeft(ChartHoverDotInner, nearest.X - 4);
         Canvas.SetTop(ChartHoverDotInner, nearest.Y - 4);
 
-        ChartTooltip.Visibility      = Visibility.Visible;
+        ChartTooltip.Visibility = Visibility.Visible;
         ChartHoverDotOuter.Visibility = Visibility.Visible;
         ChartHoverDotInner.Visibility = Visibility.Visible;
     }
 
     private void Chart_PointerExited(object sender, PointerRoutedEventArgs e)
     {
-        ChartTooltip.Visibility      = Visibility.Collapsed;
+        ChartTooltip.Visibility = Visibility.Collapsed;
         ChartHoverDotOuter.Visibility = Visibility.Collapsed;
         ChartHoverDotInner.Visibility = Visibility.Collapsed;
     }
@@ -145,6 +162,7 @@ public sealed partial class DashboardPage : Page
 
     private void RowBorder_PointerExited(object sender, PointerRoutedEventArgs e)
     {
-        if (sender is Border b) b.Background = null;
+        if (sender is Border b)
+            b.Background = null;
     }
 }

@@ -13,13 +13,24 @@ public partial class ShellViewModel : ObservableObject
     /// </summary>
     private static Func<INavigator?>? _navigatorResolver;
 
-    internal static void AttachNavigatorResolver(Func<INavigator?> resolver) => _navigatorResolver = resolver;
+    internal static void AttachNavigatorResolver(Func<INavigator?> resolver) =>
+        _navigatorResolver = resolver;
+
+    /// <summary>Routes that should hide the shell chrome (sidebar + top bar).</summary>
+    private static readonly HashSet<string> ChromelessRoutes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Login",
+        "ServerConfiguration",
+    };
 
     [ObservableProperty]
     private bool isSidebarExpanded = true;
 
     [ObservableProperty]
     private string selectedSidebarItem = "Dashboard";
+
+    [ObservableProperty]
+    private bool isChromeVisible;
 
     public ShellViewModel()
     {
@@ -39,13 +50,16 @@ public partial class ShellViewModel : ObservableObject
             _ = NavigateForSidebarAsync(item);
         });
 
-        WeakReferenceMessenger.Default.Register<NavigateToPageMessage>(this, (r, msg) =>
-        {
-            if (string.IsNullOrWhiteSpace(msg.PageKey) || r is not ShellViewModel shell)
-                return;
-            shell.SelectedSidebarItem = msg.PageKey;
-            _ = shell.NavigateForSidebarAsync(msg.PageKey);
-        });
+        WeakReferenceMessenger.Default.Register<NavigateToPageMessage>(
+            this,
+            (r, msg) =>
+            {
+                if (string.IsNullOrWhiteSpace(msg.PageKey) || r is not ShellViewModel shell)
+                    return;
+                shell.SelectedSidebarItem = msg.PageKey;
+                _ = shell.NavigateForSidebarAsync(msg.PageKey);
+            }
+        );
     }
 
     public IRelayCommand CloseSidebarCommand { get; }
@@ -56,9 +70,18 @@ public partial class ShellViewModel : ObservableObject
 
     public string TestString { get; set; } = "Hello from ShellViewModel!";
 
+    /// <summary>
+    /// Called by the Shell whenever a navigation occurs so we can show/hide chrome.
+    /// </summary>
+    internal void UpdateChromeVisibility(string? routeName)
+    {
+        IsChromeVisible = !string.IsNullOrEmpty(routeName) && !ChromelessRoutes.Contains(routeName);
+    }
+
     private async Task NavigateForSidebarAsync(string key)
     {
-        var nav = _navigatorResolver?.Invoke()
+        var nav =
+            _navigatorResolver?.Invoke()
             ?? global::CSC13001_my_shop_project.App.AppHost?.Services.GetService<INavigator>();
         if (nav is null)
             return;
@@ -71,6 +94,12 @@ public partial class ShellViewModel : ObservableObject
                     break;
                 case "Products":
                     await nav.NavigateRouteAsync(this, "Products");
+                    break;
+                case "Login":
+                    await nav.NavigateRouteAsync(this, "Login");
+                    break;
+                case "ServerConfiguration":
+                    await nav.NavigateRouteAsync(this, "ServerConfiguration");
                     break;
                 default:
                     return;

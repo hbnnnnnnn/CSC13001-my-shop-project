@@ -52,7 +52,9 @@ public static class ProductDetailFactory
             []
         );
 
-    private static (ProductModel, IReadOnlyList<OrderModel>) BuildCeramicShowcase(ProductListItem item)
+    private static (ProductModel, IReadOnlyList<OrderModel>) BuildCeramicShowcase(
+        ProductListItem item
+    )
     {
         var product = new ProductModel
         {
@@ -132,8 +134,24 @@ public static class ProductDetailFactory
 
         var orders = new List<OrderModel>
         {
-            new($"#ORD-{7800 + item.Id}", "Sample Customer A", "Feb 20, 2026", 1, $"${item.Price:0}", "Delivered", RowMain),
-            new($"#ORD-{7790 + item.Id}", "Sample Customer B", "Feb 18, 2026", 2, $"${item.Price * 2:0}", "Shipped", RowAlt),
+            new(
+                $"#ORD-{7800 + item.Id}",
+                "Sample Customer A",
+                "Feb 20, 2026",
+                1,
+                $"${item.Price:0}",
+                "Delivered",
+                RowMain
+            ),
+            new(
+                $"#ORD-{7790 + item.Id}",
+                "Sample Customer B",
+                "Feb 18, 2026",
+                2,
+                $"${item.Price * 2:0}",
+                "Shipped",
+                RowAlt
+            ),
         };
 
         return (product, orders);

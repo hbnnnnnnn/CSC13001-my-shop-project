@@ -72,12 +72,7 @@
     </Page.Resources>
 
     <ScrollViewer IsTabStop="True">
-        <Grid
-            x:Name="DashboardRoot"
-            Padding="32,32,32,24"
-            RowSpacing="24"
-            MaxWidth="1230"
-        >
+        <Grid x:Name="DashboardRoot" Padding="32,32,32,24" RowSpacing="24" MaxWidth="1230">
             <VisualStateManager.VisualStateGroups>
                 <VisualStateGroup>
                     <VisualState x:Name="NarrowLayout">
@@ -141,7 +136,10 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Spacing="4" VerticalAlignment="Center">
-                            <TextBlock Text="TOTAL PRODUCTS" Style="{StaticResource KpiLabelStyle}" />
+                            <TextBlock
+                                Text="TOTAL PRODUCTS"
+                                Style="{StaticResource KpiLabelStyle}"
+                            />
                             <TextBlock Text="1,248" Style="{StaticResource KpiValueStyle}" />
                         </StackPanel>
                         <Border
@@ -201,7 +199,10 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Spacing="4" VerticalAlignment="Center">
-                            <TextBlock Text="TOTAL REVENUE" Style="{StaticResource KpiLabelStyle}" />
+                            <TextBlock
+                                Text="TOTAL REVENUE"
+                                Style="{StaticResource KpiLabelStyle}"
+                            />
                             <TextBlock Text="$124,560" Style="{StaticResource KpiValueStyle}" />
                         </StackPanel>
                         <Border
@@ -303,11 +304,46 @@
 
                                 <Viewbox Stretch="Fill" Height="232" HorizontalAlignment="Stretch">
                                     <Canvas Width="820" Height="232">
-                                        <Line X1="60" Y1="20" X2="800" Y2="20" Stroke="{StaticResource ShellBorderBrush}" StrokeThickness="1" />
-                                        <Line X1="60" Y1="68" X2="800" Y2="68" Stroke="{StaticResource ShellBorderBrush}" StrokeThickness="1" />
-                                        <Line X1="60" Y1="116" X2="800" Y2="116" Stroke="{StaticResource ShellBorderBrush}" StrokeThickness="1" />
-                                        <Line X1="60" Y1="164" X2="800" Y2="164" Stroke="{StaticResource ShellBorderBrush}" StrokeThickness="1" />
-                                        <Line X1="60" Y1="212" X2="800" Y2="212" Stroke="{StaticResource ShellBorderBrush}" StrokeThickness="1" />
+                                        <Line
+                                            X1="60"
+                                            Y1="20"
+                                            X2="800"
+                                            Y2="20"
+                                            Stroke="{StaticResource ShellBorderBrush}"
+                                            StrokeThickness="1"
+                                        />
+                                        <Line
+                                            X1="60"
+                                            Y1="68"
+                                            X2="800"
+                                            Y2="68"
+                                            Stroke="{StaticResource ShellBorderBrush}"
+                                            StrokeThickness="1"
+                                        />
+                                        <Line
+                                            X1="60"
+                                            Y1="116"
+                                            X2="800"
+                                            Y2="116"
+                                            Stroke="{StaticResource ShellBorderBrush}"
+                                            StrokeThickness="1"
+                                        />
+                                        <Line
+                                            X1="60"
+                                            Y1="164"
+                                            X2="800"
+                                            Y2="164"
+                                            Stroke="{StaticResource ShellBorderBrush}"
+                                            StrokeThickness="1"
+                                        />
+                                        <Line
+                                            X1="60"
+                                            Y1="212"
+                                            X2="800"
+                                            Y2="212"
+                                            Stroke="{StaticResource ShellBorderBrush}"
+                                            StrokeThickness="1"
+                                        />
 
                                         <Polygon
                                             Points="60,188 120,176 180,152 240,146 300,130 360,120 420,108 480,95 540,102 600,86 660,74 720,70 780,60 800,212 60,212"
@@ -323,11 +359,41 @@
                                             StrokeEndLineCap="Round"
                                         />
 
-                                        <TextBlock Text="$8000" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" Canvas.Left="8" Canvas.Top="12" />
-                                        <TextBlock Text="$6000" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" Canvas.Left="8" Canvas.Top="60" />
-                                        <TextBlock Text="$4000" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" Canvas.Left="8" Canvas.Top="108" />
-                                        <TextBlock Text="$2000" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" Canvas.Left="8" Canvas.Top="156" />
-                                        <TextBlock Text="$0" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" Canvas.Left="26" Canvas.Top="204" />
+                                        <TextBlock
+                                            Text="$8000"
+                                            FontSize="10"
+                                            Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                            Canvas.Left="8"
+                                            Canvas.Top="12"
+                                        />
+                                        <TextBlock
+                                            Text="$6000"
+                                            FontSize="10"
+                                            Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                            Canvas.Left="8"
+                                            Canvas.Top="60"
+                                        />
+                                        <TextBlock
+                                            Text="$4000"
+                                            FontSize="10"
+                                            Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                            Canvas.Left="8"
+                                            Canvas.Top="108"
+                                        />
+                                        <TextBlock
+                                            Text="$2000"
+                                            FontSize="10"
+                                            Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                            Canvas.Left="8"
+                                            Canvas.Top="156"
+                                        />
+                                        <TextBlock
+                                            Text="$0"
+                                            FontSize="10"
+                                            Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                            Canvas.Left="26"
+                                            Canvas.Top="204"
+                                        />
                                     </Canvas>
                                 </Viewbox>
 
@@ -342,14 +408,62 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="Jan 1" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Column="1" Text="Jan 5" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Column="2" Text="Jan 9" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Column="3" Text="Jan 13" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Column="4" Text="Jan 17" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Column="5" Text="Jan 21" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Column="6" Text="Jan 25" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Center" />
-                                    <TextBlock Grid.Column="7" Text="Jan 31" FontSize="10" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Text="Jan 1"
+                                        FontSize="10"
+                                        Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                        HorizontalAlignment="Center"
+                                    />
+                                    <TextBlock
+                                        Grid.Column="1"
+                                        Text="Jan 5"
+                                        FontSize="10"
+                                        Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                        HorizontalAlignment="Center"
+                                    />
+                                    <TextBlock
+                                        Grid.Column="2"
+                                        Text="Jan 9"
+                                        FontSize="10"
+                                        Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                        HorizontalAlignment="Center"
+                                    />
+                                    <TextBlock
+                                        Grid.Column="3"
+                                        Text="Jan 13"
+                                        FontSize="10"
+                                        Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                        HorizontalAlignment="Center"
+                                    />
+                                    <TextBlock
+                                        Grid.Column="4"
+                                        Text="Jan 17"
+                                        FontSize="10"
+                                        Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                        HorizontalAlignment="Center"
+                                    />
+                                    <TextBlock
+                                        Grid.Column="5"
+                                        Text="Jan 21"
+                                        FontSize="10"
+                                        Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                        HorizontalAlignment="Center"
+                                    />
+                                    <TextBlock
+                                        Grid.Column="6"
+                                        Text="Jan 25"
+                                        FontSize="10"
+                                        Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                        HorizontalAlignment="Center"
+                                    />
+                                    <TextBlock
+                                        Grid.Column="7"
+                                        Text="Jan 31"
+                                        FontSize="10"
+                                        Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                        HorizontalAlignment="Center"
+                                    />
                                 </Grid>
                             </Grid>
                         </Grid>
@@ -396,7 +510,13 @@
                                     <ColumnDefinition Width="48" />
                                 </Grid.ColumnDefinitions>
 
-                                <Border Grid.Row="0" Grid.ColumnSpan="5" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="0,0,0,1" Padding="0,0,0,8">
+                                <Border
+                                    Grid.Row="0"
+                                    Grid.ColumnSpan="5"
+                                    BorderBrush="{StaticResource ShellBorderBrush}"
+                                    BorderThickness="0,0,0,1"
+                                    Padding="0,0,0,8"
+                                >
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="2*" />
@@ -405,14 +525,45 @@
                                             <ColumnDefinition Width="1.8*" />
                                             <ColumnDefinition Width="48" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="Order ID" FontSize="12" FontWeight="Medium" Foreground="{StaticResource DashboardSubtleTextBrush}" />
-                                        <TextBlock Grid.Column="1" Text="Customer" FontSize="12" FontWeight="Medium" Foreground="{StaticResource DashboardSubtleTextBrush}" />
-                                        <TextBlock Grid.Column="2" Text="Status" FontSize="12" FontWeight="Medium" Foreground="{StaticResource DashboardSubtleTextBrush}" />
-                                        <TextBlock Grid.Column="3" Text="Total" FontSize="12" FontWeight="Medium" Foreground="{StaticResource DashboardSubtleTextBrush}" HorizontalAlignment="Right" />
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Text="Order ID"
+                                            FontSize="12"
+                                            FontWeight="Medium"
+                                            Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                        />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Text="Customer"
+                                            FontSize="12"
+                                            FontWeight="Medium"
+                                            Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                        />
+                                        <TextBlock
+                                            Grid.Column="2"
+                                            Text="Status"
+                                            FontSize="12"
+                                            FontWeight="Medium"
+                                            Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                        />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            Text="Total"
+                                            FontSize="12"
+                                            FontWeight="Medium"
+                                            Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                            HorizontalAlignment="Right"
+                                        />
                                     </Grid>
                                 </Border>
 
-                                <Border Grid.Row="1" Grid.ColumnSpan="5" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="0,0,0,1" Padding="0,11">
+                                <Border
+                                    Grid.Row="1"
+                                    Grid.ColumnSpan="5"
+                                    BorderBrush="{StaticResource ShellBorderBrush}"
+                                    BorderThickness="0,0,0,1"
+                                    Padding="0,11"
+                                >
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="2*" />
@@ -421,19 +572,68 @@
                                             <ColumnDefinition Width="1.8*" />
                                             <ColumnDefinition Width="48" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="#ORD-7829" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
-                                        <TextBlock Grid.Column="1" Text="Eleanor Pena" FontSize="14" Foreground="{StaticResource DashboardMutedTextBrush}" />
-                                        <Border Grid.Column="2" Background="{StaticResource StatusShippedBackgroundBrush}" BorderBrush="{StaticResource StatusShippedBorderBrush}" BorderThickness="1" CornerRadius="999" HorizontalAlignment="Left" Padding="8,2">
-                                            <TextBlock Text="Shipped" FontSize="10" FontWeight="Medium" Foreground="{StaticResource StatusShippedForegroundBrush}" />
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Text="#ORD-7829"
+                                            FontSize="14"
+                                            FontWeight="Medium"
+                                            Foreground="{StaticResource ShellTextStrongBrush}"
+                                        />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Text="Eleanor Pena"
+                                            FontSize="14"
+                                            Foreground="{StaticResource DashboardMutedTextBrush}"
+                                        />
+                                        <Border
+                                            Grid.Column="2"
+                                            Background="{StaticResource StatusShippedBackgroundBrush}"
+                                            BorderBrush="{StaticResource StatusShippedBorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="999"
+                                            HorizontalAlignment="Left"
+                                            Padding="8,2"
+                                        >
+                                            <TextBlock
+                                                Text="Shipped"
+                                                FontSize="10"
+                                                FontWeight="Medium"
+                                                Foreground="{StaticResource StatusShippedForegroundBrush}"
+                                            />
                                         </Border>
-                                        <TextBlock Grid.Column="3" Text="$1,248.00" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Right" Foreground="{StaticResource ShellTextStrongBrush}" />
-                                        <Button Grid.Column="4" Width="24" Height="24" HorizontalAlignment="Center" Background="Transparent" BorderThickness="0">
-                                            <FontIcon Glyph="&#xE712;" FontSize="14" Foreground="{StaticResource DashboardMutedTextBrush}" />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            Text="$1,248.00"
+                                            FontSize="14"
+                                            FontWeight="SemiBold"
+                                            HorizontalAlignment="Right"
+                                            Foreground="{StaticResource ShellTextStrongBrush}"
+                                        />
+                                        <Button
+                                            Grid.Column="4"
+                                            Width="24"
+                                            Height="24"
+                                            HorizontalAlignment="Center"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                        >
+                                            <FontIcon
+                                                Glyph="&#xE712;"
+                                                FontSize="14"
+                                                Foreground="{StaticResource DashboardMutedTextBrush}"
+                                            />
                                         </Button>
                                     </Grid>
                                 </Border>
 
-                                <Border Grid.Row="2" Grid.ColumnSpan="5" Background="#33F5EDE4" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="0,0,0,1" Padding="0,11">
+                                <Border
+                                    Grid.Row="2"
+                                    Grid.ColumnSpan="5"
+                                    Background="#33F5EDE4"
+                                    BorderBrush="{StaticResource ShellBorderBrush}"
+                                    BorderThickness="0,0,0,1"
+                                    Padding="0,11"
+                                >
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="2*" />
@@ -442,14 +642,56 @@
                                             <ColumnDefinition Width="1.8*" />
                                             <ColumnDefinition Width="48" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="#ORD-7828" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
-                                        <TextBlock Grid.Column="1" Text="Wade Warren" FontSize="14" Foreground="{StaticResource DashboardMutedTextBrush}" />
-                                        <Border Grid.Column="2" Background="{StaticResource StatusProcessingBackgroundBrush}" BorderBrush="{StaticResource StatusProcessingBorderBrush}" BorderThickness="1" CornerRadius="999" HorizontalAlignment="Left" Padding="8,2">
-                                            <TextBlock Text="Processing" FontSize="10" FontWeight="Medium" Foreground="{StaticResource StatusProcessingForegroundBrush}" />
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Text="#ORD-7828"
+                                            FontSize="14"
+                                            FontWeight="Medium"
+                                            Foreground="{StaticResource ShellTextStrongBrush}"
+                                        />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Text="Wade Warren"
+                                            FontSize="14"
+                                            Foreground="{StaticResource DashboardMutedTextBrush}"
+                                        />
+                                        <Border
+                                            Grid.Column="2"
+                                            Background="{StaticResource StatusProcessingBackgroundBrush}"
+                                            BorderBrush="{StaticResource StatusProcessingBorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="999"
+                                            HorizontalAlignment="Left"
+                                            Padding="8,2"
+                                        >
+                                            <TextBlock
+                                                Text="Processing"
+                                                FontSize="10"
+                                                FontWeight="Medium"
+                                                Foreground="{StaticResource StatusProcessingForegroundBrush}"
+                                            />
                                         </Border>
-                                        <TextBlock Grid.Column="3" Text="$854.00" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Right" Foreground="{StaticResource ShellTextStrongBrush}" />
-                                        <Button Grid.Column="4" Width="24" Height="24" HorizontalAlignment="Center" Background="Transparent" BorderThickness="0">
-                                            <FontIcon Glyph="&#xE712;" FontSize="14" Foreground="{StaticResource DashboardMutedTextBrush}" />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            Text="$854.00"
+                                            FontSize="14"
+                                            FontWeight="SemiBold"
+                                            HorizontalAlignment="Right"
+                                            Foreground="{StaticResource ShellTextStrongBrush}"
+                                        />
+                                        <Button
+                                            Grid.Column="4"
+                                            Width="24"
+                                            Height="24"
+                                            HorizontalAlignment="Center"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                        >
+                                            <FontIcon
+                                                Glyph="&#xE712;"
+                                                FontSize="14"
+                                                Foreground="{StaticResource DashboardMutedTextBrush}"
+                                            />
                                         </Button>
                                     </Grid>
                                 </Border>
@@ -463,14 +705,56 @@
                                             <ColumnDefinition Width="1.8*" />
                                             <ColumnDefinition Width="48" />
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="#ORD-7827" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
-                                        <TextBlock Grid.Column="1" Text="Esther Howard" FontSize="14" Foreground="{StaticResource DashboardMutedTextBrush}" />
-                                        <Border Grid.Column="2" Background="{StaticResource StatusDeliveredBackgroundBrush}" BorderBrush="{StaticResource StatusDeliveredBorderBrush}" BorderThickness="1" CornerRadius="999" HorizontalAlignment="Left" Padding="8,2">
-                                            <TextBlock Text="Delivered" FontSize="10" FontWeight="Medium" Foreground="{StaticResource StatusDeliveredForegroundBrush}" />
+                                        <TextBlock
+                                            Grid.Column="0"
+                                            Text="#ORD-7827"
+                                            FontSize="14"
+                                            FontWeight="Medium"
+                                            Foreground="{StaticResource ShellTextStrongBrush}"
+                                        />
+                                        <TextBlock
+                                            Grid.Column="1"
+                                            Text="Esther Howard"
+                                            FontSize="14"
+                                            Foreground="{StaticResource DashboardMutedTextBrush}"
+                                        />
+                                        <Border
+                                            Grid.Column="2"
+                                            Background="{StaticResource StatusDeliveredBackgroundBrush}"
+                                            BorderBrush="{StaticResource StatusDeliveredBorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="999"
+                                            HorizontalAlignment="Left"
+                                            Padding="8,2"
+                                        >
+                                            <TextBlock
+                                                Text="Delivered"
+                                                FontSize="10"
+                                                FontWeight="Medium"
+                                                Foreground="{StaticResource StatusDeliveredForegroundBrush}"
+                                            />
                                         </Border>
-                                        <TextBlock Grid.Column="3" Text="$2,450.00" FontSize="14" FontWeight="SemiBold" HorizontalAlignment="Right" Foreground="{StaticResource ShellTextStrongBrush}" />
-                                        <Button Grid.Column="4" Width="24" Height="24" HorizontalAlignment="Center" Background="Transparent" BorderThickness="0">
-                                            <FontIcon Glyph="&#xE712;" FontSize="14" Foreground="{StaticResource DashboardMutedTextBrush}" />
+                                        <TextBlock
+                                            Grid.Column="3"
+                                            Text="$2,450.00"
+                                            FontSize="14"
+                                            FontWeight="SemiBold"
+                                            HorizontalAlignment="Right"
+                                            Foreground="{StaticResource ShellTextStrongBrush}"
+                                        />
+                                        <Button
+                                            Grid.Column="4"
+                                            Width="24"
+                                            Height="24"
+                                            HorizontalAlignment="Center"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                        >
+                                            <FontIcon
+                                                Glyph="&#xE712;"
+                                                FontSize="14"
+                                                Foreground="{StaticResource DashboardMutedTextBrush}"
+                                            />
                                         </Button>
                                     </Grid>
                                 </Border>
@@ -504,7 +788,11 @@
                                     HorizontalAlignment="Right"
                                 >
                                     <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <FontIcon Glyph="&#xE7BA;" FontSize="10" Foreground="#FFFB2C36" />
+                                        <FontIcon
+                                            Glyph="&#xE7BA;"
+                                            FontSize="10"
+                                            Foreground="#FFFB2C36"
+                                        />
                                         <TextBlock
                                             Text="5 Items"
                                             FontSize="12"
@@ -516,93 +804,258 @@
                             </Grid>
 
                             <StackPanel Grid.Row="1" Spacing="12">
-                                <Border BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1" CornerRadius="14" Padding="8">
+                                <Border
+                                    BorderBrush="{StaticResource ShellBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="14"
+                                    Padding="8"
+                                >
                                     <Grid ColumnSpacing="16">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="48" />
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
-                                            <Image Source="ms-appx:///Assets/Products/teak-coffee-table.png" Stretch="UniformToFill" />
+                                        <Border
+                                            Width="48"
+                                            Height="48"
+                                            CornerRadius="10"
+                                            BorderBrush="{StaticResource ShellBorderBrush}"
+                                            BorderThickness="1"
+                                        >
+                                            <Image
+                                                Source="ms-appx:///Assets/Products/teak-coffee-table.png"
+                                                Stretch="UniformToFill"
+                                            />
                                         </Border>
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                            <TextBlock Text="Teak Coffee Table" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
-                                            <TextBlock Text="Only 3 left" FontSize="12" FontWeight="Medium" Foreground="#FFFB2C36" />
+                                        <StackPanel
+                                            Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            Spacing="1"
+                                        >
+                                            <TextBlock
+                                                Text="Teak Coffee Table"
+                                                FontSize="14"
+                                                FontWeight="Medium"
+                                                Foreground="{StaticResource ShellTextStrongBrush}"
+                                            />
+                                            <TextBlock
+                                                Text="Only 3 left"
+                                                FontSize="12"
+                                                FontWeight="Medium"
+                                                Foreground="#FFFB2C36"
+                                            />
                                         </StackPanel>
-                                        <Button Grid.Column="2" Content="Restock" Style="{StaticResource PillButtonStyle}" VerticalAlignment="Center" />
+                                        <Button
+                                            Grid.Column="2"
+                                            Content="Restock"
+                                            Style="{StaticResource PillButtonStyle}"
+                                            VerticalAlignment="Center"
+                                        />
                                     </Grid>
                                 </Border>
 
-                                <Border BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1" CornerRadius="14" Padding="8">
+                                <Border
+                                    BorderBrush="{StaticResource ShellBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="14"
+                                    Padding="8"
+                                >
                                     <Grid ColumnSpacing="16">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="48" />
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
-                                            <Image Source="ms-appx:///Assets/Products/bamboo-floor-lamp.png" Stretch="UniformToFill" />
+                                        <Border
+                                            Width="48"
+                                            Height="48"
+                                            CornerRadius="10"
+                                            BorderBrush="{StaticResource ShellBorderBrush}"
+                                            BorderThickness="1"
+                                        >
+                                            <Image
+                                                Source="ms-appx:///Assets/Products/bamboo-floor-lamp.png"
+                                                Stretch="UniformToFill"
+                                            />
                                         </Border>
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                            <TextBlock Text="Bamboo Floor Lamp" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
-                                            <TextBlock Text="Only 5 left" FontSize="12" FontWeight="Medium" Foreground="#FFFB2C36" />
+                                        <StackPanel
+                                            Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            Spacing="1"
+                                        >
+                                            <TextBlock
+                                                Text="Bamboo Floor Lamp"
+                                                FontSize="14"
+                                                FontWeight="Medium"
+                                                Foreground="{StaticResource ShellTextStrongBrush}"
+                                            />
+                                            <TextBlock
+                                                Text="Only 5 left"
+                                                FontSize="12"
+                                                FontWeight="Medium"
+                                                Foreground="#FFFB2C36"
+                                            />
                                         </StackPanel>
-                                        <Button Grid.Column="2" Content="Restock" Style="{StaticResource PillButtonStyle}" VerticalAlignment="Center" />
+                                        <Button
+                                            Grid.Column="2"
+                                            Content="Restock"
+                                            Style="{StaticResource PillButtonStyle}"
+                                            VerticalAlignment="Center"
+                                        />
                                     </Grid>
                                 </Border>
 
-                                <Border BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1" CornerRadius="14" Padding="8">
+                                <Border
+                                    BorderBrush="{StaticResource ShellBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="14"
+                                    Padding="8"
+                                >
                                     <Grid ColumnSpacing="16">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="48" />
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
-                                            <Image Source="ms-appx:///Assets/Products/ceramic-planter.png" Stretch="UniformToFill" />
+                                        <Border
+                                            Width="48"
+                                            Height="48"
+                                            CornerRadius="10"
+                                            BorderBrush="{StaticResource ShellBorderBrush}"
+                                            BorderThickness="1"
+                                        >
+                                            <Image
+                                                Source="ms-appx:///Assets/Products/ceramic-planter.png"
+                                                Stretch="UniformToFill"
+                                            />
                                         </Border>
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                            <TextBlock Text="Ceramic Planter" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
-                                            <TextBlock Text="Only 2 left" FontSize="12" FontWeight="Medium" Foreground="#FFFB2C36" />
+                                        <StackPanel
+                                            Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            Spacing="1"
+                                        >
+                                            <TextBlock
+                                                Text="Ceramic Planter"
+                                                FontSize="14"
+                                                FontWeight="Medium"
+                                                Foreground="{StaticResource ShellTextStrongBrush}"
+                                            />
+                                            <TextBlock
+                                                Text="Only 2 left"
+                                                FontSize="12"
+                                                FontWeight="Medium"
+                                                Foreground="#FFFB2C36"
+                                            />
                                         </StackPanel>
-                                        <Button Grid.Column="2" Content="Restock" Style="{StaticResource PillButtonStyle}" VerticalAlignment="Center" />
+                                        <Button
+                                            Grid.Column="2"
+                                            Content="Restock"
+                                            Style="{StaticResource PillButtonStyle}"
+                                            VerticalAlignment="Center"
+                                        />
                                     </Grid>
                                 </Border>
 
-                                <Border BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1" CornerRadius="14" Padding="8">
+                                <Border
+                                    BorderBrush="{StaticResource ShellBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="14"
+                                    Padding="8"
+                                >
                                     <Grid ColumnSpacing="16">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="48" />
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
-                                            <Image Source="ms-appx:///Assets/Products/woven-basket.png" Stretch="UniformToFill" />
+                                        <Border
+                                            Width="48"
+                                            Height="48"
+                                            CornerRadius="10"
+                                            BorderBrush="{StaticResource ShellBorderBrush}"
+                                            BorderThickness="1"
+                                        >
+                                            <Image
+                                                Source="ms-appx:///Assets/Products/woven-basket.png"
+                                                Stretch="UniformToFill"
+                                            />
                                         </Border>
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                            <TextBlock Text="Woven Basket" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
-                                            <TextBlock Text="Only 4 left" FontSize="12" FontWeight="Medium" Foreground="#FFFB2C36" />
+                                        <StackPanel
+                                            Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            Spacing="1"
+                                        >
+                                            <TextBlock
+                                                Text="Woven Basket"
+                                                FontSize="14"
+                                                FontWeight="Medium"
+                                                Foreground="{StaticResource ShellTextStrongBrush}"
+                                            />
+                                            <TextBlock
+                                                Text="Only 4 left"
+                                                FontSize="12"
+                                                FontWeight="Medium"
+                                                Foreground="#FFFB2C36"
+                                            />
                                         </StackPanel>
-                                        <Button Grid.Column="2" Content="Restock" Style="{StaticResource PillButtonStyle}" VerticalAlignment="Center" />
+                                        <Button
+                                            Grid.Column="2"
+                                            Content="Restock"
+                                            Style="{StaticResource PillButtonStyle}"
+                                            VerticalAlignment="Center"
+                                        />
                                     </Grid>
                                 </Border>
 
-                                <Border BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1" CornerRadius="14" Padding="8">
+                                <Border
+                                    BorderBrush="{StaticResource ShellBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="14"
+                                    Padding="8"
+                                >
                                     <Grid ColumnSpacing="16">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="48" />
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
-                                        <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
-                                            <Image Source="ms-appx:///Assets/Products/oak-side-table.png" Stretch="UniformToFill" />
+                                        <Border
+                                            Width="48"
+                                            Height="48"
+                                            CornerRadius="10"
+                                            BorderBrush="{StaticResource ShellBorderBrush}"
+                                            BorderThickness="1"
+                                        >
+                                            <Image
+                                                Source="ms-appx:///Assets/Products/oak-side-table.png"
+                                                Stretch="UniformToFill"
+                                            />
                                         </Border>
-                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                            <TextBlock Text="Oak Side Table" FontSize="14" FontWeight="Medium" Foreground="{StaticResource ShellTextStrongBrush}" />
-                                            <TextBlock Text="Only 1 left" FontSize="12" FontWeight="Medium" Foreground="#FFFB2C36" />
+                                        <StackPanel
+                                            Grid.Column="1"
+                                            VerticalAlignment="Center"
+                                            Spacing="1"
+                                        >
+                                            <TextBlock
+                                                Text="Oak Side Table"
+                                                FontSize="14"
+                                                FontWeight="Medium"
+                                                Foreground="{StaticResource ShellTextStrongBrush}"
+                                            />
+                                            <TextBlock
+                                                Text="Only 1 left"
+                                                FontSize="12"
+                                                FontWeight="Medium"
+                                                Foreground="#FFFB2C36"
+                                            />
                                         </StackPanel>
-                                        <Button Grid.Column="2" Content="Restock" Style="{StaticResource PillButtonStyle}" VerticalAlignment="Center" />
+                                        <Button
+                                            Grid.Column="2"
+                                            Content="Restock"
+                                            Style="{StaticResource PillButtonStyle}"
+                                            VerticalAlignment="Center"
+                                        />
                                     </Grid>
                                 </Border>
                             </StackPanel>
@@ -636,14 +1089,23 @@
                                 Style="{StaticResource SectionTitleStyle}"
                             />
 
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                            <StackPanel
+                                Grid.Column="1"
+                                Orientation="Horizontal"
+                                Spacing="4"
+                                VerticalAlignment="Center"
+                            >
                                 <TextBlock
                                     Text="View All"
                                     FontSize="12"
                                     FontWeight="Medium"
                                     Foreground="{StaticResource ShellAccentBrush}"
                                 />
-                                <FontIcon Glyph="&#xE72A;" FontSize="12" Foreground="{StaticResource ShellAccentBrush}" />
+                                <FontIcon
+                                    Glyph="&#xE72A;"
+                                    FontSize="12"
+                                    Foreground="{StaticResource ShellAccentBrush}"
+                                />
                             </StackPanel>
                         </Grid>
 
@@ -654,14 +1116,38 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
-                                    <Image Source="ms-appx:///Assets/Products/teak-coffee-table.png" Stretch="UniformToFill" />
+                                <Border
+                                    Width="48"
+                                    Height="48"
+                                    CornerRadius="10"
+                                    BorderBrush="{StaticResource ShellBorderBrush}"
+                                    BorderThickness="1"
+                                >
+                                    <Image
+                                        Source="ms-appx:///Assets/Products/teak-coffee-table.png"
+                                        Stretch="UniformToFill"
+                                    />
                                 </Border>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                    <TextBlock Text="Nordic Lounge Chair" FontSize="14" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Text="324 sold" FontSize="12" Foreground="{StaticResource DashboardSubtleTextBrush}" />
+                                    <TextBlock
+                                        Text="Nordic Lounge Chair"
+                                        FontSize="14"
+                                        FontWeight="Medium"
+                                        TextTrimming="CharacterEllipsis"
+                                    />
+                                    <TextBlock
+                                        Text="324 sold"
+                                        FontSize="12"
+                                        Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                    />
                                 </StackPanel>
-                                <TextBlock Grid.Column="2" Text="$249" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                <TextBlock
+                                    Grid.Column="2"
+                                    Text="$249"
+                                    FontSize="14"
+                                    FontWeight="SemiBold"
+                                    VerticalAlignment="Center"
+                                />
                             </Grid>
 
                             <Grid ColumnSpacing="12">
@@ -670,14 +1156,38 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
-                                    <Image Source="ms-appx:///Assets/Products/bamboo-floor-lamp.png" Stretch="UniformToFill" />
+                                <Border
+                                    Width="48"
+                                    Height="48"
+                                    CornerRadius="10"
+                                    BorderBrush="{StaticResource ShellBorderBrush}"
+                                    BorderThickness="1"
+                                >
+                                    <Image
+                                        Source="ms-appx:///Assets/Products/bamboo-floor-lamp.png"
+                                        Stretch="UniformToFill"
+                                    />
                                 </Border>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                    <TextBlock Text="Minimalist Wooden Lamp" FontSize="14" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Text="212 sold" FontSize="12" Foreground="{StaticResource DashboardSubtleTextBrush}" />
+                                    <TextBlock
+                                        Text="Minimalist Wooden Lamp"
+                                        FontSize="14"
+                                        FontWeight="Medium"
+                                        TextTrimming="CharacterEllipsis"
+                                    />
+                                    <TextBlock
+                                        Text="212 sold"
+                                        FontSize="12"
+                                        Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                    />
                                 </StackPanel>
-                                <TextBlock Grid.Column="2" Text="$89" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                <TextBlock
+                                    Grid.Column="2"
+                                    Text="$89"
+                                    FontSize="14"
+                                    FontWeight="SemiBold"
+                                    VerticalAlignment="Center"
+                                />
                             </Grid>
 
                             <Grid ColumnSpacing="12">
@@ -686,14 +1196,38 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
-                                    <Image Source="ms-appx:///Assets/Products/beige-modular-sofa.png" Stretch="UniformToFill" />
+                                <Border
+                                    Width="48"
+                                    Height="48"
+                                    CornerRadius="10"
+                                    BorderBrush="{StaticResource ShellBorderBrush}"
+                                    BorderThickness="1"
+                                >
+                                    <Image
+                                        Source="ms-appx:///Assets/Products/beige-modular-sofa.png"
+                                        Stretch="UniformToFill"
+                                    />
                                 </Border>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                    <TextBlock Text="Beige Modular Sofa" FontSize="14" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Text="156 sold" FontSize="12" Foreground="{StaticResource DashboardSubtleTextBrush}" />
+                                    <TextBlock
+                                        Text="Beige Modular Sofa"
+                                        FontSize="14"
+                                        FontWeight="Medium"
+                                        TextTrimming="CharacterEllipsis"
+                                    />
+                                    <TextBlock
+                                        Text="156 sold"
+                                        FontSize="12"
+                                        Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                    />
                                 </StackPanel>
-                                <TextBlock Grid.Column="2" Text="$899" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                <TextBlock
+                                    Grid.Column="2"
+                                    Text="$899"
+                                    FontSize="14"
+                                    FontWeight="SemiBold"
+                                    VerticalAlignment="Center"
+                                />
                             </Grid>
 
                             <Grid ColumnSpacing="12">
@@ -702,14 +1236,38 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
-                                    <Image Source="ms-appx:///Assets/Products/ceramic-planter.png" Stretch="UniformToFill" />
+                                <Border
+                                    Width="48"
+                                    Height="48"
+                                    CornerRadius="10"
+                                    BorderBrush="{StaticResource ShellBorderBrush}"
+                                    BorderThickness="1"
+                                >
+                                    <Image
+                                        Source="ms-appx:///Assets/Products/ceramic-planter.png"
+                                        Stretch="UniformToFill"
+                                    />
                                 </Border>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                    <TextBlock Text="Ceramic Artisan Vase" FontSize="14" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Text="98 sold" FontSize="12" Foreground="{StaticResource DashboardSubtleTextBrush}" />
+                                    <TextBlock
+                                        Text="Ceramic Artisan Vase"
+                                        FontSize="14"
+                                        FontWeight="Medium"
+                                        TextTrimming="CharacterEllipsis"
+                                    />
+                                    <TextBlock
+                                        Text="98 sold"
+                                        FontSize="12"
+                                        Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                    />
                                 </StackPanel>
-                                <TextBlock Grid.Column="2" Text="$45" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                <TextBlock
+                                    Grid.Column="2"
+                                    Text="$45"
+                                    FontSize="14"
+                                    FontWeight="SemiBold"
+                                    VerticalAlignment="Center"
+                                />
                             </Grid>
 
                             <Grid ColumnSpacing="12">
@@ -718,14 +1276,38 @@
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <Border Width="48" Height="48" CornerRadius="10" BorderBrush="{StaticResource ShellBorderBrush}" BorderThickness="1">
-                                    <Image Source="ms-appx:///Assets/Products/woven-basket.png" Stretch="UniformToFill" />
+                                <Border
+                                    Width="48"
+                                    Height="48"
+                                    CornerRadius="10"
+                                    BorderBrush="{StaticResource ShellBorderBrush}"
+                                    BorderThickness="1"
+                                >
+                                    <Image
+                                        Source="ms-appx:///Assets/Products/woven-basket.png"
+                                        Stretch="UniformToFill"
+                                    />
                                 </Border>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="1">
-                                    <TextBlock Text="Linen Woven Rug" FontSize="14" FontWeight="Medium" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Text="74 sold" FontSize="12" Foreground="{StaticResource DashboardSubtleTextBrush}" />
+                                    <TextBlock
+                                        Text="Linen Woven Rug"
+                                        FontSize="14"
+                                        FontWeight="Medium"
+                                        TextTrimming="CharacterEllipsis"
+                                    />
+                                    <TextBlock
+                                        Text="74 sold"
+                                        FontSize="12"
+                                        Foreground="{StaticResource DashboardSubtleTextBrush}"
+                                    />
                                 </StackPanel>
-                                <TextBlock Grid.Column="2" Text="$120" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                                <TextBlock
+                                    Grid.Column="2"
+                                    Text="$120"
+                                    FontSize="14"
+                                    FontWeight="SemiBold"
+                                    VerticalAlignment="Center"
+                                />
                             </Grid>
                         </StackPanel>
                     </Grid>

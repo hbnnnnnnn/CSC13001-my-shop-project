@@ -167,7 +167,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
     </UserControl.Resources>
 
     <Border
@@ -229,7 +228,13 @@
             </Button>
 
             <!-- Search Input -->
-            <Grid Grid.Column="1" Width="672" Height="44" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Grid
+                Grid.Column="1"
+                Width="672"
+                Height="44"
+                VerticalAlignment="Center"
+                HorizontalAlignment="Center"
+            >
                 <TextBox
                     x:Name="SearchInput"
                     Style="{StaticResource ShellSearchTextBoxStyle}"
@@ -251,14 +256,32 @@
                         <SolidColorBrush x:Key="TextControlForegroundFocused" Color="#FF2C2118" />
                         <SolidColorBrush x:Key="TextControlCaretBrush" Color="#FF2C2118" />
                         <SolidColorBrush x:Key="TextControlButtonForeground" Color="Transparent" />
-                        <SolidColorBrush x:Key="TextControlButtonForegroundPointerOver" Color="Transparent" />
-                        <SolidColorBrush x:Key="TextControlButtonForegroundPressed" Color="Transparent" />
+                        <SolidColorBrush
+                            x:Key="TextControlButtonForegroundPointerOver"
+                            Color="Transparent"
+                        />
+                        <SolidColorBrush
+                            x:Key="TextControlButtonForegroundPressed"
+                            Color="Transparent"
+                        />
                         <SolidColorBrush x:Key="TextControlButtonBackground" Color="Transparent" />
-                        <SolidColorBrush x:Key="TextControlButtonBackgroundPointerOver" Color="Transparent" />
-                        <SolidColorBrush x:Key="TextControlButtonBackgroundPressed" Color="Transparent" />
+                        <SolidColorBrush
+                            x:Key="TextControlButtonBackgroundPointerOver"
+                            Color="Transparent"
+                        />
+                        <SolidColorBrush
+                            x:Key="TextControlButtonBackgroundPressed"
+                            Color="Transparent"
+                        />
                         <SolidColorBrush x:Key="TextControlButtonBorderBrush" Color="Transparent" />
-                        <SolidColorBrush x:Key="TextControlButtonBorderBrushPointerOver" Color="Transparent" />
-                        <SolidColorBrush x:Key="TextControlButtonBorderBrushPressed" Color="Transparent" />
+                        <SolidColorBrush
+                            x:Key="TextControlButtonBorderBrushPointerOver"
+                            Color="Transparent"
+                        />
+                        <SolidColorBrush
+                            x:Key="TextControlButtonBorderBrushPressed"
+                            Color="Transparent"
+                        />
                     </TextBox.Resources>
                 </TextBox>
 
@@ -302,8 +325,14 @@
                         <Flyout Placement="BottomEdgeAlignedRight">
                             <Flyout.FlyoutPresenterStyle>
                                 <Style TargetType="FlyoutPresenter">
-                                    <Setter Property="Background" Value="{StaticResource ShellBackgroundBrush}" />
-                                    <Setter Property="BorderBrush" Value="{StaticResource ShellBorderBrush}" />
+                                    <Setter
+                                        Property="Background"
+                                        Value="{StaticResource ShellBackgroundBrush}"
+                                    />
+                                    <Setter
+                                        Property="BorderBrush"
+                                        Value="{StaticResource ShellBorderBrush}"
+                                    />
                                     <Setter Property="BorderThickness" Value="1" />
                                     <Setter Property="CornerRadius" Value="12" />
                                     <Setter Property="Padding" Value="6" />
@@ -321,7 +350,11 @@
 
                             <StackPanel>
                                 <!-- Profile Header -->
-                                <StackPanel Orientation="Horizontal" Padding="10,10,10,12" Spacing="10">
+                                <StackPanel
+                                    Orientation="Horizontal"
+                                    Padding="10,10,10,12"
+                                    Spacing="10"
+                                >
                                     <Border
                                         Width="40"
                                         Height="40"
@@ -354,10 +387,17 @@
                                 </StackPanel>
 
                                 <!-- Divider -->
-                                <Border Height="1" Background="{StaticResource ShellBorderBrush}" Margin="4,0,4,4" />
+                                <Border
+                                    Height="1"
+                                    Background="{StaticResource ShellBorderBrush}"
+                                    Margin="4,0,4,4"
+                                />
 
                                 <!-- Sign Out -->
-                                <Button Style="{StaticResource FlyoutMenuItemStyle}" HorizontalAlignment="Stretch">
+                                <Button
+                                    Style="{StaticResource FlyoutMenuItemStyle}"
+                                    HorizontalAlignment="Stretch"
+                                >
                                     <Grid Padding="10,9" ColumnSpacing="10">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="20" />

@@ -1,7 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using CSC13001_my_shop_project.Models;
 using CSC13001_my_shop_project.Presentation.Dashboard;
+using CSC13001_my_shop_project.Presentation.Login;
 using CSC13001_my_shop_project.Presentation.Products;
+using CSC13001_my_shop_project.Presentation.ServerConfiguration;
 using CSC13001_my_shop_project.Services;
 using Uno.Extensions.Navigation;
 using Uno.Resizetizer;
@@ -12,6 +14,7 @@ public partial class App : Application
 {
     /// <summary>Host after launch; used by shell view model to resolve <c>INavigator</c>.</summary>
     internal static IHost? AppHost { get; private set; }
+
     /// <summary>
     /// Initializes the singleton application object. This is the first line of authored code
     /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -86,11 +89,13 @@ public partial class App : Application
 #endif
                         }
                     )
-                    .ConfigureServices((context, services) =>
-                    {
-                        services.AddSingleton<NavigationStateStore>();
-                        services.AddTransient<ProductDetailViewModel>();
-                    })
+                    .ConfigureServices(
+                        (context, services) =>
+                        {
+                            services.AddSingleton<NavigationStateStore>();
+                            services.AddTransient<ProductDetailViewModel>();
+                        }
+                    )
                     .UseNavigation(RegisterRoutes)
             );
         MainWindow = builder.Window;
@@ -110,7 +115,9 @@ public partial class App : Application
             new ViewMap(ViewModel: typeof(ShellViewModel)),
             new ViewMap<DashboardPage, DashboardViewModel>(),
             new ViewMap<ProductsPage, ProductsViewModel>(),
-            new DataViewMap<ProductDetailPage, ProductDetailViewModel, ProductDetailArgs>()
+            new DataViewMap<ProductDetailPage, ProductDetailViewModel, ProductDetailArgs>(),
+            new ViewMap<LoginPage, LoginViewModel>(),
+            new ViewMap<ServerConfigurationPage, ServerConfigurationViewModel>()
         );
 
         routes.Register(
@@ -119,7 +126,16 @@ public partial class App : Application
                 View: views.FindByViewModel<ShellViewModel>(),
                 Nested:
                 [
-                    new RouteMap("Dashboard", View: views.FindByViewModel<DashboardViewModel>(), IsDefault: true),
+                    new RouteMap(
+                        "Login",
+                        View: views.FindByViewModel<LoginViewModel>(),
+                        IsDefault: true
+                    ),
+                    new RouteMap(
+                        "ServerConfiguration",
+                        View: views.FindByViewModel<ServerConfigurationViewModel>()
+                    ),
+                    new RouteMap("Dashboard", View: views.FindByViewModel<DashboardViewModel>()),
                     new RouteMap(
                         "Products",
                         View: views.FindByViewModel<ProductsViewModel>(),
