@@ -76,7 +76,6 @@ public partial class ServerConfigurationViewModel : ObservableObject
 
     private async Task BackToLoginAsync()
     {
-        Console.WriteLine("Navigating back to Login via Shell message...");
         WeakReferenceMessenger.Default.Send(new NavigateToPageMessage("Login"));
         await Task.CompletedTask;
     }

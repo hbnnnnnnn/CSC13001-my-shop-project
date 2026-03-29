@@ -15,17 +15,6 @@ public sealed partial class Shell : UserControl, IContentControlProvider
         _vm = new ShellViewModel();
         DataContext = _vm;
         Loaded += OnShellLoaded;
-
-        // Listen for chrome visibility messages from pages.
-        WeakReferenceMessenger.Default.Register<ChromeVisibilityMessage>(
-            this,
-            (r, msg) =>
-            {
-                var visibility = msg.ShowChrome ? Visibility.Visible : Visibility.Collapsed;
-                Sidebar.Visibility = visibility;
-                TopBar.Visibility = visibility;
-            }
-        );
     }
 
     public ContentControl ContentControl => MainContent;

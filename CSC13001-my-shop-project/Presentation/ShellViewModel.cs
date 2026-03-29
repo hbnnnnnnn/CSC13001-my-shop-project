@@ -16,11 +16,21 @@ public partial class ShellViewModel : ObservableObject
     internal static void AttachNavigatorResolver(Func<INavigator?> resolver) =>
         _navigatorResolver = resolver;
 
+    private AppStateService? _appStateService;
+    private AppStateService AppState =>
+        _appStateService ??= App.AppHost?.Services.GetRequiredService<AppStateService>()!;
+
     /// <summary>Routes that should hide the shell chrome (sidebar + top bar).</summary>
     private static readonly HashSet<string> ChromelessRoutes = new(StringComparer.OrdinalIgnoreCase)
     {
         "Login",
         "ServerConfiguration",
+    };
+
+    private readonly HashSet<string> _sidebarRoutes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Dashboard",
+        "Products",
     };
 
     [ObservableProperty]
@@ -36,6 +46,7 @@ public partial class ShellViewModel : ObservableObject
     {
         CloseSidebarCommand = new RelayCommand(() =>
         {
+            AppState.Clear();
             IsSidebarExpanded = false;
         });
         OpenSidebarCommand = new RelayCommand(() =>
@@ -47,7 +58,7 @@ public partial class ShellViewModel : ObservableObject
             if (string.IsNullOrWhiteSpace(item))
                 return;
             SelectedSidebarItem = item;
-            _ = NavigateForSidebarAsync(item);
+            _ = Navigate(item);
         });
 
         WeakReferenceMessenger.Default.Register<NavigateToPageMessage>(
@@ -56,8 +67,10 @@ public partial class ShellViewModel : ObservableObject
             {
                 if (string.IsNullOrWhiteSpace(msg.PageKey) || r is not ShellViewModel shell)
                     return;
-                shell.SelectedSidebarItem = msg.PageKey;
-                _ = shell.NavigateForSidebarAsync(msg.PageKey);
+
+                var route = msg.PageKey;
+
+                _ = Navigate(route);
             }
         );
     }
@@ -78,7 +91,7 @@ public partial class ShellViewModel : ObservableObject
         IsChromeVisible = !string.IsNullOrEmpty(routeName) && !ChromelessRoutes.Contains(routeName);
     }
 
-    private async Task NavigateForSidebarAsync(string key)
+    private async Task Navigate(string route)
     {
         var nav =
             _navigatorResolver?.Invoke()
@@ -87,7 +100,7 @@ public partial class ShellViewModel : ObservableObject
             return;
         try
         {
-            switch (key)
+            switch (route)
             {
                 case "Dashboard":
                     await nav.NavigateRouteAsync(this, "Dashboard");
@@ -104,6 +117,13 @@ public partial class ShellViewModel : ObservableObject
                 default:
                     return;
             }
+
+            if (_sidebarRoutes.Contains(route))
+                SelectedSidebarItem = route;
+
+            AppState.LastPage = route;
+
+            UpdateChromeVisibility(route);
         }
         catch (Exception ex)
         {
