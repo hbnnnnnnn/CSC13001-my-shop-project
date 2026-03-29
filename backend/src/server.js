@@ -5,6 +5,7 @@ const { ApolloServerPluginDrainHttpServer } = require('@apollo/server/plugin/dra
 const http = require('http');
 const app = require('./app');
 const db = require('./config/db'); // Test DB connection early
+const { redisClient } = require('./config/redis');
 const { typeDefs, resolvers } = require('./graphql');
 const { getUserFromToken } = require('./middlewares/auth.middleware');
 
@@ -21,6 +22,7 @@ async function startServer() {
     });
 
     await server.start();
+    await redisClient.connect();
 
     // Apply GraphQL middleware to Express app
     app.use(
@@ -28,10 +30,10 @@ async function startServer() {
         expressMiddleware(server, {
             context: async ({ req }) => {
                 // Get user from token if Authorization header is provided
-                const user = getUserFromToken(req);
+                const authContext = await getUserFromToken(req);
 
-                // Inject the 'db' pool and 'user' into context for all resolvers
-                return { db, user };
+                // Inject the 'db' pool, 'user' and 'token' into context for all resolvers
+                return { db, user: authContext.user, token: authContext.token };
             },
         })
     );

@@ -1,4 +1,5 @@
 const esClient = require("../config/elasticsearch");
+const cacheService = require("./cache.service.js");
 const INDEX = process.env.ELASTICSEARCH_PRODUCT_INDEX || "products";
 
 const createIndex = async () => {
@@ -55,6 +56,7 @@ const indexProduct = async (product) => {
     id: product.product_id,
     document: product,
   });
+  await cacheService.delByPrefix("search:");
 };
 
 const bulkIndexProducts = async (products) => {
@@ -71,6 +73,7 @@ const bulkIndexProducts = async (products) => {
   await esClient.bulk({
     body: operations,
   });
+  await cacheService.delByPrefix("search:");
 };
 
 const indexUpdateProduct = async (productId, product) => {
@@ -79,6 +82,7 @@ const indexUpdateProduct = async (productId, product) => {
     id: productId,
     doc: product,
   });
+  await cacheService.delByPrefix("search:");
 };
 
 const indexDeleteProduct = async (productId) => {
@@ -86,6 +90,7 @@ const indexDeleteProduct = async (productId) => {
     index: INDEX,
     id: productId,
   });
+  await cacheService.delByPrefix("search:");
 };
 
 const searchProducts = async (
@@ -95,6 +100,13 @@ const searchProducts = async (
   filters = {},
   sort = {},
 ) => {
+  const cacheKey = `search:q:${query}:p:${page}:l:${limit}:f:${JSON.stringify(filters)}:s:${JSON.stringify(sort)}`;
+  const cachedResult = await cacheService.get(cacheKey);
+  if (cachedResult) {
+    console.log(`[Cache Hit] ${cacheKey}`);
+    return cachedResult;
+  }
+
   const filterClauses = [];
 
   if (filters.category_id) {
@@ -159,13 +171,16 @@ const searchProducts = async (
     },
   });
 
-  return {
+  const searchResponse = {
     data: result.hits.hits.map((hit) => hit._source),
     total: result.hits.total.value,
     page,
     limit,
     totalPages: Math.ceil(result.hits.total.value / limit),
   };
+
+  await cacheService.set(cacheKey, searchResponse, 300); // Cache for 5 mins
+  return searchResponse;
 };
 
 module.exports = {

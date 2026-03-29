@@ -5,6 +5,12 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using CSC13001_my_shop_project.Presentation.Dashboard;
 using CSC13001_my_shop_project.Presentation.OrderList;
+using CommunityToolkit.Mvvm.Messaging;
+using CSC13001_my_shop_project.Presentation.Dashboard;
+using Microsoft.UI.Xaml;
+using Uno.Extensions.Navigation;
+
+namespace CSC13001_my_shop_project.Presentation;
 
 public sealed partial class Shell : UserControl, IContentControlProvider
 {
@@ -23,6 +29,7 @@ public sealed partial class Shell : UserControl, IContentControlProvider
         };
         
         this.Loaded += (_, _) => SyncContentVisibility();
+        Loaded += OnShellLoaded;
     }
 
     public ContentControl ContentControl => MainContent;
@@ -44,5 +51,8 @@ public sealed partial class Shell : UserControl, IContentControlProvider
                 await MainContent.Navigator().NavigateRouteAsync(this, _vm.SelectedSidebarItem);
                 break;
         }
+    private void OnShellLoaded(object sender, RoutedEventArgs e)
+    {
+        ShellViewModel.AttachNavigatorResolver(() => this.Navigator() ?? MainContent?.Navigator());
     }
 }

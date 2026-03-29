@@ -167,23 +167,6 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
-        <Style x:Key="ShellSearchTextBoxStyle" TargetType="TextBox">
-            <Setter Property="Background" Value="{StaticResource ShellSearchBackgroundBrush}" />
-            <Setter Property="BorderBrush" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="CornerRadius" Value="22" />
-            <Setter Property="Padding" Value="46,13,16,13" />
-            <Setter Property="UseSystemFocusVisuals" Value="False" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="HorizontalContentAlignment" Value="Left" />
-            <Setter Property="Foreground" Value="{StaticResource ShellTextStrongBrush}" />
-            <Setter
-                Property="PlaceholderForeground"
-                Value="{StaticResource ShellSearchTextBrush}"
-            />
-            <Setter Property="SelectionHighlightColor" Value="{StaticResource ShellAccentBrush}" />
-        </Style>
     </UserControl.Resources>
 
     <Border
@@ -254,8 +237,14 @@
                         <Flyout Placement="BottomEdgeAlignedRight">
                             <Flyout.FlyoutPresenterStyle>
                                 <Style TargetType="FlyoutPresenter">
-                                    <Setter Property="Background" Value="{StaticResource ShellBackgroundBrush}" />
-                                    <Setter Property="BorderBrush" Value="{StaticResource ShellBorderBrush}" />
+                                    <Setter
+                                        Property="Background"
+                                        Value="{StaticResource ShellBackgroundBrush}"
+                                    />
+                                    <Setter
+                                        Property="BorderBrush"
+                                        Value="{StaticResource ShellBorderBrush}"
+                                    />
                                     <Setter Property="BorderThickness" Value="1" />
                                     <Setter Property="CornerRadius" Value="12" />
                                     <Setter Property="Padding" Value="6" />
@@ -273,7 +262,11 @@
 
                             <StackPanel>
                                 <!-- Profile Header -->
-                                <StackPanel Orientation="Horizontal" Padding="10,10,10,12" Spacing="10">
+                                <StackPanel
+                                    Orientation="Horizontal"
+                                    Padding="10,10,10,12"
+                                    Spacing="10"
+                                >
                                     <Border
                                         Width="40"
                                         Height="40"
@@ -306,10 +299,17 @@
                                 </StackPanel>
 
                                 <!-- Divider -->
-                                <Border Height="1" Background="{StaticResource ShellBorderBrush}" Margin="4,0,4,4" />
+                                <Border
+                                    Height="1"
+                                    Background="{StaticResource ShellBorderBrush}"
+                                    Margin="4,0,4,4"
+                                />
 
                                 <!-- Sign Out -->
-                                <Button Style="{StaticResource FlyoutMenuItemStyle}" HorizontalAlignment="Stretch">
+                                <Button
+                                    Style="{StaticResource FlyoutMenuItemStyle}"
+                                    HorizontalAlignment="Stretch"
+                                >
                                     <Grid Padding="10,9" ColumnSpacing="10">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="20" />
