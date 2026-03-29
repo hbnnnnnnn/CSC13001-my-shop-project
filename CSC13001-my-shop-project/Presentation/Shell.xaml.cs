@@ -10,6 +10,8 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using CSC13001_my_shop_project.Presentation.Dashboard;
 using CSC13001_my_shop_project.Presentation.OrderList;
+using CommunityToolkit.Mvvm.Messaging;
+using Uno.Extensions.Navigation;
 
 public sealed partial class Shell : UserControl, IContentControlProvider
 {
@@ -49,5 +51,6 @@ public sealed partial class Shell : UserControl, IContentControlProvider
                 await MainContent.Navigator().NavigateRouteAsync(this, _vm.SelectedSidebarItem);
                 break;
         }
+    }
     }
 }

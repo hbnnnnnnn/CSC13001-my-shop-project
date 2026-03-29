@@ -30,6 +30,7 @@ public partial class ShellViewModel : ObservableObject
     private readonly HashSet<string> _sidebarRoutes = new(StringComparer.OrdinalIgnoreCase)
     {
         "Dashboard",
+        "Orders",
         "Products",
     };
 
@@ -104,6 +105,9 @@ public partial class ShellViewModel : ObservableObject
             {
                 case "Dashboard":
                     await nav.NavigateRouteAsync(this, "Dashboard");
+                    break;
+                case "Orders":
+                    await nav.NavigateRouteAsync(this, "Orders");
                     break;
                 case "Products":
                     await nav.NavigateRouteAsync(this, "Products");

@@ -119,8 +119,10 @@ public partial class App : Application
         var shellMap = new ViewMap();
 
         views.Register(
+            new ViewMap(ViewModel: typeof(ShellViewModel)),
             shellMap,
             new ViewMap<DashboardPage, DashboardViewModel>(),
+            new ViewMap<OrderListPage, OrderListViewModel>(),
             new ViewMap<ProductsPage, ProductsViewModel>(),
             new DataViewMap<ProductDetailPage, ProductDetailViewModel, ProductDetailArgs>(),
                 new ViewMap<OrderListPage, OrderListViewModel>(),
@@ -139,11 +141,12 @@ public partial class App : Application
                         View: views.FindByViewModel<LoginViewModel>(),
                         IsDefault: true
                     ),
+                    new RouteMap("Dashboard", View: views.FindByViewModel<DashboardViewModel>()),
+                    new RouteMap("Orders", View: views.FindByViewModel<OrderListViewModel>()),
                     new RouteMap(
                         "ServerConfiguration",
                         View: views.FindByViewModel<ServerConfigurationViewModel>()
                     ),
-                    new RouteMap("Dashboard", View: views.FindByViewModel<DashboardViewModel>()),
                     new RouteMap(
                         "Products",
                         View: views.FindByViewModel<ProductsViewModel>(),
