@@ -11,6 +11,7 @@ const {
 const { searchProducts } = require("../../services/search.service");
 
 const { getCategoryById } = require("../../services/category.service");
+const { generateProductDetailsFromImage } = require("../../services/aiService");
 
 const productResolver = {
   Query: {
@@ -39,6 +40,9 @@ const productResolver = {
     },
     deleteProduct: async (_, { id }) => {
       return await deleteProduct(id);
+    },
+    generateProductDetailsFromImage: async (_, { image }) => {
+      return await generateProductDetailsFromImage(image);
     },
   },
   Product: {

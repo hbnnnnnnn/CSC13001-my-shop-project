@@ -16,6 +16,7 @@
   "dependencies": {
     "@apollo/server": "^4.13.0",
     "@elastic/elasticsearch": "^9.3.4",
+    "@google/generative-ai": "^0.24.1",
     "@graphql-tools/load-files": "^7.0.1",
     "@graphql-tools/merge": "^9.1.7",
     "@graphql-tools/schema": "^10.0.31",
