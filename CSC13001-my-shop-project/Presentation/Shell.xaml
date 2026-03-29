@@ -22,7 +22,7 @@
         <layout:SidebarControl
             x:Name="Sidebar"
             Grid.Column="0"
-            Visibility="Collapsed"
+            Visibility="{Binding IsChromeVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
             IsExpanded="{Binding IsSidebarExpanded, Mode=TwoWay}"
             SelectedItem="{Binding SelectedSidebarItem, Mode=TwoWay}"
             CloseSidebarCommand="{Binding CloseSidebarCommand}"
@@ -38,7 +38,7 @@
             <layout:TopBarControl
                 x:Name="TopBar"
                 Grid.Column="1"
-                Visibility="Collapsed"
+                Visibility="{Binding IsChromeVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
                 IsSidebarExpanded="{Binding IsSidebarExpanded, Mode=TwoWay}"
                 OpenSidebarCommand="{Binding OpenSidebarCommand}"
             />

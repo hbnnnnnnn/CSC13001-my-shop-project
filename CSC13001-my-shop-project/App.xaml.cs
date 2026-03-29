@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using CommunityToolkit.Mvvm.Messaging;
 using CSC13001_my_shop_project.Models;
 using CSC13001_my_shop_project.Presentation.Dashboard;
 using CSC13001_my_shop_project.Presentation.Login;
@@ -95,6 +96,7 @@ public partial class App : Application
                         {
                             services.AddSingleton<NavigationStateStore>();
                             services.AddTransient<ProductDetailViewModel>();
+                            services.AddSingleton<AppStateService>();
                         }
                     )
                     .UseNavigation(RegisterRoutes)
@@ -108,12 +110,16 @@ public partial class App : Application
 
         Host = await builder.NavigateAsync<Shell>();
         AppHost = Host;
+
+        NavigateOnStartup();
     }
 
     private static void RegisterRoutes(IViewRegistry views, IRouteRegistry routes)
     {
+        var shellMap = new ViewMap();
+
         views.Register(
-            new ViewMap(ViewModel: typeof(ShellViewModel)),
+            shellMap,
             new ViewMap<DashboardPage, DashboardViewModel>(),
             new ViewMap<ProductsPage, ProductsViewModel>(),
             new DataViewMap<ProductDetailPage, ProductDetailViewModel, ProductDetailArgs>(),
@@ -125,7 +131,7 @@ public partial class App : Application
         routes.Register(
             new RouteMap(
                 "",
-                View: views.FindByViewModel<ShellViewModel>(),
+                View: shellMap,
                 Nested:
                 [
                     new RouteMap(
@@ -153,5 +159,23 @@ public partial class App : Application
                 ]
             )
         );
+    }
+
+    private async void NavigateOnStartup()
+    {
+        var appStateService = Host?.Services.GetRequiredService<AppStateService>();
+
+        var lastPage = appStateService?.LastPage;
+
+        if (lastPage != null)
+        {
+            WeakReferenceMessenger.Default.Send(new NavigateToPageMessage(lastPage));
+            await Task.CompletedTask;
+        }
+        else
+        {
+            WeakReferenceMessenger.Default.Send(new NavigateToPageMessage("Login"));
+            await Task.CompletedTask;
+        }
     }
 }

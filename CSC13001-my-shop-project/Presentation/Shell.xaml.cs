@@ -28,17 +28,6 @@ public sealed partial class Shell : UserControl, IContentControlProvider
         };
         
         this.Loaded += (_, _) => SyncContentVisibility();
-
-        // Listen for chrome visibility messages from pages.
-        WeakReferenceMessenger.Default.Register<ChromeVisibilityMessage>(
-            this,
-            (r, msg) =>
-            {
-                var visibility = msg.ShowChrome ? Visibility.Visible : Visibility.Collapsed;
-                Sidebar.Visibility = visibility;
-                TopBar.Visibility = visibility;
-            }
-        );
     }
 
     public ContentControl ContentControl => MainContent;
