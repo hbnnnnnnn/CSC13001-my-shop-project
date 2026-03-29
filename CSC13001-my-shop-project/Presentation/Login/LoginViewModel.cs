@@ -1,3 +1,6 @@
+using CommunityToolkit.Mvvm.Messaging;
+using CSC13001_my_shop_project.Presentation.Dashboard;
+
 namespace CSC13001_my_shop_project.Presentation.Login;
 
 public partial class LoginViewModel : ObservableObject
@@ -27,8 +30,15 @@ public partial class LoginViewModel : ObservableObject
 
     public IAsyncRelayCommand SignIn { get; }
 
-    private async Task GoToServerConfigurationAsync() =>
-        await _navigator.NavigateRouteAsync(this, "ServerConfiguration");
+    private async Task GoToServerConfigurationAsync()
+    {
+        WeakReferenceMessenger.Default.Send(new NavigateToPageMessage("ServerConfiguration"));
+        await Task.CompletedTask;
+    }
 
-    private async Task SignInAsync() => await _navigator.NavigateRouteAsync(this, "Dashboard");
+    private async Task SignInAsync()
+    {
+        WeakReferenceMessenger.Default.Send(new NavigateToPageMessage("Dashboard"));
+        await Task.CompletedTask;
+    }
 }
