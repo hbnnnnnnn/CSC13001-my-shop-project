@@ -120,10 +120,9 @@ public partial class App : Application
 
         views.Register(
             new ViewMap(ViewModel: typeof(ShellViewModel)),
-            new ViewMap<DashboardPage, DashboardViewModel>(),
-                new ViewMap<OrderListPage, OrderListViewModel>()
             shellMap,
             new ViewMap<DashboardPage, DashboardViewModel>(),
+            new ViewMap<OrderListPage, OrderListViewModel>(),
             new ViewMap<ProductsPage, ProductsViewModel>(),
             new DataViewMap<ProductDetailPage, ProductDetailViewModel, ProductDetailArgs>(),
             new ViewMap<LoginPage, LoginViewModel>(),
@@ -136,18 +135,17 @@ public partial class App : Application
                 View: shellMap,
                 Nested:
                 [
-                    new RouteMap("Dashboard", View: views.FindByViewModel<DashboardViewModel>(), IsDefault: true),
-                    new RouteMap("Orders", View: views.FindByViewModel<OrderListViewModel>()),
                     new RouteMap(
                         "Login",
                         View: views.FindByViewModel<LoginViewModel>(),
                         IsDefault: true
                     ),
+                    new RouteMap("Dashboard", View: views.FindByViewModel<DashboardViewModel>()),
+                    new RouteMap("Orders", View: views.FindByViewModel<OrderListViewModel>()),
                     new RouteMap(
                         "ServerConfiguration",
                         View: views.FindByViewModel<ServerConfigurationViewModel>()
                     ),
-                    new RouteMap("Dashboard", View: views.FindByViewModel<DashboardViewModel>()),
                     new RouteMap(
                         "Products",
                         View: views.FindByViewModel<ProductsViewModel>(),
