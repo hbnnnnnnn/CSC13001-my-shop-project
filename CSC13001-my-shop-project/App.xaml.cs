@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using CommunityToolkit.Mvvm.Messaging;
 using CSC13001_my_shop_project.Models;
 using CSC13001_my_shop_project.Presentation.Dashboard;
+using CSC13001_my_shop_project.Presentation.OrderList;
 using CSC13001_my_shop_project.Presentation.Login;
 using CSC13001_my_shop_project.Presentation.Products;
 using CSC13001_my_shop_project.Presentation.ServerConfiguration;
@@ -118,6 +119,9 @@ public partial class App : Application
         var shellMap = new ViewMap();
 
         views.Register(
+            new ViewMap(ViewModel: typeof(ShellViewModel)),
+            new ViewMap<DashboardPage, DashboardViewModel>(),
+                new ViewMap<OrderListPage, OrderListViewModel>()
             shellMap,
             new ViewMap<DashboardPage, DashboardViewModel>(),
             new ViewMap<ProductsPage, ProductsViewModel>(),
@@ -132,6 +136,8 @@ public partial class App : Application
                 View: shellMap,
                 Nested:
                 [
+                    new RouteMap("Dashboard", View: views.FindByViewModel<DashboardViewModel>(), IsDefault: true),
+                    new RouteMap("Orders", View: views.FindByViewModel<OrderListViewModel>()),
                     new RouteMap(
                         "Login",
                         View: views.FindByViewModel<LoginViewModel>(),

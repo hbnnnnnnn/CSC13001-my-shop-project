@@ -24,6 +24,18 @@
 
                 <ResourceDictionary Source="Assets/Styles/CheckBox.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <Color x:Key="SystemAccentColor">#F3B55C</Color>
+                    <Color x:Key="SystemAccentColorLight1">#F3B55C</Color>
+                    <Color x:Key="SystemAccentColorLight2">#F3B55C</Color>
+                    <Color x:Key="SystemAccentColorLight3">#F3B55C</Color>
+                    <Color x:Key="SystemAccentColorDark1">#F3B55C</Color>
+                    <Color x:Key="SystemAccentColorDark2">#F3B55C</Color>
+                    <Color x:Key="SystemAccentColorDark3">#F3B55C</Color>
+                    <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="#F3B55C" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
 
             <!-- Add resources here -->
             <Color x:Key="AppBackgroundColor">#FAF7F2</Color>
@@ -35,6 +47,8 @@
             <Color x:Key="ShellNotificationDotColor">#FF6467</Color>
             <Color x:Key="SearchTextColor">#662C2118</Color>
 
+            <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="{StaticResource BrandColor}" />
+    <SolidColorBrush x:Key="SystemColorControlAccentBrush" Color="{StaticResource BrandColor}" />
             <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="Red" />
             <SolidColorBrush x:Key="SystemColorControlAccentBrush" Color="Red" />
 
@@ -76,6 +90,27 @@
             />
             <SolidColorBrush x:Key="ShellSearchBackgroundBrush" Color="#80F5EDE4" />
 
+            <!-- Order Status Badge Brushes -->
+            <!-- Processing: amber filled -->
+            <SolidColorBrush x:Key="StatusProcessingBgBrush" Color="#F3B55C" />
+            <SolidColorBrush x:Key="StatusProcessingFgBrush" Color="White" />
+            <SolidColorBrush x:Key="StatusProcessingBorderBrush" Color="#F3B55C" />
+            <!-- Shipped: neutral outline -->
+            <SolidColorBrush x:Key="StatusShippedBgBrush" Color="#FAF7F2" />
+            <SolidColorBrush x:Key="StatusShippedFgBrush" Color="#2C2118" />
+            <SolidColorBrush x:Key="StatusShippedBorderBrush" Color="#F5EDE4" />
+            <!-- Delivered: green -->
+            <SolidColorBrush x:Key="StatusDeliveredBgBrush" Color="#ECFDF5" />
+            <SolidColorBrush x:Key="StatusDeliveredFgBrush" Color="#009966" />
+            <SolidColorBrush x:Key="StatusDeliveredBorderBrush" Color="#D0FAE5" />
+            <!-- Pending: red-orange filled -->
+            <SolidColorBrush x:Key="StatusPendingBgBrush" Color="#E07A5F" />
+            <SolidColorBrush x:Key="StatusPendingFgBrush" Color="White" />
+            <SolidColorBrush x:Key="StatusPendingBorderBrush" Color="#E07A5F" />
+            <!-- Cancelled: grey -->
+            <SolidColorBrush x:Key="StatusCancelledBgBrush" Color="#F9FAFB" />
+            <SolidColorBrush x:Key="StatusCancelledFgBrush" Color="#99A1AF" />
+            <SolidColorBrush x:Key="StatusCancelledBorderBrush" Color="#F3F4F6" />
             <Style x:Key="ShellSearchTextBoxStyle" TargetType="TextBox">
                 <Setter Property="Background" Value="{StaticResource ShellSearchBackgroundBrush}" />
                 <Setter Property="BorderBrush" Value="Transparent" />
