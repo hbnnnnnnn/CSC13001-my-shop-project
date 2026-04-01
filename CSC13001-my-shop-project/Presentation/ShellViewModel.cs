@@ -35,13 +35,19 @@ public partial class ShellViewModel : ObservableObject
     };
 
     [ObservableProperty]
-    private bool isSidebarExpanded = true;
+    private string _userName = "John Doe";
 
     [ObservableProperty]
-    private string selectedSidebarItem = "Dashboard";
+    private string _userEmail = "john.doe@luminahaven.com";
 
     [ObservableProperty]
-    private bool isChromeVisible;
+    private bool _isSidebarExpanded = true;
+
+    [ObservableProperty]
+    private string _selectedSidebarItem = "Dashboard";
+
+    [ObservableProperty]
+    private bool _isChromeVisible;
 
     public ShellViewModel()
     {

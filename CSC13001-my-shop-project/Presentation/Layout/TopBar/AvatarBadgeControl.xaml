@@ -1,0 +1,42 @@
+<UserControl
+    x:Class="CSC13001_my_shop_project.Presentation.Layout.AvatarBadgeControl"
+    x:Name="AvatarRoot"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:utu="using:Uno.Toolkit.UI"
+    d:DesignHeight="40"
+    d:DesignWidth="40"
+    mc:Ignorable="d"
+>
+    <utu:ShadowContainer>
+        <utu:ShadowContainer.Shadows>
+            <utu:ShadowCollection>
+                <utu:Shadow
+                    OffsetX="0"
+                    OffsetY="2"
+                    BlurRadius="3"
+                    Spread="0"
+                    Color="#000000"
+                    Opacity="0.2"
+                />
+            </utu:ShadowCollection>
+        </utu:ShadowContainer.Shadows>
+        <Border
+            Width="{Binding ElementName=AvatarRoot, Path=AvatarSize}"
+            Height="{Binding ElementName=AvatarRoot, Path=AvatarSize}"
+            CornerRadius="999"
+            Background="{StaticResource ShellAvatarGradientBrush}"
+        >
+            <TextBlock
+                Text="{Binding ElementName=AvatarRoot, Path=Initials}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Foreground="White"
+                FontSize="{Binding ElementName=AvatarRoot, Path=InitialsFontSize}"
+                FontWeight="Bold"
+            />
+        </Border>
+    </utu:ShadowContainer>
+</UserControl>

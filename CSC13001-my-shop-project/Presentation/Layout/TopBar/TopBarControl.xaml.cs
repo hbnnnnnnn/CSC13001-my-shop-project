@@ -1,4 +1,6 @@
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using CSC13001_my_shop_project.Presentation.Dashboard;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -57,5 +59,19 @@ public sealed partial class TopBarControl : UserControl
         OpenSidebarButton.Visibility = IsSidebarExpanded
             ? Visibility.Collapsed
             : Visibility.Visible;
+    }
+
+    private void SignOutButton_Click(object sender, RoutedEventArgs e)
+    {
+        ProfileFlyout.Hide();
+        WeakReferenceMessenger.Default.Send(new NavigateToPageMessage("Login"));
+    }
+
+    private void ProfileFlyout_Opened(object sender, object e) {
+        VisualStateManager.GoToState(ProfileButton, "FlyoutOpen", true);
+    }
+
+    private void ProfileFlyout_Closed(object sender, object e) {
+        VisualStateManager.GoToState(ProfileButton, "FlyoutClosed", true);
     }
 }
