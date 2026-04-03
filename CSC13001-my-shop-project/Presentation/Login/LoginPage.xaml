@@ -5,19 +5,72 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:CSC13001_my_shop_project.Presentation.Controls"
+    xmlns:converters="using:CSC13001_my_shop_project.Presentation.Converters"
     mc:Ignorable="d"
     Background="{StaticResource AuthPanelBackgroundBrush}"
 >
     <Page.Resources>
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter" />
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
+        <SolidColorBrush x:Key="AuthInputFocusBackgroundBrush" Color="White" />
+        <SolidColorBrush x:Key="AuthInputFocusRingBrush" Color="{StaticResource BrandColor}" />
+        <SolidColorBrush x:Key="AuthInputPlaceholderBrush" Color="#D0D0D0" />
+
         <Style x:Key="AuthFieldTextBoxStyle" TargetType="TextBox">
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="Padding" Value="0,6,0,0" />
+            <Setter Property="Padding" Value="0" />
             <Setter Property="Foreground" Value="{StaticResource AuthTextInputBrush}" />
-            <Setter Property="PlaceholderForeground" Value="{StaticResource AuthTextInputBrush}" />
+            <Setter
+                Property="PlaceholderForeground"
+                Value="{StaticResource AuthInputPlaceholderBrush}"
+            />
             <Setter Property="SelectionHighlightColor" Value="{StaticResource BrandColor}" />
             <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="Medium" />
             <Setter Property="Height" Value="32" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Grid Background="Transparent">
+                            <TextBlock
+                                x:Name="PlaceholderTextContentPresenter"
+                                Text="{TemplateBinding PlaceholderText}"
+                                Foreground="{TemplateBinding PlaceholderForeground}"
+                                FontWeight="Thin"
+                                FontSize="13"
+                                Margin="{TemplateBinding Padding}"
+                                VerticalAlignment="Center"
+                                IsHitTestVisible="False"
+                            />
+                            <ScrollViewer
+                                x:Name="ContentElement"
+                                Margin="{TemplateBinding Padding}"
+                                VerticalAlignment="Center"
+                            />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="AuthFieldPasswordBoxStyle" TargetType="PasswordBox">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0,8,0,0" />
+            <Setter Property="Foreground" Value="{StaticResource AuthTextInputBrush}" />
+            <Setter
+                Property="PlaceholderForeground"
+                Value="{StaticResource AuthInputPlaceholderBrush}"
+            />
+            <Setter Property="SelectionHighlightColor" Value="{StaticResource BrandColor}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="Normal" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="PasswordRevealMode" Value="Hidden" />
         </Style>
 
         <Style x:Key="AuthFlatButtonStyle" TargetType="Button">
@@ -37,6 +90,17 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+
+        <Style x:Key="AuthInputIconButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Width" Value="28" />
+            <Setter Property="Height" Value="28" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="UseSystemFocusVisuals" Value="False" />
         </Style>
     </Page.Resources>
 
@@ -116,21 +180,73 @@
                             CharacterSpacing="120"
                             Foreground="{StaticResource AuthTextLabelBrush}"
                         />
-                        <Border
-                            Height="50"
-                            CornerRadius="12"
-                            Background="{StaticResource AuthInputBackgroundBrush}"
-                            BorderBrush="{StaticResource AuthInputBorderBrush}"
-                            BorderThickness="1"
-                            Padding="16,0"
-                        >
-                            <TextBox
-                                Style="{StaticResource AuthFieldTextBoxStyle}"
-                                VerticalAlignment="Center"
-                                VerticalContentAlignment="Center"
-                                Text="{Binding Email, Mode=TwoWay}"
+                        <Grid x:Name="EmailFieldChrome">
+                            <Border
+                                x:Name="EmailFieldGlow"
+                                Margin="-4"
+                                BorderBrush="{StaticResource AuthInputFocusRingBrush}"
+                                BorderThickness="4"
+                                CornerRadius="16"
+                                Opacity="0"
+                                IsHitTestVisible="False"
                             />
-                        </Border>
+
+                            <Border
+                                x:Name="EmailFieldSurface"
+                                Height="50"
+                                CornerRadius="12"
+                                Background="{StaticResource AuthInputBackgroundBrush}"
+                                BorderBrush="{StaticResource AuthInputBorderBrush}"
+                                BorderThickness="1"
+                                Padding="16,0,12,0"
+                            >
+                                <Grid ColumnSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBox
+                                        x:Name="EmailInput"
+                                        Style="{StaticResource AuthFieldTextBoxStyle}"
+                                        VerticalAlignment="Center"
+                                        PlaceholderText="admin@luminahaven.com"
+                                        Text="{Binding Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Tag="Email"
+                                        GotFocus="OnFieldElementGotFocus"
+                                        LostFocus="OnFieldElementLostFocus"
+                                    />
+
+                                    <Button
+                                        Grid.Column="1"
+                                        Style="{StaticResource AuthInputIconButtonStyle}"
+                                        CommandParameter="{Binding ElementName=EmailInput}"
+                                        Tag="Email"
+                                        Click="OnClearTextClick"
+                                        GotFocus="OnFieldElementGotFocus"
+                                        LostFocus="OnFieldElementLostFocus"
+                                        Visibility="{Binding Text, ElementName=EmailInput, Converter={StaticResource StringToVisibilityConverter}}"
+                                    >
+                                        <Canvas Width="16" Height="16">
+                                            <Path
+                                                Data="M3.5 3.5L12.5 12.5"
+                                                Stroke="{StaticResource AuthTextLabelBrush}"
+                                                StrokeThickness="1.5"
+                                                StrokeStartLineCap="Round"
+                                                StrokeEndLineCap="Round"
+                                            />
+                                            <Path
+                                                Data="M12.5 3.5L3.5 12.5"
+                                                Stroke="{StaticResource AuthTextLabelBrush}"
+                                                StrokeThickness="1.5"
+                                                StrokeStartLineCap="Round"
+                                                StrokeEndLineCap="Round"
+                                            />
+                                        </Canvas>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </Grid>
                     </StackPanel>
 
                     <StackPanel Spacing="6">
@@ -154,70 +270,123 @@
                                 Foreground="{StaticResource BrandColor}"
                                 FontSize="12"
                                 FontWeight="Medium"
-                                
                             />
                         </Grid>
 
-                        <Border
-                            Height="50"
-                            CornerRadius="12"
-                            Background="{StaticResource AuthInputBackgroundBrush}"
-                            BorderBrush="{StaticResource AuthInputBorderBrush}"
-                            BorderThickness="1"
-                            Padding="16,0,12,0"
-                        >
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
+                        <Grid x:Name="PasswordFieldChrome">
+                            <Border
+                                x:Name="PasswordFieldGlow"
+                                Margin="-4"
+                                BorderBrush="{StaticResource AuthInputFocusRingBrush}"
+                                BorderThickness="4"
+                                CornerRadius="16"
+                                Opacity="0"
+                                IsHitTestVisible="False"
+                            />
 
-                                <TextBox
-                                    Style="{StaticResource AuthFieldTextBoxStyle}"
-                                    VerticalAlignment="Center"
-                                    VerticalContentAlignment="Center"
-                                    PlaceholderText="••••••••"
-                                    Text="{Binding Password, Mode=TwoWay}"
-                                />
+                            <Border
+                                x:Name="PasswordFieldSurface"
+                                Height="50"
+                                CornerRadius="12"
+                                Background="{StaticResource AuthInputBackgroundBrush}"
+                                BorderBrush="{StaticResource AuthInputBorderBrush}"
+                                BorderThickness="1"
+                                Padding="16,0,12,0"
+                            >
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
 
-                                <Button
-                                    Grid.Column="1"
-                                    Style="{StaticResource AuthFlatButtonStyle}"
-                                    Width="28"
-                                    Height="28"
-                                >
-                                    <Canvas Width="16" Height="16">
-                                        <Path
-                                            Data="M0.708337 5.56492C0.652777 5.41525 0.652777 5.2506 0.708337 5.10092C1.24947 3.78883 2.16801 2.66695 3.34752 1.87752C4.52702 1.08809 5.91437 0.666667 7.33367 0.666667C8.75297 0.666667 10.1403 1.08809 11.3198 1.87752C12.4993 2.66695 13.4179 3.78883 13.959 5.10092C14.0146 5.2506 14.0146 5.41525 13.959 5.56492C13.4179 6.87702 12.4993 7.9989 11.3198 8.78832C10.1403 9.57775 8.75297 9.99918 7.33367 9.99918C5.91437 9.99918 4.52702 9.57775 3.34752 8.78832C2.16801 7.9989 1.24947 6.87702 0.708337 5.56492Z"
-                                            Stroke="{StaticResource AuthTextInputBrush}"
-                                            StrokeThickness="1.33"
-                                            StrokeStartLineCap="Round"
-                                            StrokeEndLineCap="Round"
-                                            StrokeLineJoin="Round"
-                                        />
-                                        <Path
-                                            Data="M2.66667 4.66667C3.77124 4.66667 4.66667 3.77124 4.66667 2.66667C4.66667 1.5621 3.77124 0.666667 2.66667 0.666667C1.5621 0.666667 0.666667 1.5621 0.666667 2.66667C0.666667 3.77124 1.5621 4.66667 2.66667 4.66667Z"
-                                            Stroke="{StaticResource AuthTextInputBrush}"
-                                            StrokeThickness="1.33"
-                                            StrokeStartLineCap="Round"
-                                            StrokeEndLineCap="Round"
-                                            StrokeLineJoin="Round"
-                                            RenderTransformOrigin="0,0"
-                                        >
-                                            <Path.RenderTransform>
-                                                <TranslateTransform X="4.667" Y="2.667" />
-                                            </Path.RenderTransform>
-                                        </Path>
-                                    </Canvas>
-                                </Button>
-                            </Grid>
-                        </Border>
+                                    <PasswordBox
+                                        x:Name="PasswordHiddenInput"
+                                        Style="{StaticResource AuthFieldPasswordBoxStyle}"
+                                        PlaceholderText="••••••••"
+                                        Text="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Visibility="{Binding IsPasswordVisible, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"
+                                        Tag="Password"
+                                        GotFocus="OnFieldElementGotFocus"
+                                        LostFocus="OnFieldElementLostFocus"
+                                    />
+
+                                    <TextBox
+                                        x:Name="PasswordVisibleInput"
+                                        Style="{StaticResource AuthFieldTextBoxStyle}"
+                                        PlaceholderText="••••••••"
+                                        Text="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Visibility="{Binding IsPasswordVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                        Tag="Password"
+                                        GotFocus="OnFieldElementGotFocus"
+                                        LostFocus="OnFieldElementLostFocus"
+                                    />
+
+                                    <Button
+                                        Grid.Column="1"
+                                        Style="{StaticResource AuthInputIconButtonStyle}"
+                                        Tag="Password"
+                                        Click="OnTogglePasswordVisibilityClick"
+                                        GotFocus="OnFieldElementGotFocus"
+                                        LostFocus="OnFieldElementLostFocus"
+                                    >
+                                        <Grid Width="16" Height="16">
+                                            <Canvas
+                                                Width="14"
+                                                Height="10"
+                                                Visibility="{Binding IsPasswordVisible, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Invert}"
+                                            >
+                                                <Path
+                                                    Data="M0.708337 5.56492C0.652777 5.41525 0.652777 5.2506 0.708337 5.10092C1.24947 3.78883 2.16801 2.66695 3.34752 1.87752C4.52702 1.08809 5.91437 0.666667 7.33367 0.666667C8.75297 0.666667 10.1403 1.08809 11.3198 1.87752C12.4993 2.66695 13.4179 3.78883 13.959 5.10092C14.0146 5.2506 14.0146 5.41525 13.959 5.56492C13.4179 6.87702 12.4993 7.9989 11.3198 8.78832C10.1403 9.57775 8.75297 9.99918 7.33367 9.99918C5.91437 9.99918 4.52702 9.57775 3.34752 8.78832C2.16801 7.9989 1.24947 6.87702 0.708337 5.56492Z"
+                                                    Stroke="{StaticResource AuthTextInputBrush}"
+                                                    StrokeThickness="1.33"
+                                                    StrokeStartLineCap="Round"
+                                                    StrokeEndLineCap="Round"
+                                                    StrokeLineJoin="Round"
+                                                />
+                                                <Path
+                                                    Data="M2.66667 4.66667C3.77124 4.66667 4.66667 3.77124 4.66667 2.66667C4.66667 1.5621 3.77124 0.666667 2.66667 0.666667C1.5621 0.666667 0.666667 1.5621 0.666667 2.66667C0.666667 3.77124 1.5621 4.66667 2.66667 4.66667Z"
+                                                    Stroke="{StaticResource AuthTextInputBrush}"
+                                                    StrokeThickness="1.33"
+                                                    StrokeStartLineCap="Round"
+                                                    StrokeEndLineCap="Round"
+                                                    StrokeLineJoin="Round"
+                                                    RenderTransformOrigin="0,0"
+                                                >
+                                                    <Path.RenderTransform>
+                                                        <TranslateTransform X="4.667" Y="2.667" />
+                                                    </Path.RenderTransform>
+                                                </Path>
+                                            </Canvas>
+
+                                            <Canvas
+                                                Width="14"
+                                                Height="10"
+                                                Visibility="{Binding IsPasswordVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                            >
+                                                <Path
+                                                    Data="M0.708337 5.56492C0.652777 5.41525 0.652777 5.2506 0.708337 5.10092C1.24947 3.78883 2.16801 2.66695 3.34752 1.87752C4.52702 1.08809 5.91437 0.666667 7.33367 0.666667C8.75297 0.666667 10.1403 1.08809 11.3198 1.87752C12.4993 2.66695 13.4179 3.78883 13.959 5.10092C14.0146 5.2506 14.0146 5.41525 13.959 5.56492C13.4179 6.87702 12.4993 7.9989 11.3198 8.78832C10.1403 9.57775 8.75297 9.99918 7.33367 9.99918C5.91437 9.99918 4.52702 9.57775 3.34752 8.78832C2.16801 7.9989 1.24947 6.87702 0.708337 5.56492Z"
+                                                    Stroke="{StaticResource AuthTextInputBrush}"
+                                                    StrokeThickness="1.33"
+                                                    StrokeStartLineCap="Round"
+                                                    StrokeEndLineCap="Round"
+                                                    StrokeLineJoin="Round"
+                                                />
+                                                <Path
+                                                    Data="M1.2 9.2L12.8 0.8"
+                                                    Stroke="{StaticResource AuthTextInputBrush}"
+                                                    StrokeThickness="1.5"
+                                                    StrokeStartLineCap="Round"
+                                                    StrokeEndLineCap="Round"
+                                                />
+                                            </Canvas>
+                                        </Grid>
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </Grid>
                     </StackPanel>
 
-                    <controls:CustomCheckBox 
-                        Content="Remember me"
-                    />
-                    
+                    <controls:CustomCheckBox Content="Remember me" />
 
                     <Button
                         Height="50"
@@ -269,7 +438,7 @@
                 </StackPanel>
 
                 <TextBlock
-                    Text="© 2026 Lumina Haven · All rights reserved"
+                    Text="Version 1.0.0"
                     FontSize="12"
                     Foreground="{StaticResource AuthTextInputBrush}"
                     HorizontalAlignment="Center"
