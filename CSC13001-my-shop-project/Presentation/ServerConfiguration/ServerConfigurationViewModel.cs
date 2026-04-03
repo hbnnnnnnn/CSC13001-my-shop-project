@@ -32,6 +32,9 @@ public partial class ServerConfigurationViewModel : ObservableObject
     private string password = string.Empty;
 
     [ObservableProperty]
+    private bool isPasswordVisible;
+
+    [ObservableProperty]
     private bool enableSsl = true;
 
     public ServerConfigurationViewModel(INavigator navigator)

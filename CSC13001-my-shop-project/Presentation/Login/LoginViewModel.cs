@@ -8,7 +8,7 @@ public partial class LoginViewModel : ObservableObject
     private readonly INavigator _navigator;
 
     [ObservableProperty]
-    private string email = "admin@luminahaven.com";
+    private string email = string.Empty;
 
     [ObservableProperty]
     private string password = string.Empty;

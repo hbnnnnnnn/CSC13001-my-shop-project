@@ -22,7 +22,7 @@
           </utum:MaterialToolkitTheme.FontOverrideDictionary> -->
                 </utum:MaterialToolkitTheme>
 
-                <ResourceDictionary Source="Assets/Styles/CheckBox.xaml"/>
+                <ResourceDictionary Source="Assets/Styles/CheckBox.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
@@ -47,8 +47,14 @@
             <Color x:Key="ShellNotificationDotColor">#FF6467</Color>
             <Color x:Key="SearchTextColor">#662C2118</Color>
 
-            <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="{StaticResource BrandColor}" />
-            <SolidColorBrush x:Key="SystemColorControlAccentBrush" Color="{StaticResource BrandColor}" />
+            <SolidColorBrush
+                x:Key="SystemControlHighlightAccentBrush"
+                Color="{StaticResource BrandColor}"
+            />
+                    <SolidColorBrush
+                x:Key="SystemColorControlAccentBrush"
+                Color="{StaticResource BrandColor}"
+            />
 
             <SolidColorBrush
                 x:Key="ShellBackgroundBrush"
@@ -151,7 +157,8 @@
             <Color x:Key="AuthTextStrongColor">#2C2118</Color>
             <Color x:Key="AuthTextMutedColor">#802C2118</Color>
             <Color x:Key="AuthTextLabelColor">#8C2C2118</Color>
-            <Color x:Key="AuthTextInputColor">#612C2118</Color>
+            <Color x:Key="AuthTextInputColor">#000000</Color>
+            <Color x:Key="AuthTextPlaceholderColor">#612C2118</Color>
             <Color x:Key="AuthTextOnHeroColor">#E6FFFFFF</Color>
             <Color x:Key="AuthTextOnHeroMutedColor">#80FFFFFF</Color>
             <Color x:Key="AuthNoteBackgroundColor">#14F3B55C</Color>
@@ -187,6 +194,10 @@
                 Color="{StaticResource AuthTextInputColor}"
             />
             <SolidColorBrush
+                x:Key="AuthTextPlaceholderBrush"
+                Color="{StaticResource AuthTextPlaceholderColor}"
+            />
+            <SolidColorBrush
                 x:Key="AuthTextOnHeroBrush"
                 Color="{StaticResource AuthTextOnHeroColor}"
             />
@@ -220,9 +231,6 @@
                 <GradientStop Color="#1FF3B55C" Offset="0" />
                 <GradientStop Color="#14F3B55C" Offset="1" />
             </LinearGradientBrush>
-
-
-            
         </ResourceDictionary>
     </Application.Resources>
 </Application>
