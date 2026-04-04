@@ -26,11 +26,11 @@ const getProductSalesReport = async ({ period = 'day', startDate = null, endDate
             product_id: row.product_id,
             sku: row.sku,
             name: row.name,
-            quantity: row.total_quantity,
-            revenue: row.total_revenue
+            quantity: Number(row.total_quantity ?? 0),
+            revenue: Number(row.total_revenue ?? 0)
         });
-        groupedData[row.period].totalQuantity += parseInt(row.total_quantity);
-        groupedData[row.period].totalRevenue += parseInt(row.total_revenue);
+        groupedData[row.period].totalQuantity += Number(row.total_quantity ?? 0);
+        groupedData[row.period].totalRevenue += Number(row.total_revenue ?? 0);
     });
 
     const result = Object.values(groupedData);
@@ -53,10 +53,10 @@ const getRevenueReport = async ({ period = 'day', startDate = null, endDate = nu
     const result = data.map(row => ({
         period: row.period,
         date: row.date,
-        totalOrders: row.total_orders,
-        totalRevenue: row.total_revenue,
-        totalItemsSold: row.total_items_sold,
-        avgOrderValue: row.avg_order_value
+        totalOrders: Number(row.total_orders ?? 0),
+        totalRevenue: Number(row.total_revenue ?? 0),
+        totalItemsSold: Number(row.total_items_sold ?? 0),
+        avgOrderValue: Number(row.avg_order_value ?? 0)
     }));
 
     await cacheService.set(cacheKey, result, 600);
@@ -79,10 +79,10 @@ const getTopSellingProducts = async ({ limit = 10, startDate = null, endDate = n
         product_id: row.product_id,
         sku: row.sku,
         name: row.name,
-        price: row.price,
-        totalQuantity: row.total_quantity,
-        totalRevenue: row.total_revenue,
-        timesSold: row.times_sold
+        price: Number(row.price ?? 0),
+        totalQuantity: Number(row.total_quantity ?? 0),
+        totalRevenue: Number(row.total_revenue ?? 0),
+        timesSold: Number(row.times_sold ?? 0)
     }));
 
     await cacheService.set(cacheKey, result, 600);
