@@ -7,24 +7,29 @@ class ReportRepository {
 
     async getProductSalesReport(period = 'day', startDate = null, endDate = null) {
         let dateFormat;
+        let dateExpr;
         let groupByClause;
 
         switch (period) {
             case 'week':
                 dateFormat = 'YYYY-IW';
+                dateExpr = `DATE_TRUNC('week', o.created_time)::DATE`;
                 groupByClause = `TO_CHAR(o.created_time, 'YYYY-IW'), DATE_TRUNC('week', o.created_time)::DATE`;
                 break;
             case 'month':
                 dateFormat = 'YYYY-MM';
+                dateExpr = `DATE_TRUNC('month', o.created_time)::DATE`;
                 groupByClause = `TO_CHAR(o.created_time, 'YYYY-MM'), DATE_TRUNC('month', o.created_time)::DATE`;
                 break;
             case 'year':
                 dateFormat = 'YYYY';
+                dateExpr = `DATE_TRUNC('year', o.created_time)::DATE`;
                 groupByClause = `TO_CHAR(o.created_time, 'YYYY'), DATE_TRUNC('year', o.created_time)::DATE`;
                 break;
             case 'day':
             default:
                 dateFormat = 'YYYY-MM-DD';
+                dateExpr = `o.created_time::DATE`;
                 groupByClause = `TO_CHAR(o.created_time, 'YYYY-MM-DD'), o.created_time::DATE`;
                 break;
         }
@@ -45,7 +50,7 @@ class ReportRepository {
         const query = `
             SELECT 
                 TO_CHAR(o.created_time, '${dateFormat}') AS period,
-                o.created_time::DATE AS date,
+                ${dateExpr} AS date,
                 p.product_id,
                 p.sku,
                 p.name,
@@ -56,7 +61,7 @@ class ReportRepository {
             JOIN product p ON oi.product_id = p.product_id
             ${whereClause}
             GROUP BY ${groupByClause}, p.product_id, p.sku, p.name
-            ORDER BY o.created_time DESC, p.product_id
+            ORDER BY ${dateExpr} DESC, p.product_id
         `;
 
         const result = await this.db.query(query, params);
@@ -65,24 +70,29 @@ class ReportRepository {
 
     async getRevenueReport(period = 'day', startDate = null, endDate = null) {
         let dateFormat;
+        let dateExpr;
         let groupByClause;
 
         switch (period) {
             case 'week':
                 dateFormat = 'YYYY-IW';
+                dateExpr = `DATE_TRUNC('week', o.created_time)::DATE`;
                 groupByClause = `TO_CHAR(o.created_time, 'YYYY-IW'), DATE_TRUNC('week', o.created_time)::DATE`;
                 break;
             case 'month':
                 dateFormat = 'YYYY-MM';
+                dateExpr = `DATE_TRUNC('month', o.created_time)::DATE`;
                 groupByClause = `TO_CHAR(o.created_time, 'YYYY-MM'), DATE_TRUNC('month', o.created_time)::DATE`;
                 break;
             case 'year':
                 dateFormat = 'YYYY';
+                dateExpr = `DATE_TRUNC('year', o.created_time)::DATE`;
                 groupByClause = `TO_CHAR(o.created_time, 'YYYY'), DATE_TRUNC('year', o.created_time)::DATE`;
                 break;
             case 'day':
             default:
                 dateFormat = 'YYYY-MM-DD';
+                dateExpr = `o.created_time::DATE`;
                 groupByClause = `TO_CHAR(o.created_time, 'YYYY-MM-DD'), o.created_time::DATE`;
                 break;
         }
@@ -103,7 +113,7 @@ class ReportRepository {
         const query = `
             SELECT 
                 TO_CHAR(o.created_time, '${dateFormat}') AS period,
-                o.created_time::DATE AS date,
+                ${dateExpr} AS date,
                 COUNT(DISTINCT o.order_id) AS total_orders,
                 SUM(o.final_price) AS total_revenue,
                 SUM(oi.quantity) AS total_items_sold,
@@ -112,7 +122,7 @@ class ReportRepository {
             LEFT JOIN order_item oi ON o.order_id = oi.order_id
             ${whereClause}
             GROUP BY ${groupByClause}
-            ORDER BY o.created_time DESC
+            ORDER BY ${dateExpr} DESC
         `;
 
         const result = await this.db.query(query, params);
