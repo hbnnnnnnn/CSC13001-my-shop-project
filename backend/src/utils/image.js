@@ -98,7 +98,7 @@ const convertImageUrlToBase64 = async (imageUrl) => {
     maxRedirects: 0,
   });
 
-  const base64 = Buffer.from(response.data, "binary").toString("base64");
+  const base64 = Buffer.from(response.data).toString("base64");
 
   const contentType = response.headers["content-type"] || "image/jpeg";
 
