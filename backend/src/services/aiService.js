@@ -10,10 +10,10 @@ const parseJsonFromModelResponse = (text) => {
   try {
     return JSON.parse(jsonCandidate);
   } catch {
-    const start = cleaned.indexOf("{");
-    const end = cleaned.lastIndexOf("}");
+    const start = jsonCandidate.indexOf("{");
+    const end = jsonCandidate.lastIndexOf("}");
     if (start !== -1 && end !== -1 && end > start) {
-      return JSON.parse(cleaned.slice(start, end + 1));
+      return JSON.parse(jsonCandidate.slice(start, end + 1));
     }
     throw new Error("Model response is not valid JSON");
   }
