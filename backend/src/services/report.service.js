@@ -102,13 +102,13 @@ const getSalesOverview = async ({ startDate = null, endDate = null } = {}) => {
     const data = await reportRepository.getSalesOverview(startDate, endDate);
     
     const result = {
-        totalOrders: data.total_orders || 0,
-        totalRevenue: data.total_revenue || 0,
-        totalItemsSold: data.total_items_sold || 0,
-        uniqueCustomers: data.unique_customers || 0,
-        avgOrderValue: data.avg_order_value || 0,
-        maxOrderValue: data.max_order_value || 0,
-        minOrderValue: data.min_order_value || 0
+        totalOrders: Number(data.total_orders ?? 0),
+        totalRevenue: Number(data.total_revenue ?? 0),
+        totalItemsSold: Number(data.total_items_sold ?? 0),
+        uniqueCustomers: Number(data.unique_customers ?? 0),
+        avgOrderValue: Number(data.avg_order_value ?? 0),
+        maxOrderValue: Number(data.max_order_value ?? 0),
+        minOrderValue: Number(data.min_order_value ?? 0)
     };
 
     await cacheService.set(cacheKey, result, 600);
