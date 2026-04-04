@@ -101,7 +101,7 @@ const productSchema = `#graphql
   }
 
   extend type Mutation {
-    generateProductDetailsFromImage(image: String!): AIProductSuggestion!
+    generateProductDetailsFromImage(imageUrl: String!): AIProductSuggestion!
   }
 `;
 

@@ -41,8 +41,8 @@ const productResolver = {
     deleteProduct: async (_, { id }) => {
       return await deleteProduct(id);
     },
-    generateProductDetailsFromImage: async (_, { image }) => {
-      return await generateProductDetailsFromImage(image);
+    generateProductDetailsFromImage: async (_, { imageUrl }) => {
+      return await generateProductDetailsFromImage(imageUrl);
     },
   },
   Product: {

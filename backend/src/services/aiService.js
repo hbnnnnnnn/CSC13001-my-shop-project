@@ -1,10 +1,5 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash",
-});
+const { convertImageUrlToBase64 } = require("../utils/image");
 
 const parseJsonFromModelResponse = (text) => {
   const cleaned = text.trim();
@@ -24,27 +19,37 @@ const parseJsonFromModelResponse = (text) => {
   }
 };
 
-const generateProductDetailsFromImage = async (image) => {
+const generateProductDetailsFromImage = async (imageUrl) => {
   try {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error("Missing GEMINI_API_KEY environment variable");
+    }
+
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash",
+    });
+
+    const { base64, mimeType } = await convertImageUrlToBase64(imageUrl);
     const prompt = `
-You are an e-commerce assistant.
+  You are an e-commerce assistant.
 
-Given a product image, generate:
-1. Product name (short, clear)
-2. Product description (2-3 sentences)
+  Given a product image, generate:
+  1. Product name (short, clear)
+  2. Product description (2-3 sentences)
 
-Return JSON format:
-{
-  "name": "...",
-  "description": "..."
-}
-`;
+  Return JSON format:
+  {
+    "name": "...",
+    "description": "..."
+  }
+  `;
 
     const result = await model.generateContent([
       {
         inlineData: {
-          mimeType: "image/jpeg", 
-          data: image,
+          mimeType,
+          data: base64,
         },
       },
       prompt,
@@ -57,7 +62,9 @@ Return JSON format:
     return parsed;
   } catch (error) {
     console.error("AI error:", error);
-    throw new Error("Failed to generate product info from image");
+    throw new Error(
+      `Failed to generate product info from image: ${error.message}`
+    );
   }
 };
 
