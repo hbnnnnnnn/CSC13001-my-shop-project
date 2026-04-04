@@ -94,6 +94,15 @@ const productSchema = `#graphql
     updateProduct(id: ID!, input: UpdateProductInput!): Product!
     deleteProduct(id: ID!): Boolean!
   }
+  
+  type AIProductSuggestion {
+    name: String
+    description: String
+  }
+
+  extend type Mutation {
+    generateProductDetailsFromImage(imageUrl: String!): AIProductSuggestion!
+  }
 `;
 
 module.exports = productSchema;
