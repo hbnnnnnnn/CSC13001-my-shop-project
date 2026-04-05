@@ -21,7 +21,21 @@
             </ResourceDictionary>
           </utum:MaterialToolkitTheme.FontOverrideDictionary> -->
                 </utum:MaterialToolkitTheme>
+
+                <ResourceDictionary Source="Assets/Styles/CheckBox.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <Color x:Key="SystemAccentColor">#F3B55C</Color>
+                    <Color x:Key="SystemAccentColorLight1">#F3B55C</Color>
+                    <Color x:Key="SystemAccentColorLight2">#F3B55C</Color>
+                    <Color x:Key="SystemAccentColorLight3">#F3B55C</Color>
+                    <Color x:Key="SystemAccentColorDark1">#F3B55C</Color>
+                    <Color x:Key="SystemAccentColorDark2">#F3B55C</Color>
+                    <Color x:Key="SystemAccentColorDark3">#F3B55C</Color>
+                    <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="#F3B55C" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
 
             <!-- Add resources here -->
             <Color x:Key="AppBackgroundColor">#FAF7F2</Color>
@@ -33,8 +47,16 @@
             <Color x:Key="ShellNotificationDotColor">#FF6467</Color>
             <Color x:Key="SearchTextColor">#662C2118</Color>
 
+            <SolidColorBrush
+                x:Key="SystemControlHighlightAccentBrush"
+                Color="{StaticResource BrandColor}"
+            />
+            <SolidColorBrush
+                x:Key="SystemColorControlAccentBrush"
+                Color="{StaticResource BrandColor}"
+            />
             <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="Red" />
-    <SolidColorBrush x:Key="SystemColorControlAccentBrush" Color="Red" />
+            <SolidColorBrush x:Key="SystemColorControlAccentBrush" Color="Red" />
 
             <SolidColorBrush
                 x:Key="ShellBackgroundBrush"
@@ -74,6 +96,27 @@
             />
             <SolidColorBrush x:Key="ShellSearchBackgroundBrush" Color="#80F5EDE4" />
 
+            <!-- Order Status Badge Brushes -->
+            <!-- Processing: amber filled -->
+            <SolidColorBrush x:Key="StatusProcessingBgBrush" Color="#F3B55C" />
+            <SolidColorBrush x:Key="StatusProcessingFgBrush" Color="White" />
+            <SolidColorBrush x:Key="StatusProcessingBorderBrush" Color="#F3B55C" />
+            <!-- Shipped: neutral outline -->
+            <SolidColorBrush x:Key="StatusShippedBgBrush" Color="#FAF7F2" />
+            <SolidColorBrush x:Key="StatusShippedFgBrush" Color="#2C2118" />
+            <SolidColorBrush x:Key="StatusShippedBorderBrush" Color="#F5EDE4" />
+            <!-- Delivered: green -->
+            <SolidColorBrush x:Key="StatusDeliveredBgBrush" Color="#ECFDF5" />
+            <SolidColorBrush x:Key="StatusDeliveredFgBrush" Color="#009966" />
+            <SolidColorBrush x:Key="StatusDeliveredBorderBrush" Color="#D0FAE5" />
+            <!-- Pending: red-orange filled -->
+            <SolidColorBrush x:Key="StatusPendingBgBrush" Color="#E07A5F" />
+            <SolidColorBrush x:Key="StatusPendingFgBrush" Color="White" />
+            <SolidColorBrush x:Key="StatusPendingBorderBrush" Color="#E07A5F" />
+            <!-- Cancelled: grey -->
+            <SolidColorBrush x:Key="StatusCancelledBgBrush" Color="#F9FAFB" />
+            <SolidColorBrush x:Key="StatusCancelledFgBrush" Color="#99A1AF" />
+            <SolidColorBrush x:Key="StatusCancelledBorderBrush" Color="#F3F4F6" />
             <Style x:Key="ShellSearchTextBoxStyle" TargetType="TextBox">
                 <Setter Property="Background" Value="{StaticResource ShellSearchBackgroundBrush}" />
                 <Setter Property="BorderBrush" Value="Transparent" />
@@ -88,7 +131,10 @@
                     Property="PlaceholderForeground"
                     Value="{StaticResource ShellSearchTextBrush}"
                 />
-                <Setter Property="SelectionHighlightColor" Value="{StaticResource ShellAccentBrush}" />
+                <Setter
+                    Property="SelectionHighlightColor"
+                    Value="{StaticResource ShellAccentBrush}"
+                />
             </Style>
             <SolidColorBrush x:Key="ShellNavHoverBackgroundBrush" Color="#80F5EDE4" />
             <SolidColorBrush x:Key="ShellAvatarSoftBrush" Color="#F5EDE4" />
@@ -104,6 +150,87 @@
             >
                 <GradientStop Color="#F5EDE4" Offset="0" />
                 <GradientStop Color="#00F5EDE4" Offset="1" />
+            </LinearGradientBrush>
+
+            <Color x:Key="AuthPanelBackgroundColor">#FAF7F2</Color>
+            <Color x:Key="AuthInputBackgroundColor">#59F5EDE4</Color>
+            <Color x:Key="AuthInputBorderColor">#F5EDE4</Color>
+            <Color x:Key="AuthTextStrongColor">#2C2118</Color>
+            <Color x:Key="AuthTextMutedColor">#802C2118</Color>
+            <Color x:Key="AuthTextLabelColor">#8C2C2118</Color>
+            <Color x:Key="AuthTextInputColor">#000000</Color>
+            <Color x:Key="AuthTextPlaceholderColor">#612C2118</Color>
+            <Color x:Key="AuthTextOnHeroColor">#E6FFFFFF</Color>
+            <Color x:Key="AuthTextOnHeroMutedColor">#80FFFFFF</Color>
+            <Color x:Key="AuthNoteBackgroundColor">#14F3B55C</Color>
+            <Color x:Key="AuthNoteBorderColor">#33F3B55C</Color>
+            <Color x:Key="AuthPrimaryButtonBottomColor">#E8A84D</Color>
+
+            <SolidColorBrush
+                x:Key="AuthPanelBackgroundBrush"
+                Color="{StaticResource AuthPanelBackgroundColor}"
+            />
+            <SolidColorBrush
+                x:Key="AuthInputBackgroundBrush"
+                Color="{StaticResource AuthInputBackgroundColor}"
+            />
+            <SolidColorBrush
+                x:Key="AuthInputBorderBrush"
+                Color="{StaticResource AuthInputBorderColor}"
+            />
+            <SolidColorBrush
+                x:Key="AuthTextStrongBrush"
+                Color="{StaticResource AuthTextStrongColor}"
+            />
+            <SolidColorBrush
+                x:Key="AuthTextMutedBrush"
+                Color="{StaticResource AuthTextMutedColor}"
+            />
+            <SolidColorBrush
+                x:Key="AuthTextLabelBrush"
+                Color="{StaticResource AuthTextLabelColor}"
+            />
+            <SolidColorBrush
+                x:Key="AuthTextInputBrush"
+                Color="{StaticResource AuthTextInputColor}"
+            />
+            <SolidColorBrush
+                x:Key="AuthTextPlaceholderBrush"
+                Color="{StaticResource AuthTextPlaceholderColor}"
+            />
+            <SolidColorBrush
+                x:Key="AuthTextOnHeroBrush"
+                Color="{StaticResource AuthTextOnHeroColor}"
+            />
+            <SolidColorBrush
+                x:Key="AuthTextOnHeroMutedBrush"
+                Color="{StaticResource AuthTextOnHeroMutedColor}"
+            />
+            <SolidColorBrush
+                x:Key="AuthNoteBackgroundBrush"
+                Color="{StaticResource AuthNoteBackgroundColor}"
+            />
+            <SolidColorBrush
+                x:Key="AuthNoteBorderBrush"
+                Color="{StaticResource AuthNoteBorderColor}"
+            />
+
+            <LinearGradientBrush x:Key="AuthPrimaryButtonBrush" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="{StaticResource BrandColor}" Offset="0" />
+                <GradientStop Color="{StaticResource AuthPrimaryButtonBottomColor}" Offset="1" />
+            </LinearGradientBrush>
+            <LinearGradientBrush x:Key="AuthHeroOverlayBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#852C2118" Offset="0" />
+                <GradientStop Color="#472C2118" Offset="0.5" />
+                <GradientStop Color="#2EF3B55C" Offset="1" />
+            </LinearGradientBrush>
+            <LinearGradientBrush
+                x:Key="AuthSettingsButtonBackgroundBrush"
+                StartPoint="0,0"
+                EndPoint="0,1"
+            >
+                <GradientStop Color="#1FF3B55C" Offset="0" />
+                <GradientStop Color="#14F3B55C" Offset="1" />
             </LinearGradientBrush>
         </ResourceDictionary>
     </Application.Resources>

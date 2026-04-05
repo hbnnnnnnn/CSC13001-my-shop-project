@@ -22,7 +22,11 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="Root" Background="Transparent" Padding="{TemplateBinding Padding}">
+                        <Border
+                            x:Name="Root"
+                            Background="Transparent"
+                            Padding="{TemplateBinding Padding}"
+                        >
                             <VisualStateManager.VisualStateGroups>
                                 <VisualStateGroup x:Name="CommonStates">
                                     <VisualState x:Name="Normal">
@@ -30,7 +34,8 @@
                                             <DoubleAnimation
                                                 Storyboard.TargetName="UnderlineBar"
                                                 Storyboard.TargetProperty="Opacity"
-                                                To="0" Duration="0:0:0.12"
+                                                To="0"
+                                                Duration="0:0:0.12"
                                             />
                                         </Storyboard>
                                     </VisualState>
@@ -39,7 +44,8 @@
                                             <DoubleAnimation
                                                 Storyboard.TargetName="UnderlineBar"
                                                 Storyboard.TargetProperty="Opacity"
-                                                To="1" Duration="0:0:0.12"
+                                                To="1"
+                                                Duration="0:0:0.12"
                                             />
                                         </Storyboard>
                                     </VisualState>
@@ -48,7 +54,8 @@
                                             <DoubleAnimation
                                                 Storyboard.TargetName="UnderlineBar"
                                                 Storyboard.TargetProperty="Opacity"
-                                                To="1" Duration="0:0:0"
+                                                To="1"
+                                                Duration="0:0:0"
                                             />
                                         </Storyboard>
                                     </VisualState>
@@ -116,7 +123,8 @@
                                             <DoubleAnimation
                                                 Storyboard.TargetName="Root"
                                                 Storyboard.TargetProperty="Opacity"
-                                                To="1" Duration="0:0:0.12"
+                                                To="1"
+                                                Duration="0:0:0.12"
                                             />
                                         </Storyboard>
                                     </VisualState>
@@ -125,7 +133,8 @@
                                             <DoubleAnimation
                                                 Storyboard.TargetName="Root"
                                                 Storyboard.TargetProperty="Opacity"
-                                                To="0.65" Duration="0:0:0.12"
+                                                To="0.65"
+                                                Duration="0:0:0.12"
                                             />
                                         </Storyboard>
                                     </VisualState>
@@ -134,7 +143,8 @@
                                             <DoubleAnimation
                                                 Storyboard.TargetName="Root"
                                                 Storyboard.TargetProperty="Opacity"
-                                                To="0.45" Duration="0:0:0"
+                                                To="0.45"
+                                                Duration="0:0:0"
                                             />
                                         </Storyboard>
                                     </VisualState>
@@ -143,7 +153,8 @@
                                             <DoubleAnimation
                                                 Storyboard.TargetName="Root"
                                                 Storyboard.TargetProperty="Opacity"
-                                                To="0.38" Duration="0:0:0"
+                                                To="0.38"
+                                                Duration="0:0:0"
                                             />
                                         </Storyboard>
                                     </VisualState>
@@ -162,7 +173,6 @@
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Padding="32" Spacing="0">
-
             <!-- ═══════════════════════════════════════════════════════ -->
             <!--  PAGE HEADER                                           -->
             <!-- ═══════════════════════════════════════════════════════ -->
@@ -195,7 +205,14 @@
                 <utu:ShadowContainer Grid.Column="0">
                     <utu:ShadowContainer.Shadows>
                         <utu:ShadowCollection>
-                            <utu:Shadow OffsetX="0" OffsetY="4" BlurRadius="14" Spread="0" Color="#000000" Opacity="0.07" />
+                            <utu:Shadow
+                                OffsetX="0"
+                                OffsetY="4"
+                                BlurRadius="14"
+                                Spread="0"
+                                Color="#000000"
+                                Opacity="0.07"
+                            />
                         </utu:ShadowCollection>
                     </utu:ShadowContainer.Shadows>
                     <Border
@@ -217,7 +234,11 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel VerticalAlignment="Center" Spacing="4">
-                                <TextBlock Text="Total Products" FontSize="13" Foreground="#FF9CA3AF" />
+                                <TextBlock
+                                    Text="Total Products"
+                                    FontSize="13"
+                                    Foreground="#FF9CA3AF"
+                                />
                                 <TextBlock
                                     Text="{Binding TotalProducts}"
                                     FontSize="28"
@@ -228,7 +249,8 @@
                             <!-- Package / box icon -->
                             <Border
                                 Grid.Column="1"
-                                Width="52" Height="52"
+                                Width="52"
+                                Height="52"
                                 CornerRadius="10"
                                 Background="#FFF5EDE4"
                                 VerticalAlignment="Center"
@@ -270,7 +292,14 @@
                 <utu:ShadowContainer Grid.Column="1">
                     <utu:ShadowContainer.Shadows>
                         <utu:ShadowCollection>
-                            <utu:Shadow OffsetX="0" OffsetY="4" BlurRadius="14" Spread="0" Color="#000000" Opacity="0.07" />
+                            <utu:Shadow
+                                OffsetX="0"
+                                OffsetY="4"
+                                BlurRadius="14"
+                                Spread="0"
+                                Color="#000000"
+                                Opacity="0.07"
+                            />
                         </utu:ShadowCollection>
                     </utu:ShadowContainer.Shadows>
                     <Border
@@ -292,7 +321,11 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel VerticalAlignment="Center" Spacing="4">
-                                <TextBlock Text="Total Orders" FontSize="13" Foreground="#FF9CA3AF" />
+                                <TextBlock
+                                    Text="Total Orders"
+                                    FontSize="13"
+                                    Foreground="#FF9CA3AF"
+                                />
                                 <TextBlock
                                     Text="{Binding TotalOrders}"
                                     FontSize="28"
@@ -303,7 +336,8 @@
                             <!-- Shopping cart icon (orange tint, same as Products) -->
                             <Border
                                 Grid.Column="1"
-                                Width="52" Height="52"
+                                Width="52"
+                                Height="52"
                                 CornerRadius="10"
                                 Background="#FFF5EDE4"
                                 VerticalAlignment="Center"
@@ -341,7 +375,14 @@
                 <utu:ShadowContainer Grid.Column="2">
                     <utu:ShadowContainer.Shadows>
                         <utu:ShadowCollection>
-                            <utu:Shadow OffsetX="0" OffsetY="4" BlurRadius="14" Spread="0" Color="#000000" Opacity="0.07" />
+                            <utu:Shadow
+                                OffsetX="0"
+                                OffsetY="4"
+                                BlurRadius="14"
+                                Spread="0"
+                                Color="#000000"
+                                Opacity="0.07"
+                            />
                         </utu:ShadowCollection>
                     </utu:ShadowContainer.Shadows>
                     <Border
@@ -363,7 +404,11 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel VerticalAlignment="Center" Spacing="4">
-                                <TextBlock Text="Total Revenue" FontSize="13" Foreground="#FF9CA3AF" />
+                                <TextBlock
+                                    Text="Total Revenue"
+                                    FontSize="13"
+                                    Foreground="#FF9CA3AF"
+                                />
                                 <TextBlock
                                     Text="{Binding TotalRevenue}"
                                     FontSize="28"
@@ -374,7 +419,8 @@
                             <!-- Revenue / dollar icon (orange tint, same as Products) -->
                             <Border
                                 Grid.Column="1"
-                                Width="52" Height="52"
+                                Width="52"
+                                Height="52"
                                 CornerRadius="10"
                                 Background="#FFF5EDE4"
                                 VerticalAlignment="Center"
@@ -416,7 +462,6 @@
 
                 <!-- LEFT PANEL -->
                 <StackPanel Grid.Column="0" Spacing="16">
-
                     <!-- Daily Sales Chart Card -->
                     <Border
                         Background="#FFFFFFFF"
@@ -452,7 +497,12 @@
                                     Padding="10,4"
                                     VerticalAlignment="Center"
                                 >
-                                    <TextBlock Text="Daily" FontSize="12" FontWeight="SemiBold" Foreground="White" />
+                                    <TextBlock
+                                        Text="Daily"
+                                        FontSize="12"
+                                        FontWeight="SemiBold"
+                                        Foreground="White"
+                                    />
                                 </Border>
                             </Grid>
 
@@ -471,24 +521,90 @@
                             >
                                 <Canvas
                                     x:Name="ChartCanvas"
-                                    Width="880" Height="270"
+                                    Width="880"
+                                    Height="270"
                                     Background="Transparent"
                                     PointerMoved="Chart_PointerMoved"
                                     PointerExited="Chart_PointerExited"
                                 >
                                     <!-- Horizontal grid lines -->
-                                    <Line X1="52" Y1="12"  X2="876" Y2="12"  Stroke="#10000000" StrokeThickness="1" />
-                                    <Line X1="52" Y1="64"  X2="876" Y2="64"  Stroke="#10000000" StrokeThickness="1" />
-                                    <Line X1="52" Y1="116" X2="876" Y2="116" Stroke="#10000000" StrokeThickness="1" />
-                                    <Line X1="52" Y1="168" X2="876" Y2="168" Stroke="#10000000" StrokeThickness="1" />
-                                    <Line X1="52" Y1="220" X2="876" Y2="220" Stroke="#22000000" StrokeThickness="1" />
+                                    <Line
+                                        X1="52"
+                                        Y1="12"
+                                        X2="876"
+                                        Y2="12"
+                                        Stroke="#10000000"
+                                        StrokeThickness="1"
+                                    />
+                                    <Line
+                                        X1="52"
+                                        Y1="64"
+                                        X2="876"
+                                        Y2="64"
+                                        Stroke="#10000000"
+                                        StrokeThickness="1"
+                                    />
+                                    <Line
+                                        X1="52"
+                                        Y1="116"
+                                        X2="876"
+                                        Y2="116"
+                                        Stroke="#10000000"
+                                        StrokeThickness="1"
+                                    />
+                                    <Line
+                                        X1="52"
+                                        Y1="168"
+                                        X2="876"
+                                        Y2="168"
+                                        Stroke="#10000000"
+                                        StrokeThickness="1"
+                                    />
+                                    <Line
+                                        X1="52"
+                                        Y1="220"
+                                        X2="876"
+                                        Y2="220"
+                                        Stroke="#22000000"
+                                        StrokeThickness="1"
+                                    />
 
                                     <!-- Y-axis labels -->
-                                    <TextBlock Canvas.Left="4" Canvas.Top="4"   Text="$8k" FontSize="11" Foreground="#FF9CA3AF" />
-                                    <TextBlock Canvas.Left="4" Canvas.Top="56"  Text="$6k" FontSize="11" Foreground="#FF9CA3AF" />
-                                    <TextBlock Canvas.Left="4" Canvas.Top="108" Text="$4k" FontSize="11" Foreground="#FF9CA3AF" />
-                                    <TextBlock Canvas.Left="4" Canvas.Top="160" Text="$2k" FontSize="11" Foreground="#FF9CA3AF" />
-                                    <TextBlock Canvas.Left="4" Canvas.Top="212" Text="$0"  FontSize="11" Foreground="#FF9CA3AF" />
+                                    <TextBlock
+                                        Canvas.Left="4"
+                                        Canvas.Top="4"
+                                        Text="$8k"
+                                        FontSize="11"
+                                        Foreground="#FF9CA3AF"
+                                    />
+                                    <TextBlock
+                                        Canvas.Left="4"
+                                        Canvas.Top="56"
+                                        Text="$6k"
+                                        FontSize="11"
+                                        Foreground="#FF9CA3AF"
+                                    />
+                                    <TextBlock
+                                        Canvas.Left="4"
+                                        Canvas.Top="108"
+                                        Text="$4k"
+                                        FontSize="11"
+                                        Foreground="#FF9CA3AF"
+                                    />
+                                    <TextBlock
+                                        Canvas.Left="4"
+                                        Canvas.Top="160"
+                                        Text="$2k"
+                                        FontSize="11"
+                                        Foreground="#FF9CA3AF"
+                                    />
+                                    <TextBlock
+                                        Canvas.Left="4"
+                                        Canvas.Top="212"
+                                        Text="$0"
+                                        FontSize="11"
+                                        Foreground="#FF9CA3AF"
+                                    />
 
                                     <!-- Area fill (closes at baseline y=220) -->
                                     <Polygon
@@ -507,21 +623,26 @@
                                     <!-- ── Interactive hover elements (controlled from code-behind) ── -->
                                     <Ellipse
                                         x:Name="ChartHoverDotOuter"
-                                        Canvas.Left="0" Canvas.Top="0"
-                                        Width="14" Height="14"
+                                        Canvas.Left="0"
+                                        Canvas.Top="0"
+                                        Width="14"
+                                        Height="14"
                                         Fill="White"
                                         Visibility="Collapsed"
                                     />
                                     <Ellipse
                                         x:Name="ChartHoverDotInner"
-                                        Canvas.Left="0" Canvas.Top="0"
-                                        Width="8" Height="8"
+                                        Canvas.Left="0"
+                                        Canvas.Top="0"
+                                        Width="8"
+                                        Height="8"
                                         Fill="{StaticResource ShellAccentBrush}"
                                         Visibility="Collapsed"
                                     />
                                     <Border
                                         x:Name="ChartTooltip"
-                                        Canvas.Left="0" Canvas.Top="0"
+                                        Canvas.Left="0"
+                                        Canvas.Top="0"
                                         Background="#E21F2937"
                                         CornerRadius="5"
                                         Padding="8,5"
@@ -537,14 +658,62 @@
                                     </Border>
 
                                     <!-- X-axis labels (every 4 days) -->
-                                    <TextBlock Canvas.Left="38"  Canvas.Top="228" Text="Mar 1"  FontSize="11" Foreground="#FF9CA3AF" />
-                                    <TextBlock Canvas.Left="148" Canvas.Top="228" Text="Mar 5"  FontSize="11" Foreground="#FF9CA3AF" />
-                                    <TextBlock Canvas.Left="258" Canvas.Top="228" Text="Mar 9"  FontSize="11" Foreground="#FF9CA3AF" />
-                                    <TextBlock Canvas.Left="365" Canvas.Top="228" Text="Mar 13" FontSize="11" Foreground="#FF9CA3AF" />
-                                    <TextBlock Canvas.Left="475" Canvas.Top="228" Text="Mar 17" FontSize="11" Foreground="#FF9CA3AF" />
-                                    <TextBlock Canvas.Left="582" Canvas.Top="228" Text="Mar 21" FontSize="11" Foreground="#FF9CA3AF" />
-                                    <TextBlock Canvas.Left="692" Canvas.Top="228" Text="Mar 25" FontSize="11" Foreground="#FF9CA3AF" />
-                                    <TextBlock Canvas.Left="800" Canvas.Top="228" Text="Mar 29" FontSize="11" Foreground="#FF9CA3AF" />
+                                    <TextBlock
+                                        Canvas.Left="38"
+                                        Canvas.Top="228"
+                                        Text="Mar 1"
+                                        FontSize="11"
+                                        Foreground="#FF9CA3AF"
+                                    />
+                                    <TextBlock
+                                        Canvas.Left="148"
+                                        Canvas.Top="228"
+                                        Text="Mar 5"
+                                        FontSize="11"
+                                        Foreground="#FF9CA3AF"
+                                    />
+                                    <TextBlock
+                                        Canvas.Left="258"
+                                        Canvas.Top="228"
+                                        Text="Mar 9"
+                                        FontSize="11"
+                                        Foreground="#FF9CA3AF"
+                                    />
+                                    <TextBlock
+                                        Canvas.Left="365"
+                                        Canvas.Top="228"
+                                        Text="Mar 13"
+                                        FontSize="11"
+                                        Foreground="#FF9CA3AF"
+                                    />
+                                    <TextBlock
+                                        Canvas.Left="475"
+                                        Canvas.Top="228"
+                                        Text="Mar 17"
+                                        FontSize="11"
+                                        Foreground="#FF9CA3AF"
+                                    />
+                                    <TextBlock
+                                        Canvas.Left="582"
+                                        Canvas.Top="228"
+                                        Text="Mar 21"
+                                        FontSize="11"
+                                        Foreground="#FF9CA3AF"
+                                    />
+                                    <TextBlock
+                                        Canvas.Left="692"
+                                        Canvas.Top="228"
+                                        Text="Mar 25"
+                                        FontSize="11"
+                                        Foreground="#FF9CA3AF"
+                                    />
+                                    <TextBlock
+                                        Canvas.Left="800"
+                                        Canvas.Top="228"
+                                        Text="Mar 29"
+                                        FontSize="11"
+                                        Foreground="#FF9CA3AF"
+                                    />
                                 </Canvas>
                             </Viewbox>
                         </StackPanel>
@@ -588,13 +757,41 @@
                                     <ColumnDefinition Width="1.5*" />
                                     <ColumnDefinition Width="1.3*" />
                                 </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="ORDER ID" FontSize="11" FontWeight="SemiBold" Foreground="#FF9CA3AF" />
-                                <TextBlock Grid.Column="1" Text="CUSTOMER" FontSize="11" FontWeight="SemiBold" Foreground="#FF9CA3AF" />
-                                <TextBlock Grid.Column="2" Text="STATUS"   FontSize="11" FontWeight="SemiBold" Foreground="#FF9CA3AF" />
-                                <TextBlock Grid.Column="3" Text="TOTAL"    FontSize="11" FontWeight="SemiBold" Foreground="#FF9CA3AF" />
+                                <TextBlock
+                                    Grid.Column="0"
+                                    Text="ORDER ID"
+                                    FontSize="11"
+                                    FontWeight="SemiBold"
+                                    Foreground="#FF9CA3AF"
+                                />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Text="CUSTOMER"
+                                    FontSize="11"
+                                    FontWeight="SemiBold"
+                                    Foreground="#FF9CA3AF"
+                                />
+                                <TextBlock
+                                    Grid.Column="2"
+                                    Text="STATUS"
+                                    FontSize="11"
+                                    FontWeight="SemiBold"
+                                    Foreground="#FF9CA3AF"
+                                />
+                                <TextBlock
+                                    Grid.Column="3"
+                                    Text="TOTAL"
+                                    FontSize="11"
+                                    FontWeight="SemiBold"
+                                    Foreground="#FF9CA3AF"
+                                />
                             </Grid>
 
-                            <Border Height="1" Background="{StaticResource ShellBorderBrush}" Margin="0,0,0,4" />
+                            <Border
+                                Height="1"
+                                Background="{StaticResource ShellBorderBrush}"
+                                Margin="0,0,0,4"
+                            />
 
                             <!-- Order rows -->
                             <ItemsControl ItemsSource="{Binding RecentOrders}">
@@ -676,7 +873,11 @@
                         <StackPanel>
                             <!-- Section header with alert badge -->
                             <Grid Margin="0,0,0,16">
-                                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                <StackPanel
+                                    Orientation="Horizontal"
+                                    Spacing="10"
+                                    VerticalAlignment="Center"
+                                >
                                     <TextBlock
                                         Text="Low Stock Alert"
                                         FontSize="17"
@@ -725,7 +926,8 @@
                                                 <!-- Thumbnail: placeholder + real image overlay -->
                                                 <Grid
                                                     Grid.Column="0"
-                                                    Width="44" Height="44"
+                                                    Width="44"
+                                                    Height="44"
                                                     Margin="0,0,14,0"
                                                 >
                                                     <Border
@@ -741,7 +943,11 @@
                                                 </Grid>
 
                                                 <!-- Product info + stock badge -->
-                                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                                                <StackPanel
+                                                    Grid.Column="1"
+                                                    VerticalAlignment="Center"
+                                                    Spacing="4"
+                                                >
                                                     <TextBlock
                                                         Text="{Binding Name}"
                                                         FontSize="13"
@@ -773,8 +979,15 @@
                                                     VerticalAlignment="Center"
                                                     BorderBrush="#80F3B55C"
                                                 >
-                                                    <StackPanel Orientation="Horizontal" Spacing="5">
-                                                        <Canvas Width="13" Height="13" VerticalAlignment="Center">
+                                                    <StackPanel
+                                                        Orientation="Horizontal"
+                                                        Spacing="5"
+                                                    >
+                                                        <Canvas
+                                                            Width="13"
+                                                            Height="13"
+                                                            VerticalAlignment="Center"
+                                                        >
                                                             <Path
                                                                 Data="M11.5 7.5C11.5 9.71 9.71 11.5 7.5 11.5C5.29 11.5 3.5 9.71 3.5 7.5C3.5 5.29 5.29 3.5 7.5 3.5C8.73 3.5 9.83 4.07 10.56 4.96"
                                                                 Stroke="{StaticResource ShellAccentBrush}"
@@ -808,7 +1021,6 @@
                         </StackPanel>
                     </Border>
                     <!-- end Low Stock Alert -->
-
                 </StackPanel>
                 <!-- end LEFT PANEL -->
 
@@ -863,7 +1075,8 @@
                                             <!-- Thumbnail: placeholder + real image overlay -->
                                             <Grid
                                                 Grid.Column="0"
-                                                Width="42" Height="42"
+                                                Width="42"
+                                                Height="42"
                                                 Margin="0,0,10,0"
                                             >
                                                 <Border
@@ -878,7 +1091,11 @@
                                                 </Border>
                                             </Grid>
                                             <!-- Name + sold count -->
-                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                            <StackPanel
+                                                Grid.Column="1"
+                                                VerticalAlignment="Center"
+                                                Spacing="2"
+                                            >
                                                 <TextBlock
                                                     Text="{Binding Name}"
                                                     FontSize="13"
@@ -909,7 +1126,6 @@
                     </StackPanel>
                 </Border>
                 <!-- end RIGHT PANEL -->
-
             </Grid>
             <!-- end MAIN CONTENT GRID -->
 
@@ -930,12 +1146,21 @@
                         VerticalAlignment="Center"
                     />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="20">
-                        <TextBlock Text="Support" FontSize="13" Foreground="#FF9CA3AF" VerticalAlignment="Center" />
-                        <TextBlock Text="Privacy"  FontSize="13" Foreground="#FF9CA3AF" VerticalAlignment="Center" />
+                        <TextBlock
+                            Text="Support"
+                            FontSize="13"
+                            Foreground="#FF9CA3AF"
+                            VerticalAlignment="Center"
+                        />
+                        <TextBlock
+                            Text="Privacy"
+                            FontSize="13"
+                            Foreground="#FF9CA3AF"
+                            VerticalAlignment="Center"
+                        />
                     </StackPanel>
                 </Grid>
             </Border>
-
         </StackPanel>
     </ScrollViewer>
 </Page>

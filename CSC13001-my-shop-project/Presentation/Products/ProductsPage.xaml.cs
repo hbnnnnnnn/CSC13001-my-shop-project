@@ -1,4 +1,6 @@
+using CommunityToolkit.Mvvm.Messaging;
 using CSC13001_my_shop_project.Models;
+using CSC13001_my_shop_project.Presentation.Dashboard;
 using CSC13001_my_shop_project.Services;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
@@ -20,12 +22,13 @@ public sealed partial class ProductsPage : Page
     private NavigationStateStore? _stateStore;
     private double _pendingScrollOffset = -1;
 
-    public static readonly DependencyProperty ProductGridTileWidthProperty = DependencyProperty.Register(
-        nameof(ProductGridTileWidth),
-        typeof(double),
-        typeof(ProductsPage),
-        new PropertyMetadata(232.0)
-    );
+    public static readonly DependencyProperty ProductGridTileWidthProperty =
+        DependencyProperty.Register(
+            nameof(ProductGridTileWidth),
+            typeof(double),
+            typeof(ProductsPage),
+            new PropertyMetadata(232.0)
+        );
 
     public double ProductGridTileWidth
     {
@@ -43,6 +46,7 @@ public sealed partial class ProductsPage : Page
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        WeakReferenceMessenger.Default.Send(new ChromeVisibilityMessage(true));
         UpdateProductGridTileWidth(ProductsGridView.ActualWidth);
         ApplyPendingScrollOffset();
         if (VM is not null)
@@ -94,7 +98,12 @@ public sealed partial class ProductsPage : Page
 
         // Best-effort: scroll as far as possible
         if (ProductsScrollViewer.ScrollableHeight > 0)
-            ProductsScrollViewer.ChangeView(null, Math.Min(offset, ProductsScrollViewer.ScrollableHeight), null, disableAnimation: true);
+            ProductsScrollViewer.ChangeView(
+                null,
+                Math.Min(offset, ProductsScrollViewer.ScrollableHeight),
+                null,
+                disableAnimation: true
+            );
     }
 
     private ProductsViewModel? VM => DataContext as ProductsViewModel;
@@ -103,7 +112,10 @@ public sealed partial class ProductsPage : Page
     {
         get
         {
-            _stateStore ??= (App.AppHost?.Services.GetService(typeof(NavigationStateStore)) as NavigationStateStore)!;
+            _stateStore ??= (
+                App.AppHost?.Services.GetService(typeof(NavigationStateStore))
+                as NavigationStateStore
+            )!;
             return _stateStore;
         }
     }
@@ -113,16 +125,19 @@ public sealed partial class ProductsPage : Page
         if (VM is null)
             return;
 
-        StateStore.Save(StateKey, new ProductListNavigationState
-        {
-            ScrollOffsetY = ProductsScrollViewer.VerticalOffset,
-            SearchQuery = VM.SearchQuery,
-            SelectedCategory = VM.SelectedCategory,
-            SelectedStatusFilter = VM.SelectedStatusFilter,
-            SelectedSort = VM.SelectedSort,
-            CurrentPage = VM.CurrentPage,
-            IsGridView = VM.IsGridView,
-        });
+        StateStore.Save(
+            StateKey,
+            new ProductListNavigationState
+            {
+                ScrollOffsetY = ProductsScrollViewer.VerticalOffset,
+                SearchQuery = VM.SearchQuery,
+                SelectedCategory = VM.SelectedCategory,
+                SelectedStatusFilter = VM.SelectedStatusFilter,
+                SelectedSort = VM.SelectedSort,
+                CurrentPage = VM.CurrentPage,
+                IsGridView = VM.IsGridView,
+            }
+        );
     }
 
     private void RestoreState(ProductsViewModel vm)
@@ -225,7 +240,8 @@ public sealed partial class ProductsPage : Page
     }
 
     private void SearchBox_GotFocus(object sender, RoutedEventArgs e) =>
-        ToolbarSearchFocusRing.BorderBrush = Application.Current.Resources["ShellAccentBrush"] as Brush;
+        ToolbarSearchFocusRing.BorderBrush =
+            Application.Current.Resources["ShellAccentBrush"] as Brush;
 
     private void SearchBox_LostFocus(object sender, RoutedEventArgs e) =>
         ToolbarSearchFocusRing.BorderBrush = new SolidColorBrush(Microsoft.UI.Colors.Transparent);

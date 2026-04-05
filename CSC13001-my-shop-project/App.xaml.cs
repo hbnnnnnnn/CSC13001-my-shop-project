@@ -1,7 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
+using CommunityToolkit.Mvvm.Messaging;
 using CSC13001_my_shop_project.Models;
 using CSC13001_my_shop_project.Presentation.Dashboard;
+using CSC13001_my_shop_project.Presentation.OrderList;
+using CSC13001_my_shop_project.Presentation.Login;
 using CSC13001_my_shop_project.Presentation.Products;
+using CSC13001_my_shop_project.Presentation.ServerConfiguration;
 using CSC13001_my_shop_project.Services;
 using Microsoft.Extensions.Options;
 using Uno.Extensions.Navigation;
@@ -13,6 +17,7 @@ public partial class App : Application
 {
     /// <summary>Host after launch; used by shell view model to resolve <c>INavigator</c>.</summary>
     internal static IHost? AppHost { get; private set; }
+
     /// <summary>
     /// Initializes the singleton application object. This is the first line of authored code
     /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -87,9 +92,10 @@ public partial class App : Application
 #endif
                         }
                     )
-                    .ConfigureServices((context, services) =>
-                    {
-                        services.AddSingleton<NavigationStateStore>();
+                    .ConfigureServices(
+                        (context, services) =>
+                        {
+                            services.AddSingleton<NavigationStateStore>();
                         services.AddSingleton<ITokenService, TokenService>();
                         services.AddHttpClient<GraphQlClient>((sp, http) =>
                         {
@@ -106,8 +112,10 @@ public partial class App : Application
                             http.BaseAddress = new Uri($"{u.Scheme}://{u.Authority}/");
                         });
                         services.AddTransient<ProductsViewModel>();
-                        services.AddTransient<ProductDetailViewModel>();
-                    })
+                            services.AddTransient<ProductDetailViewModel>();
+                            services.AddSingleton<AppStateService>();
+                        }
+                    )
                     .UseNavigation(RegisterRoutes)
             );
         MainWindow = builder.Window;
@@ -119,24 +127,42 @@ public partial class App : Application
 
         Host = await builder.NavigateAsync<Shell>();
         AppHost = Host;
+
+        NavigateOnStartup();
     }
 
     private static void RegisterRoutes(IViewRegistry views, IRouteRegistry routes)
     {
+        var shellMap = new ViewMap();
+
         views.Register(
             new ViewMap(ViewModel: typeof(ShellViewModel)),
+            shellMap,
             new ViewMap<DashboardPage, DashboardViewModel>(),
+            new ViewMap<OrderListPage, OrderListViewModel>(),
             new ViewMap<ProductsPage, ProductsViewModel>(),
-            new DataViewMap<ProductDetailPage, ProductDetailViewModel, ProductDetailArgs>()
+            new DataViewMap<ProductDetailPage, ProductDetailViewModel, ProductDetailArgs>(),
+            new ViewMap<LoginPage, LoginViewModel>(),
+            new ViewMap<ServerConfigurationPage, ServerConfigurationViewModel>()
         );
 
         routes.Register(
             new RouteMap(
                 "",
-                View: views.FindByViewModel<ShellViewModel>(),
+                View: shellMap,
                 Nested:
                 [
-                    new RouteMap("Dashboard", View: views.FindByViewModel<DashboardViewModel>(), IsDefault: true),
+                    new RouteMap(
+                        "Login",
+                        View: views.FindByViewModel<LoginViewModel>(),
+                        IsDefault: true
+                    ),
+                    new RouteMap("Dashboard", View: views.FindByViewModel<DashboardViewModel>()),
+                    new RouteMap("Orders", View: views.FindByViewModel<OrderListViewModel>()),
+                    new RouteMap(
+                        "ServerConfiguration",
+                        View: views.FindByViewModel<ServerConfigurationViewModel>()
+                    ),
                     new RouteMap(
                         "Products",
                         View: views.FindByViewModel<ProductsViewModel>(),
@@ -151,5 +177,23 @@ public partial class App : Application
                 ]
             )
         );
+    }
+
+    private async void NavigateOnStartup()
+    {
+        var appStateService = Host?.Services.GetRequiredService<AppStateService>();
+
+        var lastPage = appStateService?.LastPage;
+
+        if (lastPage != null)
+        {
+            WeakReferenceMessenger.Default.Send(new NavigateToPageMessage(lastPage));
+            await Task.CompletedTask;
+        }
+        else
+        {
+            WeakReferenceMessenger.Default.Send(new NavigateToPageMessage("Login"));
+            await Task.CompletedTask;
+        }
     }
 }

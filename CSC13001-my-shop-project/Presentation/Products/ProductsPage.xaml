@@ -74,12 +74,18 @@
                                     <VisualState x:Name="Normal" />
                                     <VisualState x:Name="PointerOver">
                                         <VisualState.Setters>
-                                            <Setter Target="RootBorder.Background" Value="#B0F0E4D8" />
+                                            <Setter
+                                                Target="RootBorder.Background"
+                                                Value="#B0F0E4D8"
+                                            />
                                         </VisualState.Setters>
                                     </VisualState>
                                     <VisualState x:Name="Pressed">
                                         <VisualState.Setters>
-                                            <Setter Target="RootBorder.Background" Value="#C0EDE0D4" />
+                                            <Setter
+                                                Target="RootBorder.Background"
+                                                Value="#C0EDE0D4"
+                                            />
                                         </VisualState.Setters>
                                     </VisualState>
                                 </VisualStateGroup>
@@ -88,7 +94,8 @@
                                 Content="{TemplateBinding Content}"
                                 ContentTemplate="{TemplateBinding ContentTemplate}"
                                 HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            />
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -134,7 +141,11 @@
     </Page.Resources>
 
     <Grid>
-    <ScrollViewer x:Name="ProductsScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer
+        x:Name="ProductsScrollViewer"
+        VerticalScrollBarVisibility="Auto"
+        HorizontalScrollBarVisibility="Disabled"
+    >
         <StackPanel Padding="32,24,32,32" Spacing="0">
             <!-- Header -->
             <Grid Margin="0,0,0,20">
@@ -209,7 +220,11 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel VerticalAlignment="Center" Spacing="4">
-                                <TextBlock Text="Total Products" FontSize="13" Foreground="#FF9CA3AF" />
+                                <TextBlock
+                                    Text="Total Products"
+                                    FontSize="13"
+                                    Foreground="#FF9CA3AF"
+                                />
                                 <TextBlock
                                     Text="{Binding TotalProductsStat}"
                                     FontSize="26"
@@ -317,7 +332,11 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel VerticalAlignment="Center" Spacing="4">
-                                <TextBlock Text="Out of Stock" FontSize="13" Foreground="#FF9CA3AF" />
+                                <TextBlock
+                                    Text="Out of Stock"
+                                    FontSize="13"
+                                    Foreground="#FF9CA3AF"
+                                />
                                 <TextBlock
                                     Text="{Binding OutOfStockStat}"
                                     FontSize="26"
@@ -435,7 +454,10 @@
                             LostFocus="SearchBox_LostFocus"
                         >
                             <TextBox.Resources>
-                                <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#80F5EDE4" />
+                                <SolidColorBrush
+                                    x:Key="TextControlBackgroundFocused"
+                                    Color="#80F5EDE4"
+                                />
                                 <SolidColorBrush
                                     x:Key="TextControlBackgroundPointerOver"
                                     Color="#80F5EDE4"
@@ -444,17 +466,47 @@
                                     x:Key="TextControlSelectionHighlightColor"
                                     Color="#CC2C2118"
                                 />
-                                <SolidColorBrush x:Key="TextControlForegroundFocused" Color="#FF2C2118" />
+                                <SolidColorBrush
+                                    x:Key="TextControlForegroundFocused"
+                                    Color="#FF2C2118"
+                                />
                                 <SolidColorBrush x:Key="TextControlCaretBrush" Color="#FF2C2118" />
-                                <SolidColorBrush x:Key="TextControlButtonForeground" Color="Transparent" />
-                                <SolidColorBrush x:Key="TextControlButtonForegroundPointerOver" Color="Transparent" />
-                                <SolidColorBrush x:Key="TextControlButtonForegroundPressed" Color="Transparent" />
-                                <SolidColorBrush x:Key="TextControlButtonBackground" Color="Transparent" />
-                                <SolidColorBrush x:Key="TextControlButtonBackgroundPointerOver" Color="Transparent" />
-                                <SolidColorBrush x:Key="TextControlButtonBackgroundPressed" Color="Transparent" />
-                                <SolidColorBrush x:Key="TextControlButtonBorderBrush" Color="Transparent" />
-                                <SolidColorBrush x:Key="TextControlButtonBorderBrushPointerOver" Color="Transparent" />
-                                <SolidColorBrush x:Key="TextControlButtonBorderBrushPressed" Color="Transparent" />
+                                <SolidColorBrush
+                                    x:Key="TextControlButtonForeground"
+                                    Color="Transparent"
+                                />
+                                <SolidColorBrush
+                                    x:Key="TextControlButtonForegroundPointerOver"
+                                    Color="Transparent"
+                                />
+                                <SolidColorBrush
+                                    x:Key="TextControlButtonForegroundPressed"
+                                    Color="Transparent"
+                                />
+                                <SolidColorBrush
+                                    x:Key="TextControlButtonBackground"
+                                    Color="Transparent"
+                                />
+                                <SolidColorBrush
+                                    x:Key="TextControlButtonBackgroundPointerOver"
+                                    Color="Transparent"
+                                />
+                                <SolidColorBrush
+                                    x:Key="TextControlButtonBackgroundPressed"
+                                    Color="Transparent"
+                                />
+                                <SolidColorBrush
+                                    x:Key="TextControlButtonBorderBrush"
+                                    Color="Transparent"
+                                />
+                                <SolidColorBrush
+                                    x:Key="TextControlButtonBorderBrushPointerOver"
+                                    Color="Transparent"
+                                />
+                                <SolidColorBrush
+                                    x:Key="TextControlButtonBorderBrushPressed"
+                                    Color="Transparent"
+                                />
                             </TextBox.Resources>
                         </TextBox>
 
@@ -497,12 +549,30 @@
                         Style="{StaticResource FilterDropdownButtonStyle}"
                     >
                         <Button.Flyout>
-                            <MenuFlyout x:Name="CategoryMenuFlyout" Placement="BottomEdgeAlignedLeft" />
+                            <MenuFlyout
+                                x:Name="CategoryMenuFlyout"
+                                Placement="BottomEdgeAlignedLeft"
+                            />
                         </Button.Flyout>
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="&#xE71C;" FontSize="13" Foreground="#992C2118" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding SelectedCategory}" FontSize="14" Foreground="#FF2C2118" VerticalAlignment="Center" />
-                            <FontIcon Glyph="&#xE70D;" FontSize="10" Foreground="#992C2118" VerticalAlignment="Center" />
+                            <FontIcon
+                                Glyph="&#xE71C;"
+                                FontSize="13"
+                                Foreground="#992C2118"
+                                VerticalAlignment="Center"
+                            />
+                            <TextBlock
+                                Text="{Binding SelectedCategory}"
+                                FontSize="14"
+                                Foreground="#FF2C2118"
+                                VerticalAlignment="Center"
+                            />
+                            <FontIcon
+                                Glyph="&#xE70D;"
+                                FontSize="10"
+                                Foreground="#992C2118"
+                                VerticalAlignment="Center"
+                            />
                         </StackPanel>
                     </Button>
 
@@ -514,11 +584,24 @@
                         Style="{StaticResource FilterDropdownButtonStyle}"
                     >
                         <Button.Flyout>
-                            <MenuFlyout x:Name="StatusMenuFlyout" Placement="BottomEdgeAlignedLeft" />
+                            <MenuFlyout
+                                x:Name="StatusMenuFlyout"
+                                Placement="BottomEdgeAlignedLeft"
+                            />
                         </Button.Flyout>
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <TextBlock Text="{Binding SelectedStatusFilter}" FontSize="14" Foreground="#FF2C2118" VerticalAlignment="Center" />
-                            <FontIcon Glyph="&#xE70D;" FontSize="10" Foreground="#992C2118" VerticalAlignment="Center" />
+                            <TextBlock
+                                Text="{Binding SelectedStatusFilter}"
+                                FontSize="14"
+                                Foreground="#FF2C2118"
+                                VerticalAlignment="Center"
+                            />
+                            <FontIcon
+                                Glyph="&#xE70D;"
+                                FontSize="10"
+                                Foreground="#992C2118"
+                                VerticalAlignment="Center"
+                            />
                         </StackPanel>
                     </Button>
 
@@ -533,9 +616,24 @@
                             <MenuFlyout x:Name="SortMenuFlyout" Placement="BottomEdgeAlignedLeft" />
                         </Button.Flyout>
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="&#xE8CB;" FontSize="13" Foreground="#992C2118" VerticalAlignment="Center" />
-                            <TextBlock Text="{Binding SelectedSort}" FontSize="14" Foreground="#FF2C2118" VerticalAlignment="Center" />
-                            <FontIcon Glyph="&#xE70D;" FontSize="10" Foreground="#992C2118" VerticalAlignment="Center" />
+                            <FontIcon
+                                Glyph="&#xE8CB;"
+                                FontSize="13"
+                                Foreground="#992C2118"
+                                VerticalAlignment="Center"
+                            />
+                            <TextBlock
+                                Text="{Binding SelectedSort}"
+                                FontSize="14"
+                                Foreground="#FF2C2118"
+                                VerticalAlignment="Center"
+                            />
+                            <FontIcon
+                                Glyph="&#xE70D;"
+                                FontSize="10"
+                                Foreground="#992C2118"
+                                VerticalAlignment="Center"
+                            />
                         </StackPanel>
                     </Button>
 
@@ -660,7 +758,10 @@
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
                                     <Grid Grid.Row="0">
-                                        <Border CornerRadius="12,12,0,0" Background="{StaticResource ShellAvatarSoftBrush}" />
+                                        <Border
+                                            CornerRadius="12,12,0,0"
+                                            Background="{StaticResource ShellAvatarSoftBrush}"
+                                        />
                                         <Border CornerRadius="12,12,0,0">
                                             <Image
                                                 Source="{Binding Thumbnail}"
@@ -694,11 +795,7 @@
                                             </StackPanel>
                                         </Border>
                                     </Grid>
-                                    <StackPanel
-                                        Grid.Row="1"
-                                        Padding="16,14,16,16"
-                                        Spacing="6"
-                                    >
+                                    <StackPanel Grid.Row="1" Padding="16,14,16,16" Spacing="6">
                                         <TextBlock
                                             Text="{Binding CategorySkuLine}"
                                             FontSize="11"
@@ -727,7 +824,11 @@
                                             />
                                         </StackPanel>
                                         <Grid>
-                                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                            <StackPanel
+                                                Orientation="Horizontal"
+                                                Spacing="8"
+                                                VerticalAlignment="Center"
+                                            >
                                                 <TextBlock
                                                     Text="{Binding PriceText}"
                                                     FontSize="20"
@@ -805,10 +906,17 @@
                                         Background="{StaticResource ShellAvatarSoftBrush}"
                                     >
                                         <Border CornerRadius="10">
-                                            <Image Source="{Binding Thumbnail}" Stretch="UniformToFill" />
+                                            <Image
+                                                Source="{Binding Thumbnail}"
+                                                Stretch="UniformToFill"
+                                            />
                                         </Border>
                                     </Border>
-                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
+                                    <StackPanel
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"
+                                        Spacing="4"
+                                    >
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <TextBlock
                                                 Text="{Binding CategorySkuLine}"
@@ -846,7 +954,11 @@
                                             Foreground="{StaticResource ShellTextStrongBrush}"
                                         />
                                         <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <TextBlock Text="&#x2605;" FontSize="13" Foreground="#FFFBBF24" />
+                                            <TextBlock
+                                                Text="&#x2605;"
+                                                FontSize="13"
+                                                Foreground="#FFFBBF24"
+                                            />
                                             <TextBlock
                                                 Text="{Binding RatingText}"
                                                 FontSize="13"
@@ -906,7 +1018,11 @@
                         Command="{Binding PreviousPageCommand}"
                         IsEnabled="{Binding CanGoPrevious}"
                     >
-                        <FontIcon Glyph="&#xE76B;" FontSize="12" Foreground="{StaticResource ShellTextStrongBrush}" />
+                        <FontIcon
+                            Glyph="&#xE76B;"
+                            FontSize="12"
+                            Foreground="{StaticResource ShellTextStrongBrush}"
+                        />
                     </Button>
                     <ItemsControl ItemsSource="{Binding PageButtons}">
                         <ItemsControl.ItemsPanel>
@@ -944,7 +1060,11 @@
                         Command="{Binding NextPageCommand}"
                         IsEnabled="{Binding CanGoNext}"
                     >
-                        <FontIcon Glyph="&#xE76C;" FontSize="12" Foreground="{StaticResource ShellTextStrongBrush}" />
+                        <FontIcon
+                            Glyph="&#xE76C;"
+                            FontSize="12"
+                            Foreground="{StaticResource ShellTextStrongBrush}"
+                        />
                     </Button>
                 </StackPanel>
             </Grid>

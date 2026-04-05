@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
-using Windows.ApplicationModel.DataTransfer;
 using Uno.Extensions.Navigation;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace CSC13001_my_shop_project.Presentation.Products;
 

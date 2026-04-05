@@ -1,4 +1,6 @@
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using CSC13001_my_shop_project.Presentation.Dashboard;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -59,13 +61,17 @@ public sealed partial class TopBarControl : UserControl
             : Visibility.Visible;
     }
 
-    private void OnSearchFocused(object sender, RoutedEventArgs e)
+    private void SignOutButton_Click(object sender, RoutedEventArgs e)
     {
-        SearchFocusRing.BorderBrush = Application.Current.Resources["ShellAccentBrush"] as Brush;
+        ProfileFlyout.Hide();
+        WeakReferenceMessenger.Default.Send(new NavigateToPageMessage("Login"));
     }
 
-    private void OnSearchUnfocused(object sender, RoutedEventArgs e)
-    {
-        SearchFocusRing.BorderBrush = new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+    private void ProfileFlyout_Opened(object sender, object e) {
+        VisualStateManager.GoToState(ProfileButton, "FlyoutOpen", true);
+    }
+
+    private void ProfileFlyout_Closed(object sender, object e) {
+        VisualStateManager.GoToState(ProfileButton, "FlyoutClosed", true);
     }
 }

@@ -7,7 +7,8 @@ class OrderRepository extends BaseRepository {
         super("orders", "order_id", db);
     }
 
-    async getOrderItems(orderId) {
+    async getOrderItems(orderId, client) {
+        const db = client || this.db;
         const result = await db.query(
             `SELECT *
        FROM order_item

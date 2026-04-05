@@ -18,6 +18,7 @@ const accountSchema = `#graphql
   type Mutation {
     login(username: String!, password: String!): AuthPayload!
     register(username: String!, password: String!, full_name: String!, account_role: String): AuthPayload!
+    logout: Boolean!
   }
 `;
 

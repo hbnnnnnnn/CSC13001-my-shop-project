@@ -1,14 +1,50 @@
 const customerRepository = require('../repositories/customer.repository.js');
+const cacheService = require('./cache.service.js');
 
 const getAllCustomers = async (page = 1, limit = 10) => {
-    return await customerRepository.findAll({ page, limit });
+    const cacheKey = `customers:all:p:${page}:l:${limit}`;
+    const cachedCustomers = await cacheService.get(cacheKey);
+    if (cachedCustomers) {
+        console.log(`[Cache Hit] ${cacheKey}`);
+        return cachedCustomers;
+    }
+
+    const customers = await customerRepository.findAll({ page, limit });
+    await cacheService.set(cacheKey, customers, 600); // 10 minutes
+    return customers;
 };
 
 const getCustomerById = async (id) => {
+    const cacheKey = `customer:${id}`;
+    const cachedCustomer = await cacheService.get(cacheKey);
+    if (cachedCustomer) {
+        console.log(`[Cache Hit] ${cacheKey}`);
+        return cachedCustomer;
+    }
+
     const customer = await customerRepository.findById(id);
     if (!customer) {
         throw new Error('Customer not found');
     }
+    
+    await cacheService.set(cacheKey, customer, 1800); // 30 mins
+    return customer;
+};
+
+const getCustomerByPhone = async (phone) => {
+    const cacheKey = `customer:phone:${phone}`;
+    const cachedCustomer = await cacheService.get(cacheKey);
+    if (cachedCustomer) {
+        console.log(`[Cache Hit] ${cacheKey}`);
+        return cachedCustomer;
+    }
+
+    const customer = await customerRepository.findByPhone(phone);
+    if (!customer) {
+        throw new Error('Customer not found');
+    }
+
+    await cacheService.set(cacheKey, customer, 1800); // 30 mins
     return customer;
 };
 
@@ -20,11 +56,15 @@ const createCustomer = async (name, phone, address) => {
         }
     }
 
-    return await customerRepository.create({
+    const newCustomer = await customerRepository.create({
         name,
         phone,
         address
     });
+
+    // Invalidate pagination cache
+    await cacheService.delByPrefix("customers:all:p:");
+    return newCustomer;
 };
 
 const updateCustomer = async (id, name, phone, address) => {
@@ -45,7 +85,15 @@ const updateCustomer = async (id, name, phone, address) => {
     if (phone !== undefined) dataToUpdate.phone = phone;
     if (address !== undefined) dataToUpdate.address = address;
 
-    return await customerRepository.update(id, dataToUpdate);
+    const updatedCustomer = await customerRepository.update(id, dataToUpdate);
+
+    // Invalidate caches
+    await cacheService.del(`customer:${id}`);
+    if (existing.phone) await cacheService.del(`customer:phone:${existing.phone}`);
+    if (phone) await cacheService.del(`customer:phone:${phone}`);
+    await cacheService.delByPrefix("customers:all:p:");
+
+    return updatedCustomer;
 };
 
 const deleteCustomer = async (id) => {
@@ -54,12 +102,20 @@ const deleteCustomer = async (id) => {
         throw new Error('Customer not found');
     }
 
-    return await customerRepository.delete(id);
+    const deletedCustomer = await customerRepository.delete(id);
+
+    // Invalidate caches
+    await cacheService.del(`customer:${id}`);
+    if (existing.phone) await cacheService.del(`customer:phone:${existing.phone}`);
+    await cacheService.delByPrefix("customers:all:p:");
+
+    return deletedCustomer;
 };
 
 module.exports = {
     getAllCustomers,
     getCustomerById,
+    getCustomerByPhone,
     createCustomer,
     updateCustomer,
     deleteCustomer
