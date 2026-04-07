@@ -182,12 +182,12 @@
                                 <TextBlock Text="STATUS" Style="{StaticResource FieldLabelStyle}" />
                                 <Border Background="#FAF7F2" BorderBrush="#F5EDE4" BorderThickness="1" CornerRadius="14" Height="50" Padding="14,0">
                                     <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                        <Ellipse Width="8" Height="8" Fill="{Binding Order.StatusAccentBrush}" VerticalAlignment="Center" />
+                                        <Ellipse Width="8" Height="8" Fill="{Binding Order.StatusFgBrush}" VerticalAlignment="Center" />
                                         <TextBlock
                                             Text="{Binding Order.Status}"
                                             FontSize="16"
                                             FontWeight="Medium"
-                                            Foreground="{Binding Order.StatusAccentBrush}"
+                                            Foreground="{Binding Order.StatusFgBrush}"
                                             VerticalAlignment="Center"
                                         />
                                     </StackPanel>
@@ -227,8 +227,8 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="50" />
-                            <ColumnDefinition Width="80" />
-                            <ColumnDefinition Width="80" />
+                            <ColumnDefinition Width="140" />
+                            <ColumnDefinition Width="140" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="PRODUCT NAME" FontSize="12" FontWeight="Bold" Foreground="#B32C2118" CharacterSpacing="50" VerticalAlignment="Center" />
                         <TextBlock Grid.Column="1" Text="QTY" FontSize="12" FontWeight="Bold" Foreground="#B32C2118" CharacterSpacing="50" HorizontalAlignment="Right" VerticalAlignment="Center" />
@@ -245,13 +245,13 @@
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="50" />
-                                            <ColumnDefinition Width="80" />
-                                            <ColumnDefinition Width="80" />
+                                            <ColumnDefinition Width="140" />
+                                            <ColumnDefinition Width="140" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock Grid.Column="0" Text="{Binding ProductName}" FontSize="14" FontWeight="Medium" Foreground="#FF2C2118" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                                         <TextBlock Grid.Column="1" Text="{Binding Quantity}" FontSize="14" Foreground="#CC2C2118" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="2" Text="{Binding UnitPriceFormatted}" FontSize="14" Foreground="#CC2C2118" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                        <TextBlock Grid.Column="3" Text="{Binding TotalFormatted}" FontSize="14" FontWeight="Bold" Foreground="#FF2C2118" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="2" Text="{Binding UnitPriceFormatted}" FontSize="13" Foreground="#CC2C2118" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="3" Text="{Binding TotalFormatted}" FontSize="13" FontWeight="Bold" Foreground="#FF2C2118" HorizontalAlignment="Right" VerticalAlignment="Center" />
                                     </Grid>
                                 </DataTemplate>
                             </ItemsRepeater.ItemTemplate>

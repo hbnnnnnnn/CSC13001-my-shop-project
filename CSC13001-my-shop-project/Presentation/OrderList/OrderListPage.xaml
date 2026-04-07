@@ -478,7 +478,7 @@
                                     <ColumnDefinition Width="1.3*" />  <!-- Date -->
                                     <ColumnDefinition Width="2*" />    <!-- Customer Name -->
                                     <ColumnDefinition Width="1.5*" />  <!-- Order Status -->
-                                    <ColumnDefinition Width="1.2*" />  <!-- Amount -->
+                                    <ColumnDefinition Width="1.8*" />  <!-- Amount -->
                                     <ColumnDefinition Width="0.6*" />  <!-- Action -->
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="ORDER ID" FontSize="12" FontWeight="Bold" Foreground="#B32C2118" CharacterSpacing="50" />
@@ -509,7 +509,7 @@
                                                 <ColumnDefinition Width="1.3*" />
                                                 <ColumnDefinition Width="2*" />
                                                 <ColumnDefinition Width="1.5*" />
-                                                <ColumnDefinition Width="1.2*" />
+                                                <ColumnDefinition Width="1.8*" />
                                                 <ColumnDefinition Width="0.6*" />
                                             </Grid.ColumnDefinitions>
 

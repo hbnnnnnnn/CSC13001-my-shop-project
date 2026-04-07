@@ -119,6 +119,7 @@ public partial class App : Application
                             // API services
                             services.AddSingleton<GraphqlService>();
                             services.AddSingleton<AuthService>();
+                            services.AddSingleton<OrderService>();
                         }
                     )
                     .UseNavigation(RegisterRoutes)

@@ -1,3 +1,4 @@
+using CSC13001_my_shop_project.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -27,25 +28,77 @@ public sealed partial class OrderListPage : Page
         };
     }
 
+    /// <summary>
+    /// Resolves a service from the DI container.
+    /// </summary>
+    private T? GetService<T>() where T : class
+        => App.AppHost?.Services.GetService<T>();
+
     private async void NewOrderButton_Click(object sender, RoutedEventArgs e)
     {
+        var orderService = GetService<OrderService>();
+        var authService = GetService<AuthService>();
+        if (orderService is null || authService is null) return;
+
         var dialog = new CreateOrderDialog
         {
             XamlRoot = this.XamlRoot,
-            DataContext = new CreateOrderViewModel()
+            DataContext = new CreateOrderViewModel(orderService, authService)
         };
 
-        await dialog.ShowAsync();
+        // Show dialog (fire-and-forget internally)
+        _ = dialog.ShowAsync();
+
+        // Wait for the dialog to signal completion
+        var success = await dialog.WaitForResultAsync();
+
+        if (success)
+        {
+            // Show success notification
+            var successDialog = new ContentDialog
+            {
+                XamlRoot = this.XamlRoot,
+                Title = "Success",
+                Content = "Order has been created successfully!",
+                CloseButtonText = "OK"
+            };
+            await successDialog.ShowAsync();
+
+            // Refresh order list immediately
+            if (DataContext is OrderListViewModel vm)
+            {
+                await vm.LoadOrdersAsync();
+            }
+        }
     }
 
     private async void ViewOrder_Click(object sender, RoutedEventArgs e)
     {
         if (sender is MenuFlyoutItem item && item.DataContext is OrderItem order)
         {
+            var orderService = GetService<OrderService>();
+
+            // Fetch full order details (with product names) from backend
+            OrderItem detailedOrder = order;
+            if (orderService is not null)
+            {
+                try
+                {
+                    // Extract numeric ID from "#123" format
+                    var rawId = order.Id.TrimStart('#');
+                    detailedOrder = await orderService.GetOrderByIdAsync(rawId);
+                }
+                catch
+                {
+                    // Fallback to the list data if detail fetch fails
+                    detailedOrder = order;
+                }
+            }
+
             var dialog = new OrderDetailDialog
             {
                 XamlRoot = this.XamlRoot,
-                DataContext = new OrderDetailViewModel(order)
+                DataContext = new OrderDetailViewModel(detailedOrder)
             };
 
             await dialog.ShowAsync();
@@ -56,10 +109,14 @@ public sealed partial class OrderListPage : Page
     {
         if (sender is MenuFlyoutItem item && item.DataContext is OrderItem order)
         {
+            var orderService = GetService<OrderService>();
+            var authService = GetService<AuthService>();
+            if (orderService is null || authService is null) return;
+
             var dialog = new CreateOrderDialog
             {
                 XamlRoot = this.XamlRoot,
-                DataContext = new CreateOrderViewModel(order)
+                DataContext = new CreateOrderViewModel(order, orderService, authService)
             };
 
             await dialog.ShowAsync();

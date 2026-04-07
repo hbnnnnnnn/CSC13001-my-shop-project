@@ -1,13 +1,22 @@
-using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Shapes;
 
 namespace CSC13001_my_shop_project.Presentation.OrderList;
 
 public sealed partial class CreateOrderDialog : ContentDialog
 {
+    /// <summary>
+    /// Set to true when order was created/updated successfully.
+    /// </summary>
+    public bool IsSuccess { get; private set; }
+
+    /// <summary>
+    /// Completes when the dialog is done (success or cancel).
+    /// </summary>
+    private readonly TaskCompletionSource<bool> _completionSource = new();
+    public Task<bool> WaitForResultAsync() => _completionSource.Task;
+
     public CreateOrderDialog()
     {
         this.InitializeComponent();
@@ -18,7 +27,6 @@ public sealed partial class CreateOrderDialog : ContentDialog
     {
         UpdateEmptyState();
         UpdateDateDisplay();
-        UpdateStatusDisplay();
     }
 
     private void UpdateEmptyState()
@@ -43,74 +51,11 @@ public sealed partial class CreateOrderDialog : ContentDialog
         }
     }
 
-    private void UpdateStatusDisplay()
-    {
-        if (DataContext is CreateOrderViewModel vm && !string.IsNullOrEmpty(vm.SelectedStatus))
-        {
-            StatusFilterText.Text = vm.SelectedStatus;
-            ApplyStatusColor(vm.SelectedStatus);
-        }
-    }
-
-    /// <summary>
-    /// Apply status-matching color to the button dot and text.
-    /// </summary>
-    private void ApplyStatusColor(string status)
-    {
-        var brush = GetStatusAccentBrush(status);
-        StatusDotBtn.Fill = brush;
-        StatusFilterText.Foreground = brush;
-    }
-
-    /// <summary>
-    /// Returns the accent/prominent color for a given status.
-    /// For filled badges (Processing, Pending) → uses BgBrush (amber, red-orange).
-    /// For outlined badges (Shipped, Delivered, Cancelled) → uses FgBrush (dark, green, grey).
-    /// This matches the OrderList page status column color palette.
-    /// </summary>
-    public static SolidColorBrush GetStatusAccentBrush(string status)
-    {
-        // For filled statuses (Fg=White in OrderList), use BgBrush as the accent
-        // For outlined statuses, use FgBrush as the accent
-        var key = status switch
-        {
-            "Processing" => "StatusProcessingBgBrush",   // #F3B55C amber
-            "Shipped" => "StatusShippedFgBrush",          // #2C2118 dark
-            "Delivered" => "StatusDeliveredFgBrush",      // #009966 green
-            "Pending" => "StatusPendingBgBrush",          // #E07A5F red-orange
-            "Cancelled" => "StatusCancelledFgBrush",      // #99A1AF grey
-            _ => "StatusShippedFgBrush"
-        };
-
-        if (Application.Current.Resources.TryGetValue(key, out var resource) && resource is SolidColorBrush brush)
-        {
-            return brush;
-        }
-        return new SolidColorBrush(Colors.Gray);
-    }
-
-    public static SolidColorBrush GetStatusBgBrush(string status)
-    {
-        var key = status switch
-        {
-            "Processing" => "StatusProcessingBgBrush",
-            "Shipped" => "StatusShippedBgBrush",
-            "Delivered" => "StatusDeliveredBgBrush",
-            "Pending" => "StatusPendingBgBrush",
-            "Cancelled" => "StatusCancelledBgBrush",
-            _ => "StatusShippedBgBrush"
-        };
-
-        if (Application.Current.Resources.TryGetValue(key, out var resource) && resource is SolidColorBrush brush)
-        {
-            return brush;
-        }
-        return new SolidColorBrush(Colors.Gray);
-    }
-
     // ─── Header buttons ───
     private void CancelButton_Click(object sender, RoutedEventArgs e)
     {
+        IsSuccess = false;
+        _completionSource.TrySetResult(false);
         this.Hide();
     }
 
@@ -121,7 +66,23 @@ public sealed partial class CreateOrderDialog : ContentDialog
             var saved = await vm.SaveAsync();
             if (saved)
             {
+                IsSuccess = true;
+                _completionSource.TrySetResult(true);
                 this.Hide();
+            }
+            else if (!string.IsNullOrEmpty(vm.ErrorMessage))
+            {
+                // Show error in a dialog
+                var errorDialog = new ContentDialog
+                {
+                    XamlRoot = this.XamlRoot,
+                    Title = "Error",
+                    Content = vm.ErrorMessage,
+                    CloseButtonText = "OK"
+                };
+                this.Hide();
+                await errorDialog.ShowAsync();
+                await this.ShowAsync();
             }
         }
     }
@@ -133,38 +94,6 @@ public sealed partial class CreateOrderDialog : ContentDialog
         {
             vm.OrderDate = args.NewDate;
             DateDisplayText.Text = args.NewDate.ToString("MM/dd/yyyy");
-        }
-    }
-
-    // ─── Status Flyout ───
-    private void StatusFilterList_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (sender is ListView lv && lv.SelectedItem is string selected && DataContext is CreateOrderViewModel vm)
-        {
-            vm.SelectedStatus = selected;
-            StatusFilterText.Text = selected;
-            ApplyStatusColor(selected);
-            StatusFilterButton.Flyout?.Hide();
-        }
-    }
-
-    // ─── Color flyout list items when container is loaded ───
-    private void StatusFilterList_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
-    {
-        if (args.Item is string status && args.ItemContainer?.ContentTemplateRoot is StackPanel panel)
-        {
-            var accentBrush = GetStatusAccentBrush(status);
-            foreach (var child in panel.Children)
-            {
-                if (child is Ellipse dot)
-                {
-                    dot.Fill = accentBrush;
-                }
-                else if (child is TextBlock tb)
-                {
-                    tb.Foreground = accentBrush;
-                }
-            }
         }
     }
 
@@ -187,7 +116,17 @@ public sealed partial class CreateOrderDialog : ContentDialog
         };
 
         var panel = new StackPanel { Spacing = 12 };
-        var nameBox = new TextBox { PlaceholderText = "Product name", Header = "Name" };
+
+        // Product picker ComboBox (loaded from backend)
+        var productCombo = new ComboBox
+        {
+            Header = "Product",
+            PlaceholderText = "Select a product...",
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            DisplayMemberPath = "DisplayText",
+            ItemsSource = vm.AvailableProducts
+        };
+
         var qtyBox = new NumberBox
         {
             PlaceholderText = "1",
@@ -196,27 +135,39 @@ public sealed partial class CreateOrderDialog : ContentDialog
             Value = 1,
             SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Inline
         };
-        var priceBox = new NumberBox
+
+        var priceText = new TextBlock
         {
-            PlaceholderText = "0.00",
-            Header = "Unit Price",
-            Minimum = 0,
-            Value = 0
+            Text = "Unit price: —",
+            FontSize = 14,
+            Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(0x99, 0x2C, 0x21, 0x18)),
+            Margin = new Thickness(0, 4, 0, 0)
         };
 
-        panel.Children.Add(nameBox);
+        // Auto-fill price when product is selected
+        productCombo.SelectionChanged += (_, _) =>
+        {
+            if (productCombo.SelectedItem is Services.ProductPickerItem selected)
+            {
+                priceText.Text = $"Đơn giá: {selected.Price:N0} ₫  |  Tồn kho: {selected.Stock}";
+            }
+        };
+
+        panel.Children.Add(productCombo);
         panel.Children.Add(qtyBox);
-        panel.Children.Add(priceBox);
+        panel.Children.Add(priceText);
         addDialog.Content = panel;
 
         var result = await addDialog.ShowAsync();
-        if (result == ContentDialogResult.Primary && !string.IsNullOrWhiteSpace(nameBox.Text))
+        if (result == ContentDialogResult.Primary && productCombo.SelectedItem is Services.ProductPickerItem selectedProduct)
         {
+            var qty = (int)qtyBox.Value;
             vm.Products.Add(new OrderProductItem
             {
-                ProductName = nameBox.Text,
-                Quantity = (int)qtyBox.Value,
-                UnitPrice = (decimal)priceBox.Value
+                ProductId = selectedProduct.ProductId,
+                ProductName = selectedProduct.Name,
+                Quantity = qty,
+                UnitPrice = selectedProduct.Price,
             });
             vm.RefreshTotals();
         }
