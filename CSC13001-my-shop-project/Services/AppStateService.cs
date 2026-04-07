@@ -1,3 +1,5 @@
+using CSC13001_my_shop_project.Services;
+
 public class AppStateService
 {
     private readonly ApplicationDataContainer _settings = ApplicationData.Current.LocalSettings;
