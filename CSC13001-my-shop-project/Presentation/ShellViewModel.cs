@@ -2,6 +2,7 @@ namespace CSC13001_my_shop_project.Presentation;
 
 using CommunityToolkit.Mvvm.Messaging;
 using CSC13001_my_shop_project.Presentation.Dashboard;
+using CSC13001_my_shop_project.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Uno.Extensions.Navigation;
 
@@ -35,10 +36,10 @@ public partial class ShellViewModel : ObservableObject
     };
 
     [ObservableProperty]
-    private string _userName = "John Doe";
+    private string _userName = string.Empty;
 
     [ObservableProperty]
-    private string _userEmail = "john.doe@luminahaven.com";
+    private string _userEmail = string.Empty;
 
     [ObservableProperty]
     private bool _isSidebarExpanded = true;
@@ -68,12 +69,16 @@ public partial class ShellViewModel : ObservableObject
             _ = Navigate(item);
         });
 
+        SignOutCommand = new AsyncRelayCommand(SignOutAsync);
+
         WeakReferenceMessenger.Default.Register<NavigateToPageMessage>(
             this,
             (r, msg) =>
             {
                 if (string.IsNullOrWhiteSpace(msg.PageKey) || r is not ShellViewModel shell)
+                {
                     return;
+                }
 
                 var route = msg.PageKey;
 
@@ -87,6 +92,8 @@ public partial class ShellViewModel : ObservableObject
     public IRelayCommand OpenSidebarCommand { get; }
 
     public IRelayCommand<string> SelectSidebarItemCommand { get; }
+
+    public IAsyncRelayCommand SignOutCommand { get; }
 
     public string TestString { get; set; } = "Hello from ShellViewModel!";
 
@@ -134,10 +141,44 @@ public partial class ShellViewModel : ObservableObject
             AppState.LastPage = route;
 
             UpdateChromeVisibility(route);
+
+            // Refresh user info when entering a chrome-visible page
+            if (!ChromelessRoutes.Contains(route))
+                RefreshUserInfo();
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine(ex);
         }
+    }
+
+    /// <summary>
+    /// Refreshes the displayed user name and email from the current auth session.
+    /// </summary>
+    private void RefreshUserInfo()
+    {
+        var auth = App.AppHost?.Services.GetService<AuthService>();
+        if (auth?.CurrentAccount is { } acct)
+        {
+            UserName = acct.FullName;
+            UserEmail = acct.Username;
+        }
+    }
+
+    /// <summary>
+    /// Signs the user out, clears the session, and navigates to the login page.
+    /// </summary>
+    private async Task SignOutAsync()
+    {
+        var auth = App.AppHost?.Services.GetService<AuthService>();
+        if (auth is not null)
+            await auth.LogoutAsync();
+
+        AppState.Clear();
+
+        UserName = string.Empty;
+        UserEmail = string.Empty;
+
+        WeakReferenceMessenger.Default.Send(new NavigateToPageMessage("Login"));
     }
 }
