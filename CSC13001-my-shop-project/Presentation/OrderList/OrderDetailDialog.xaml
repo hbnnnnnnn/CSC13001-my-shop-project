@@ -208,7 +208,7 @@
             </ScrollViewer>
 
             <!-- ─── RIGHT COLUMN: Products Panel (same frame as Create/Edit) ─── -->
-            <Border Grid.Column="1" Background="#4DFAF7F2" BorderBrush="#F5EDE4" BorderThickness="1" CornerRadius="14">
+            <Border Grid.Column="1" Background="#4DFAF7F2" BorderBrush="#F5EDE4" BorderThickness="1" CornerRadius="0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />

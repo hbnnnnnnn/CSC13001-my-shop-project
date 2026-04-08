@@ -79,20 +79,26 @@ public partial class OrderListViewModel : ObservableObject
 
         try
         {
+            Console.Error.WriteLine("[OrderListVM] Loading orders...");
             var (orders, _, _) = await _orderService.GetOrdersAsync(page: 1, limit: 500);
+            Console.Error.WriteLine($"[OrderListVM] Got {orders.Count} orders");
             _allOrders = orders;
             ApplyFilters();
+            Console.Error.WriteLine($"[OrderListVM] After filter: {FilteredOrders.Count} displayed");
         }
         catch (GraphqlException ex)
         {
+            Console.Error.WriteLine($"[OrderListVM] GraphQL error: {ex.Message}");
             ErrorMessage = ex.Message;
         }
-        catch (HttpRequestException)
+        catch (HttpRequestException ex)
         {
+            Console.Error.WriteLine($"[OrderListVM] HTTP error: {ex.Message}");
             ErrorMessage = "Cannot connect to server. Check your connection.";
         }
         catch (Exception ex)
         {
+            Console.Error.WriteLine($"[OrderListVM] Error: {ex.GetType().Name}: {ex.Message}");
             ErrorMessage = $"Failed to load orders: {ex.Message}";
         }
         finally
@@ -200,8 +206,18 @@ public partial class OrderProductItem : ObservableObject
     public string UnitPriceFormatted => $"{UnitPrice:N0} ₫";
     public string TotalFormatted => $"{Total:N0} ₫";
 
-    partial void OnQuantityChanged(int value) => OnPropertyChanged(nameof(Total));
-    partial void OnUnitPriceChanged(decimal value) => OnPropertyChanged(nameof(Total));
+    partial void OnQuantityChanged(int value)
+    {
+        OnPropertyChanged(nameof(Total));
+        OnPropertyChanged(nameof(TotalFormatted));
+    }
+
+    partial void OnUnitPriceChanged(decimal value)
+    {
+        OnPropertyChanged(nameof(Total));
+        OnPropertyChanged(nameof(UnitPriceFormatted));
+        OnPropertyChanged(nameof(TotalFormatted));
+    }
 }
 
 public partial class OrderItem : ObservableObject

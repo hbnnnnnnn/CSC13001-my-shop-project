@@ -38,14 +38,14 @@ public class OrderService
     // ────────────────────────────────────────────────────
 
     /// <summary>
-    /// Fetches a paginated list of orders and resolves customer names.
+    /// Fetches a paginated list of orders with nested customer data.
+    /// Uses backend nested resolvers — no separate customer query needed.
     /// </summary>
     public async Task<(List<OrderItem> Orders, int Total, int TotalPages)> GetOrdersAsync(
         int page = 1,
         int limit = 100
     )
     {
-        // 1. Fetch orders
         var data = await _graphql.QueryAsync(
             @"query Orders($page: Int, $limit: Int) {
                 orders(page: $page, limit: $limit) {
@@ -56,14 +56,15 @@ public class OrderService
                         final_price
                         status
                         customer_id
-                        account_id
                         shipping_address
+                        customer { name phone }
                         items {
                             order_item_id
                             product_id
                             quantity
                             unit_sale_price
                             total_price
+                            product { name }
                         }
                     }
                     total
@@ -79,54 +80,16 @@ public class OrderService
         var total = ordersData.GetProperty("total").GetInt32();
         var totalPages = ordersData.GetProperty("totalPages").GetInt32();
 
-        // 2. Parse orders
-        var orderElements = ordersData.GetProperty("data").EnumerateArray().ToList();
-
-        // 3. Collect unique customer IDs and resolve names
-        var customerIds = orderElements
-            .Where(o => o.TryGetProperty("customer_id", out var c) && c.ValueKind != JsonValueKind.Null)
-            .Select(o => o.GetProperty("customer_id").GetString()!)
-            .Distinct()
+        var orders = ordersData.GetProperty("data").EnumerateArray()
+            .Select(MapOrderItem)
             .ToList();
-
-        var customerMap = new Dictionary<string, string>();
-        if (customerIds.Count > 0)
-        {
-            try
-            {
-                var custData = await _graphql.QueryAsync(
-                    @"query Customers($limit: Int) {
-                        customers(limit: $limit) {
-                            data { customer_id name }
-                        }
-                    }",
-                    new { limit = 500 }
-                );
-                foreach (var c in custData.GetProperty("customers").GetProperty("data").EnumerateArray())
-                {
-                    var id = c.GetProperty("customer_id").GetString()!;
-                    var name = c.GetProperty("name").GetString()!;
-                    customerMap[id] = name;
-                }
-            }
-            catch
-            {
-                /* best-effort — show IDs if customers query fails */
-            }
-        }
-
-        // 4. Map to OrderItem
-        var orders = new List<OrderItem>();
-        foreach (var o in orderElements)
-        {
-            orders.Add(MapOrderItem(o, customerMap));
-        }
 
         return (orders, total, totalPages);
     }
 
     /// <summary>
-    /// Fetches a single order by ID with full item details (product names resolved).
+    /// Fetches a single order by ID with full details.
+    /// Uses backend nested resolvers — customer + product names resolved in one query.
     /// </summary>
     public async Task<OrderItem> GetOrderByIdAsync(string id)
     {
@@ -139,79 +102,22 @@ public class OrderService
                     final_price
                     status
                     customer_id
-                    account_id
                     shipping_address
+                    customer { name phone address }
                     items {
                         order_item_id
                         product_id
                         quantity
                         unit_sale_price
                         total_price
+                        product { name }
                     }
                 }
             }",
             new { id }
         );
 
-        var orderEl = data.GetProperty("order");
-
-        // Resolve customer name + phone
-        var customerMap = new Dictionary<string, string>();
-        string? customerPhone = null;
-        if (orderEl.TryGetProperty("customer_id", out var custId) && custId.ValueKind != JsonValueKind.Null)
-        {
-            var cid = custId.GetString()!;
-            try
-            {
-                var custData = await _graphql.QueryAsync(
-                    "query Customer($id: ID!) { customer(id: $id) { customer_id name phone } }",
-                    new { id = cid }
-                );
-                var custNode = custData.GetProperty("customer");
-                customerMap[cid] = custNode.GetProperty("name").GetString()!;
-                if (custNode.TryGetProperty("phone", out var ph) && ph.ValueKind != JsonValueKind.Null)
-                    customerPhone = ph.GetString();
-            }
-            catch { /* best-effort */ }
-        }
-
-        var order = MapOrderItem(orderEl, customerMap);
-        if (!string.IsNullOrEmpty(customerPhone))
-            order.Phone = customerPhone;
-
-        // Resolve product names for each item
-        if (order.Products.Count > 0)
-        {
-            var productIds = order.Products
-                .Select(p => p.ProductId)
-                .Where(pid => !string.IsNullOrEmpty(pid))
-                .Distinct()
-                .ToList();
-
-            var productMap = new Dictionary<string, string>();
-            foreach (var pid in productIds)
-            {
-                try
-                {
-                    var pData = await _graphql.QueryAsync(
-                        "query Product($id: ID!) { product(id: $id) { product_id name } }",
-                        new { id = pid }
-                    );
-                    productMap[pid] = pData.GetProperty("product").GetProperty("name").GetString()!;
-                }
-                catch { /* best-effort */ }
-            }
-
-            foreach (var item in order.Products)
-            {
-                if (!string.IsNullOrEmpty(item.ProductId) && productMap.TryGetValue(item.ProductId, out var name))
-                {
-                    item.ProductName = name;
-                }
-            }
-        }
-
-        return order;
+        return MapOrderItem(data.GetProperty("order"));
     }
 
     // ────────────────────────────────────────────────────
@@ -238,19 +144,20 @@ public class OrderService
                     status
                     customer_id
                     shipping_address
+                    customer { name phone }
                     items {
                         product_id
                         quantity
                         unit_sale_price
                         total_price
+                        product { name }
                     }
                 }
             }",
             new { customerId, shippingAddress, items = itemsInput }
         );
 
-        var orderEl = data.GetProperty("createOrder");
-        return MapOrderItem(orderEl, new Dictionary<string, string>());
+        return MapOrderItem(data.GetProperty("createOrder"));
     }
 
     /// <summary>
@@ -335,7 +242,11 @@ public class OrderService
     // MAPPING HELPERS
     // ────────────────────────────────────────────────────
 
-    private static OrderItem MapOrderItem(JsonElement o, Dictionary<string, string> customerMap)
+    /// <summary>
+    /// Maps a GraphQL Order JSON element to an OrderItem model.
+    /// Reads nested customer/product data directly — no separate resolution needed.
+    /// </summary>
+    private static OrderItem MapOrderItem(JsonElement o)
     {
         var orderId = o.GetProperty("order_id").GetString()!;
         var status = o.GetProperty("status").GetString() ?? "Unknown";
@@ -350,10 +261,26 @@ public class OrderService
             ? sa.GetString() ?? ""
             : "";
 
-        // Resolve customer name
-        var customerName = customerId != null && customerMap.TryGetValue(customerId, out var name)
-            ? name
-            : (customerId ?? "—");
+        // Read nested customer data
+        var customerName = "—";
+        var customerPhone = "";
+        var customerAddress = "";
+        if (o.TryGetProperty("customer", out var custEl) && custEl.ValueKind == JsonValueKind.Object)
+        {
+            customerName = custEl.TryGetProperty("name", out var cn) && cn.ValueKind != JsonValueKind.Null
+                ? cn.GetString() ?? "—"
+                : "—";
+            customerPhone = custEl.TryGetProperty("phone", out var cp) && cp.ValueKind != JsonValueKind.Null
+                ? cp.GetString() ?? ""
+                : "";
+            // Use customer address as fallback if shipping_address is empty
+            if (string.IsNullOrEmpty(shippingAddress))
+            {
+                customerAddress = custEl.TryGetProperty("address", out var ca) && ca.ValueKind != JsonValueKind.Null
+                    ? ca.GetString() ?? ""
+                    : "";
+            }
+        }
 
         // Parse date
         var dateStr = "";
@@ -365,7 +292,7 @@ public class OrderService
                 dateStr = createdTime;
         }
 
-        // Parse items
+        // Parse items with nested product names
         var products = new ObservableCollection<OrderProductItem>();
         if (o.TryGetProperty("items", out var itemsEl) && itemsEl.ValueKind == JsonValueKind.Array)
         {
@@ -377,10 +304,19 @@ public class OrderService
                 var quantity = item.GetProperty("quantity").GetInt32();
                 var unitPrice = item.GetProperty("unit_sale_price").GetInt32();
 
+                // Read nested product name directly
+                var productName = $"Product #{productId}";
+                if (item.TryGetProperty("product", out var prodEl) && prodEl.ValueKind == JsonValueKind.Object)
+                {
+                    productName = prodEl.TryGetProperty("name", out var pn) && pn.ValueKind != JsonValueKind.Null
+                        ? pn.GetString() ?? productName
+                        : productName;
+                }
+
                 products.Add(new OrderProductItem
                 {
                     ProductId = productId,
-                    ProductName = $"Product #{productId}",  // placeholder, resolved later for detail view
+                    ProductName = productName,
                     Quantity = quantity,
                     UnitPrice = unitPrice,
                 });
@@ -395,9 +331,9 @@ public class OrderService
             Date = dateStr,
             Status = status,
             Amount = $"{finalPrice:N0} ₫",
-            Phone = "",
+            Phone = customerPhone,
             Email = "",
-            Address = shippingAddress,
+            Address = string.IsNullOrEmpty(shippingAddress) ? customerAddress : shippingAddress,
             ShippingFee = 0m,
             Products = products,
         };

@@ -162,13 +162,23 @@ public sealed partial class CreateOrderDialog : ContentDialog
         if (result == ContentDialogResult.Primary && productCombo.SelectedItem is Services.ProductPickerItem selectedProduct)
         {
             var qty = (int)qtyBox.Value;
-            vm.Products.Add(new OrderProductItem
+
+            // Check if product already exists — merge quantity if so
+            var existing = vm.Products.FirstOrDefault(p => p.ProductId == selectedProduct.ProductId);
+            if (existing != null)
             {
-                ProductId = selectedProduct.ProductId,
-                ProductName = selectedProduct.Name,
-                Quantity = qty,
-                UnitPrice = selectedProduct.Price,
-            });
+                existing.Quantity += qty;
+            }
+            else
+            {
+                vm.Products.Add(new OrderProductItem
+                {
+                    ProductId = selectedProduct.ProductId,
+                    ProductName = selectedProduct.Name,
+                    Quantity = qty,
+                    UnitPrice = selectedProduct.Price,
+                });
+            }
             vm.RefreshTotals();
         }
 
