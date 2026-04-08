@@ -6,6 +6,7 @@ const orderSchema = `#graphql
     quantity: Int!
     unit_sale_price: Int!
     total_price: Int!
+    product: Product
   }
 
   type Order {
@@ -18,6 +19,8 @@ const orderSchema = `#graphql
     account_id: ID
     shipping_address: String
     items: [OrderItem!]
+    customer: Customer
+    account: Account
   }
 
   type OrderList {

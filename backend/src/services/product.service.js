@@ -6,7 +6,7 @@ const {
   indexUpdateProduct,
   indexDeleteProduct,
 } = require("./search.service.js");
-const cacheService = require("./cache.service.js");
+const cacheService = require("../utils/cache.util.js");
 
 const getProducts = async ({
   page = 1,
@@ -66,7 +66,7 @@ const createProduct = async (product, client) => {
     
     // Invalidate product lists and dashboard stats
     await cacheService.delByPrefix("products:p:");
-    await cacheService.del("products:low_stock");
+    await cacheService.delByPrefix("products:low_stock:");
 
     return newProduct;
   } catch (error) {
@@ -86,8 +86,8 @@ const updateProduct = async (id, product, client) => {
     // Invalidate relevant caches
     await cacheService.del(`product:${id}`);
     await cacheService.delByPrefix("products:p:");
-    if (product.stock !== undefined) await cacheService.del("products:low_stock");
-    if (product.price !== undefined) await cacheService.del("products:top_selling");
+    if (product.stock !== undefined) await cacheService.delByPrefix("products:low_stock:");
+    if (product.price !== undefined) await cacheService.delByPrefix("products:top_selling:");
 
     return updatedProduct;
   } catch (error) {
@@ -103,8 +103,8 @@ const deleteProduct = async (id, client) => {
     // Invalidate caches
     await cacheService.del(`product:${id}`);
     await cacheService.delByPrefix("products:p:");
-    await cacheService.del("products:low_stock");
-    await cacheService.del("products:top_selling");
+    await cacheService.delByPrefix("products:low_stock:");
+    await cacheService.delByPrefix("products:top_selling:");
 
     return deletedProduct;
   } catch (error) {
@@ -126,7 +126,7 @@ const updateProductStock = async (productId, newStock, client) => {
     // Invalidate caches
     await cacheService.del(`product:${productId}`);
     await cacheService.delByPrefix("products:p:");
-    await cacheService.del("products:low_stock");
+    await cacheService.delByPrefix("products:low_stock:");
     
     return productWithCategory;
   } catch (error) {

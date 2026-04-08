@@ -1,6 +1,6 @@
 // auth middleware to protect routes that require authentication
 const jwt = require('jsonwebtoken');
-const cacheService = require('../services/cache.service');
+const cacheService = require('../utils/cache.util.js');
 
 const verifyToken = (token) => {
     try {

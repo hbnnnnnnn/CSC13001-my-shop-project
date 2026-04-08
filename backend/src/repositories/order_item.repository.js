@@ -16,6 +16,16 @@ class OrderItemRepository extends BaseRepository {
 
         return result.rows;
     }
+
+    async findByOrderIds(orderIds, client) {
+        const db = client || this.db;
+        const result = await db.query(
+            "SELECT * FROM order_item WHERE order_id = ANY($1)",
+            [orderIds]
+        );
+
+        return result.rows;
+    }
 }
 
 module.exports = new OrderItemRepository();

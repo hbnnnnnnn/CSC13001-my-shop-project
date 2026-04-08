@@ -2,8 +2,9 @@ const { redisClient } = require('../config/redis');
 
 /**
  * Wrapper for common cache operations
+ * Moved to utils to avoid circular dependencies and serve as a technical utility.
  */
-const cacheService = {
+const cacheUtil = {
   /**
    * Get value from cache
    * @param {string} key 
@@ -25,6 +26,29 @@ const cacheService = {
   },
 
   /**
+   * Get multiple values from cache
+   * @param {string[]} keys 
+   * @returns {any[]} array of parsed values or nulls
+   */
+  async getMany(keys) {
+    if (!keys || keys.length === 0) return [];
+    try {
+      const results = await redisClient.mGet(keys);
+      return results.map(data => {
+        if (!data) return null;
+        try {
+          return JSON.parse(data);
+        } catch (e) {
+          return data;
+        }
+      });
+    } catch (error) {
+      console.error(`Redis MGet Error:`, error);
+      return keys.map(() => null);
+    }
+  },
+
+  /**
    * Set value in cache with optional TTL
    * @param {string} key 
    * @param {any} value 
@@ -38,6 +62,25 @@ const cacheService = {
       });
     } catch (error) {
       console.error(`Redis Set Error [${key}]:`, error);
+    }
+  },
+
+  /**
+   * Set multiple values in cache with TTL
+   * @param {Object} entries Object with key-value pairs
+   * @param {number} ttlSeconds 
+   */
+  async setMany(entries, ttlSeconds = 3600) {
+    if (!entries || Object.keys(entries).length === 0) return;
+    try {
+      const pipeline = redisClient.multi();
+      for (const [key, value] of Object.entries(entries)) {
+        const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+        pipeline.set(key, stringValue, { EX: ttlSeconds });
+      }
+      await pipeline.exec();
+    } catch (error) {
+      console.error(`Redis MSet Error:`, error);
     }
   },
 
@@ -59,7 +102,6 @@ const cacheService = {
    */
   async delByPrefix(prefix) {
     try {
-      // Using SCAN is safer than KEYS * for performance
       let cursor = '0';
       const matchPattern = `${prefix}*`;
       do {
@@ -79,4 +121,4 @@ const cacheService = {
   }
 };
 
-module.exports = cacheService;
+module.exports = cacheUtil;
