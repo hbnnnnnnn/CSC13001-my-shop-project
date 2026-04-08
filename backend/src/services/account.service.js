@@ -78,7 +78,29 @@ const register = async (username, password, full_name, account_role) => {
     };
 };
 
+const logout = async (token) => {
+    if (!token) return true;
+    try {
+        // Giải mã không cần verify để lấy thời gian expire (exp)
+        const decoded = jwt.decode(token);
+        if (decoded && decoded.exp) {
+            const currentUnixTime = Math.floor(Date.now() / 1000);
+            const ttlSeconds = decoded.exp - currentUnixTime;
+
+            if (ttlSeconds > 0) {
+                // Đưa token vào blacklist trong Redis với TTL khớp với thời gian còn lại của token
+                await cacheService.set(`blacklist:${token}`, 'true', ttlSeconds);
+                console.log(`[Logout Service] Token blacklisted for ${ttlSeconds}s`);
+            }
+        }
+    } catch (err) {
+        console.error("Logout Service Error:", err);
+    }
+    return true;
+};
+
 module.exports = {
     login,
-    register
+    register,
+    logout
 };
