@@ -1,5 +1,5 @@
 const customerRepository = require('../repositories/customer.repository.js');
-const cacheService = require('./cache.service.js');
+const cacheService = require('../utils/cache.util.js');
 
 const getAllCustomers = async (page = 1, limit = 10) => {
     const cacheKey = `customers:all:p:${page}:l:${limit}`;

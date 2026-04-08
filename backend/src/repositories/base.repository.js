@@ -43,6 +43,13 @@ class BaseRepository {
     return result.rows[0];
   }
 
+  async findByIds(ids, client) {
+    const db = client || this.db;
+    const query = format('SELECT * FROM %I WHERE %I = ANY($1)', this.tableName, this.idColumn);
+    const result = await db.query(query, [ids]);
+    return result.rows;
+  }
+
   async create(data, client) {
     const db = client || this.db;
     const keys = Object.keys(data);
