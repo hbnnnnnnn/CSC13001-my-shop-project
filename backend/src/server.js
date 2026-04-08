@@ -8,6 +8,7 @@ const db = require('./config/db'); // Test DB connection early
 const { redisClient } = require('./config/redis');
 const { typeDefs, resolvers } = require('./graphql');
 const { getUserFromToken } = require('./middlewares/auth.middleware');
+const { createLoaders } = require('./graphql/loaders');
 
 const PORT = process.env.PORT || 4000;
 
@@ -32,8 +33,13 @@ async function startServer() {
                 // Get user from token if Authorization header is provided
                 const authContext = await getUserFromToken(req);
 
-                // Inject the 'db' pool, 'user' and 'token' into context for all resolvers
-                return { db, user: authContext.user, token: authContext.token };
+                // Inject the 'db' pool, 'user', 'token' and 'loaders' into context for all resolvers
+                return { 
+                    db, 
+                    user: authContext.user, 
+                    token: authContext.token,
+                    loaders: createLoaders() 
+                };
             },
         })
     );

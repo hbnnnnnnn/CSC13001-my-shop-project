@@ -1,5 +1,5 @@
 const esClient = require("../config/elasticsearch");
-const cacheService = require("./cache.service.js");
+const cacheService = require("../utils/cache.util.js");
 const INDEX = process.env.ELASTICSEARCH_PRODUCT_INDEX || "products";
 
 const createIndex = async () => {
