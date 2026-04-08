@@ -10,7 +10,7 @@ const cacheUtil = require('../../utils/cache.util');
  * Hàm trợ giúp để thực hiện fetch hàng loạt có tích hợp Redis Cache.
  * Luồng: Check Redis (mget) -> Lấy ID thiếu từ DB -> Lưu lại vào Redis (mset) -> Trả về kết quả khớp thứ tự.
  */
-const batchFetchWithCache = async (ids, { repository, cacheKeyPrefix, idField, ttlSeconds = 3600 }) => {
+const batchFetchWithCache = async (ids, { repository, cacheKeyPrefix, idField, ttlSeconds = 3600, transform = null }) => {
     const keys = ids.map(id => `${cacheKeyPrefix}:${id}`);
     
     // 1. Kiểm tra cache Redis tập trung (MGET)
@@ -47,7 +47,13 @@ const batchFetchWithCache = async (ids, { repository, cacheKeyPrefix, idField, t
 
         const entriesToCache = {};
         missingIds.forEach((id, i) => {
-            const data = dbMap[id] || null;
+            let data = dbMap[id] || null;
+            
+            // Áp dụng biến đổi dữ liệu nếu có (ví dụ: loại bỏ trường nhạy cảm)
+            if (data && typeof transform === 'function') {
+                data = transform(data);
+            }
+
             const originalIndex = missingIndices[i];
             results[originalIndex] = data;
             
@@ -87,7 +93,11 @@ const createLoaders = () => {
                 repository: accountRepository,
                 cacheKeyPrefix: 'account',
                 idField: 'account_id',
-                ttlSeconds: 600
+                ttlSeconds: 600,
+                transform: (data) => {
+                    const { password_hash, ...safeData } = data;
+                    return safeData;
+                }
             });
         }),
 
