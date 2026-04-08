@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const accountRepository = require('../repositories/account.repository.js');
-const cacheService = require('./cache.service.js');
+const cacheService = require("../utils/cache.util.js");
 
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_MINUTES = 1;

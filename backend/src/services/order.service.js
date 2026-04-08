@@ -3,7 +3,7 @@ const orderRepository = require('../repositories/order.repository.js');
 const orderItemRepository = require('../repositories/order_item.repository.js');
 const productService = require('./product.service.js');
 const { indexUpdateProduct } = require('./search.service.js');
-const cacheService = require('./cache.service.js');
+const cacheService = require("../utils/cache.util.js");
 
 const createOrder = async (orderData, items) => {
     const client = await pool.connect();

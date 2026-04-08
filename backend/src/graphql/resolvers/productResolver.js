@@ -46,8 +46,9 @@ const productResolver = {
     },
   },
   Product: {
-    category: async (parent) => {
-      return await getCategoryById(parent.category_id);
+    category: (parent, _, { loaders }) => {
+      if (!parent.category_id) return null;
+      return loaders.category.load(parent.category_id);
     },
   },
 };

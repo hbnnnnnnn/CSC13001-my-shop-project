@@ -1,6 +1,6 @@
 const accountService = require('../../services/account.service.js');
 const { requireAuth } = require('../../middlewares/auth.middleware.js');
-const cacheService = require('../../services/cache.service.js');
+const cacheService = require('../../utils/cache.util.js');
 const jwt = require('jsonwebtoken');
 
 const accountResolver = {
