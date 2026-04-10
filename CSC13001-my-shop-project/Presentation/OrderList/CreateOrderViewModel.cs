@@ -9,19 +9,10 @@ namespace CSC13001_my_shop_project.Presentation.OrderList;
 
 public partial class CreateOrderViewModel : ObservableObject
 {
-<<<<<<< Updated upstream
-    private readonly OrderService? _orderService;
-    private readonly AuthService? _authService;
-
-=======
-<<<<<<< Updated upstream
-=======
     private readonly OrderService? _orderService;
     private readonly AuthService? _authService;
     private readonly string? _editOrderId;
 
->>>>>>> Stashed changes
->>>>>>> Stashed changes
     [ObservableProperty]
     private string _dialogTitle = "CREATE ORDER";
 
@@ -86,22 +77,35 @@ public partial class CreateOrderViewModel : ObservableObject
         "Cancelled"
     };
 
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
-    public CreateOrderViewModel()
-=======
     public bool IsEditMode => _editOrderId is not null;
 
->>>>>>> Stashed changes
+    /// <summary>
+    /// True when fields (info, products, date) can be edited.
+    /// Only Created and Processing allow full editing.
+    /// </summary>
+    public bool IsFieldsEditable => SelectedStatus is "Created" or "Processing";
+
+    /// <summary>
+    /// Visibility for Remove buttons in the product list DataTemplate.
+    /// </summary>
+    public Microsoft.UI.Xaml.Visibility RemoveButtonVisibility =>
+        IsFieldsEditable
+            ? Microsoft.UI.Xaml.Visibility.Visible
+            : Microsoft.UI.Xaml.Visibility.Collapsed;
+
+    /// <summary>
+    /// When status changes, notify dependent computed properties.
+    /// </summary>
+    partial void OnSelectedStatusChanged(string value)
+    {
+        OnPropertyChanged(nameof(IsFieldsEditable));
+        OnPropertyChanged(nameof(RemoveButtonVisibility));
+    }
+
     /// <summary>
     /// Constructor for Create mode with API services.
     /// </summary>
     public CreateOrderViewModel(OrderService orderService, AuthService authService)
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
     {
         _orderService = orderService;
         _authService = authService;
@@ -114,19 +118,10 @@ public partial class CreateOrderViewModel : ObservableObject
     /// </summary>
     public CreateOrderViewModel(OrderItem order, OrderService orderService, AuthService authService)
     {
-<<<<<<< Updated upstream
-        _orderService = orderService;
-        _authService = authService;
-
-=======
-<<<<<<< Updated upstream
-=======
         _orderService = orderService;
         _authService = authService;
         _editOrderId = order.Id.TrimStart('#');
 
->>>>>>> Stashed changes
->>>>>>> Stashed changes
         DialogTitle = $"EDIT ORDER {order.Id}";
         SubmitButtonText = "Update Order";
         CustomerName = order.CustomerName;
@@ -160,17 +155,10 @@ public partial class CreateOrderViewModel : ObservableObject
         );
 
         RefreshTotals();
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
         _ = LoadPickerDataAsync();
     }
 
     /// <summary>
-<<<<<<< Updated upstream
-=======
     /// Returns the list of statuses reachable from the current status.
     /// Follows backend state machine transitions.
     /// </summary>
@@ -191,7 +179,6 @@ public partial class CreateOrderViewModel : ObservableObject
     }
 
     /// <summary>
->>>>>>> Stashed changes
     /// When a customer is selected from the picker, auto-fill their details.
     /// </summary>
     partial void OnSelectedCustomerChanged(CustomerPickerItem? value)
@@ -228,10 +215,6 @@ public partial class CreateOrderViewModel : ObservableObject
         {
             IsLoadingPickers = false;
         }
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
->>>>>>> Stashed changes
     }
 
     public void RefreshTotals()
@@ -254,18 +237,9 @@ public partial class CreateOrderViewModel : ObservableObject
 
     public async Task<bool> SaveAsync()
     {
-<<<<<<< Updated upstream
-        ErrorMessage = null;
-        Debug.WriteLine("[CreateOrder] SaveAsync called");
-
-=======
-<<<<<<< Updated upstream
-=======
         ErrorMessage = null;
         Debug.WriteLine($"[CreateOrder] SaveAsync called (IsEditMode={IsEditMode})");
 
->>>>>>> Stashed changes
->>>>>>> Stashed changes
         if (!ValidateInput())
         {
             Debug.WriteLine($"[CreateOrder] Validation failed: {ErrorMessage}");
@@ -282,45 +256,6 @@ public partial class CreateOrderViewModel : ObservableObject
         IsSaving = true;
         try
         {
-<<<<<<< Updated upstream
-            // Build items list: product_id + quantity
-            var items = Products
-                .Where(p => !string.IsNullOrEmpty(p.ProductId))
-                .Select(p => (p.ProductId, p.Quantity))
-                .ToList();
-
-            Debug.WriteLine($"[CreateOrder] Items count: {items.Count}");
-            foreach (var item in items)
-            {
-                Debug.WriteLine($"  - ProductId={item.ProductId}, Qty={item.Quantity}");
-            }
-
-            if (items.Count == 0)
-            {
-                ErrorMessage = "No valid products to submit.";
-                Debug.WriteLine("[CreateOrder] No valid items");
-                return false;
-            }
-
-            // Get customer_id from selected customer
-            var customerId = SelectedCustomer?.CustomerId;
-            Debug.WriteLine($"[CreateOrder] CustomerId={customerId}, Address={Address}");
-
-            var result = await _orderService.CreateOrderAsync(
-                customerId,
-                string.IsNullOrWhiteSpace(Address) ? null : Address,
-                items
-            );
-
-            Debug.WriteLine($"[CreateOrder] SUCCESS - Created order: {result.Id}");
-            return true;
-        }
-=======
-<<<<<<< Updated upstream
-            await Task.CompletedTask;
-            return true;
-        }
-=======
             // Build items list: product_id + quantity
             var items = Products
                 .Where(p => !string.IsNullOrEmpty(p.ProductId))
@@ -383,7 +318,6 @@ public partial class CreateOrderViewModel : ObservableObject
 
             return true;
         }
->>>>>>> Stashed changes
         catch (GraphqlException ex)
         {
             ErrorMessage = ex.Message;
@@ -398,18 +332,10 @@ public partial class CreateOrderViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-<<<<<<< Updated upstream
-            ErrorMessage = $"Failed to create order: {ex.Message}";
-            Debug.WriteLine($"[CreateOrder] Exception: {ex}");
-            return false;
-        }
-=======
             ErrorMessage = $"Failed to save order: {ex.Message}";
             Debug.WriteLine($"[CreateOrder] Exception: {ex}");
             return false;
         }
->>>>>>> Stashed changes
->>>>>>> Stashed changes
         finally
         {
             IsSaving = false;

@@ -27,14 +27,7 @@ public sealed partial class CreateOrderDialog : ContentDialog
     {
         UpdateEmptyState();
         UpdateDateDisplay();
-<<<<<<< Updated upstream
-=======
-<<<<<<< Updated upstream
-        UpdateStatusDisplay();
-=======
         UpdateSelectedStatusColors();
->>>>>>> Stashed changes
->>>>>>> Stashed changes
     }
 
     private void UpdateEmptyState()
@@ -233,6 +226,8 @@ public sealed partial class CreateOrderDialog : ContentDialog
         if (vm.IsEditMode)
         {
             StatusPickerPanel.Visibility = Visibility.Visible;
+            Grid.SetColumn(DatePickerPanel, 1); // Move DATE next to STATUS
+
             var brush = GetStatusFgBrush(vm.SelectedStatus);
             SelectedStatusDot.Fill = brush;
             SelectedStatusText.Foreground = brush;
@@ -240,7 +235,36 @@ public sealed partial class CreateOrderDialog : ContentDialog
             // Apply colors to dropdown items when they load
             StatusOptionsList.ContainerContentChanging -= OnStatusItemContentChanging;
             StatusOptionsList.ContainerContentChanging += OnStatusItemContentChanging;
+
+            // Enable/disable fields based on whether target status allows editing
+            UpdateFieldsEditability(vm.SelectedStatus);
         }
+    }
+
+    /// <summary>
+    /// Enables or disables input fields based on the selected target status.
+    /// Only Created and Processing allow editing customer info, products, and address.
+    /// Shipped/Delivered/Cancelled are status-only transitions.
+    /// </summary>
+    private void UpdateFieldsEditability(string targetStatus)
+    {
+        var isEditable = targetStatus is "Created" or "Processing";
+
+        // Customer info fields
+        CustomerPicker.IsEnabled = isEditable;
+        PhoneTextBox.IsReadOnly = !isEditable;
+        EmailTextBox.IsReadOnly = !isEditable;
+        AddressTextBox.IsReadOnly = !isEditable;
+
+        // Date picker
+        DatePickerButton.IsEnabled = isEditable;
+
+        // Product add button
+        AddProductButton.IsEnabled = isEditable;
+
+        // Visual feedback: dim the locked sections
+        CustomerDetailsPanel.Opacity = isEditable ? 1.0 : 0.5;
+        DatePickerPanel.Opacity = isEditable ? 1.0 : 0.5;
     }
 
     /// <summary>

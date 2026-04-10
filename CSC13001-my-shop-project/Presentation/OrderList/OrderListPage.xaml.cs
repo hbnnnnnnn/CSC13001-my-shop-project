@@ -109,22 +109,6 @@ public sealed partial class OrderListPage : Page
     {
         if (sender is MenuFlyoutItem item && item.DataContext is OrderItem order)
         {
-<<<<<<< Updated upstream
-            var orderService = GetService<OrderService>();
-            var authService = GetService<AuthService>();
-            if (orderService is null || authService is null) return;
-
-            var dialog = new CreateOrderDialog
-            {
-                XamlRoot = this.XamlRoot,
-                DataContext = new CreateOrderViewModel(order, orderService, authService)
-=======
-<<<<<<< Updated upstream
-            var dialog = new CreateOrderDialog
-            {
-                XamlRoot = this.XamlRoot,
-                DataContext = new CreateOrderViewModel(order)
-=======
             var orderService = GetService<OrderService>();
             var authService = GetService<AuthService>();
             if (orderService is null || authService is null) return;
@@ -145,8 +129,6 @@ public sealed partial class OrderListPage : Page
             {
                 XamlRoot = this.XamlRoot,
                 DataContext = new CreateOrderViewModel(detailedOrder, orderService, authService)
->>>>>>> Stashed changes
->>>>>>> Stashed changes
             };
 
             // Show dialog and wait for result

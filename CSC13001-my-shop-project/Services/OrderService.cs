@@ -160,22 +160,6 @@ public class OrderService
         return MapOrderItem(data.GetProperty("createOrder"));
     }
 
-    /// <summary>
-<<<<<<< Updated upstream
-    /// Updates the status of an existing order.
-    /// </summary>
-    public async Task UpdateOrderStatusAsync(string orderId, string status)
-    {
-        await _graphql.QueryAsync(
-            @"mutation UpdateStatus($id: ID!, $status: String!) {
-                updateOrderStatus(id: $id, status: $status) {
-                    order_id
-                    status
-                }
-            }",
-            new { id = orderId, status }
-        );
-=======
     /// Full update of an order: status, info, and/or items via <c>updateOrderFull</c>.
     /// This is the recommended mutation (replaces deprecated updateOrderStatus/updateOrder).
     /// </summary>
@@ -254,7 +238,6 @@ public class OrderService
     public async Task UpdateOrderStatusAsync(string orderId, string status)
     {
         await UpdateOrderFullAsync(orderId, status: status);
->>>>>>> Stashed changes
     }
 
     // ────────────────────────────────────────────────────
