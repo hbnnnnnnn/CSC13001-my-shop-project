@@ -2,6 +2,8 @@ services:
   backend:
     build: .
     container_name: myshop_backend
+    networks:
+      - myshop_network
     ports:
       - "4000:4000" # Change left port if you want expose different port to host
     env_file:
@@ -22,6 +24,8 @@ services:
   db:
     image: postgres:15-alpine
     container_name: myshop_db
+    networks:
+      - myshop_network
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -43,6 +47,8 @@ services:
     image: dpage/pgadmin4:latest
     container_name: myshop_pgadmin
     profiles: ["tools"]
+    networks:
+      - myshop_network
     environment:
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
@@ -56,6 +62,8 @@ services:
   elasticsearch:
     image: elasticsearch:9.3.2
     container_name: myshop_elasticsearch
+    networks:
+      - myshop_network
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false # disable auth for dev
@@ -76,6 +84,8 @@ services:
     image: kibana:9.3.2
     container_name: myshop_kibana
     profiles: ["tools"]
+    networks:
+      - myshop_network
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:
@@ -88,6 +98,8 @@ services:
   redis:
     image: redis:7-alpine
     container_name: myshop_redis
+    networks:
+      - myshop_network
     ports:
       - "6379:6379"
     volumes:
@@ -103,9 +115,16 @@ services:
     image: redis/redisinsight:latest
     container_name: myshop_redis_insight
     profiles: ["tools"]
+    networks:
+      - myshop_network
     ports:
       - "5540:5540"
     restart: unless-stopped
+
+networks:
+  myshop_network:
+    name: myshop_network
+    driver: bridge
 
 volumes:
   pgdata:

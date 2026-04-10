@@ -150,9 +150,10 @@ mutation DeleteCategory {
 
 ```graphql
 mutation CreateCustomer {
-  createCustomer(name: "Nguyen Van A", phone: "0900000001", address: "HCM") {
+  createCustomer(name: "Nguyen Van A", email: "a@gmail.com", phone: "0900000001", address: "HCM") {
     customer_id
     name
+    email
     phone
     address
   }
@@ -167,6 +168,7 @@ query Customers {
     data {
       customer_id
       name
+      email
       phone
       address
     }
@@ -185,6 +187,7 @@ query CustomerById {
   customer(id: "1") {
     customer_id
     name
+    email
     phone
     address
   }
@@ -198,6 +201,7 @@ query CustomerByPhone {
   customerByPhone(phone: "0900000001") {
     customer_id
     name
+    email
     phone
     address
   }
@@ -208,9 +212,10 @@ query CustomerByPhone {
 
 ```graphql
 mutation UpdateCustomer {
-  updateCustomer(id: "1", name: "Nguyen Van B", phone: "0900000002", address: "Ha Noi") {
+  updateCustomer(id: "1", name: "Nguyen Van B", email: "b@gmail.com", phone: "0900000002", address: "Ha Noi") {
     customer_id
     name
+    email
     phone
     address
   }
@@ -414,6 +419,9 @@ mutation CreateOrder {
     customer_id: "1"
     account_id: "1"
     shipping_address: "123 Demo Street"
+    recipient_name: "Nguyen Van A"
+    recipient_phone: "0900000001"
+    recipient_email: "a@gmail.com"
     items: [
       { product_id: "1", quantity: 2 }
       { product_id: "2", quantity: 1 }
@@ -427,9 +435,11 @@ mutation CreateOrder {
     customer_id
     account_id
     shipping_address
+    recipient_name
+    recipient_phone
+    recipient_email
     items {
       order_item_id
-      order_id
       product_id
       quantity
       unit_sale_price
@@ -447,23 +457,17 @@ query Orders {
     data {
       order_id
       created_time
-      updated_time
       final_price
       status
-      customer_id
-      account_id
-      shipping_address
+      recipient_name
+      recipient_phone
       items {
-        order_item_id
         product_id
         quantity
-        unit_sale_price
         total_price
       }
     }
     total
-    page
-    limit
     totalPages
   }
 }
@@ -480,11 +484,12 @@ query OrderById {
     final_price
     status
     customer_id
-    account_id
     shipping_address
+    recipient_name
+    recipient_phone
+    recipient_email
     items {
       order_item_id
-      order_id
       product_id
       quantity
       unit_sale_price
@@ -494,16 +499,55 @@ query OrderById {
 }
 ```
 
-### 6.4 Cap nhat status order (Admin/Sale)
+### 6.4 Update đơn hàng FULL (Admin/Sale) - KHUYÊN DÙNG
+Dùng để sửa địa chỉ, người nhận, status HOẶC thay đổi danh sách món đồ (Replace all items).
+
+```graphql
+mutation UpdateOrderFull {
+  updateOrderFull(
+    id: "1",
+    input: {
+      status: "Processing"
+      shipping_address: "456 New Street, Ward 5"
+      recipient_name: "Nguyen Van B"
+      items: [
+        { product_id: "1", quantity: 5 }
+        { product_id: "3", quantity: 2 }
+      ]
+    }
+  ) {
+    order_id
+    status
+    final_price
+    recipient_name
+    shipping_address
+    items {
+      product_id
+      quantity
+      total_price
+    }
+  }
+}
+```
+
+### 6.4.1 Cap nhat status order (Admin/Sale) - @DEPRECATED
 
 ```graphql
 mutation UpdateOrderStatus {
-  updateOrderStatus(id: "1", status: "Paid") {
+  updateOrderStatus(id: "1", status: "Processing") {
     order_id
     status
     updated_time
-    final_price
   }
+}
+```
+
+### 6.5 Soft Delete đơn hàng (Admin)
+Lưu ý: Chỉ xóa được đơn ở trạng thái Created/Processing. Đơn đã đi giao (Shipped/Delivered) sẽ bị chặn.
+
+```graphql
+mutation DeleteOrder {
+  deleteOrder(id: "1")
 }
 ```
 

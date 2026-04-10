@@ -11,11 +11,30 @@ const orderResolver = {
         })
     },
     Mutation: {
-        createOrder: requireRole(['Admin', 'Sale'], async (_, { customer_id, account_id, shipping_address, items }) => {
-            return await orderService.createOrder({ customer_id, account_id, shipping_address }, items);
+        createOrder: requireRole(['Admin', 'Sale'], async (_, { customer_id, account_id, shipping_address, recipient_name, recipient_phone, recipient_email, items }) => {
+            return await orderService.createOrder({ 
+                customer_id, 
+                account_id, 
+                shipping_address,
+                recipient_name,
+                recipient_phone,
+                recipient_email
+            }, items);
         }),
+        // DEPRECATED: Please use updateOrderFull instead
         updateOrderStatus: requireRole(['Admin', 'Sale'], async (_, { id, status }) => {
             return await orderService.updateOrderStatus(id, status);
+        }),
+        // DEPRECATED: Please use updateOrderFull instead
+        updateOrder: requireRole(['Admin', 'Sale'], async (_, { id, input }) => {
+            return await orderService.updateOrder(id, input);
+        }),
+        // NEW API
+        updateOrderFull: requireRole(['Admin', 'Sale'], async (_, { id, input }) => {
+            return await orderService.updateOrderFull(id, input);
+        }),
+        deleteOrder: requireRole(['Admin'], async (_, { id }) => {
+            return await orderService.softDeleteOrder(id);
         })
     },
     // Field resolvers
