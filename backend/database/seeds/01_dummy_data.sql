@@ -27,9 +27,9 @@ INSERT INTO CATEGORY (name, description) VALUES
 ('Accessories', 'Earphones, charging cables, adapters, phone cases');
 
 -- 3. Insert Customers
-INSERT INTO CUSTOMER (name, phone, address) VALUES
-('John Smith', '0901234567', '123 Main Street, District 1, HCMC'),
-('Jane Doe', '0987654321', '456 Second Street, District 2, HCMC');
+INSERT INTO CUSTOMER (name, phone, email, address) VALUES
+('John Smith', '0901234567', 'john@example.com', '123 Main Street, District 1, HCMC'),
+('Jane Doe', '0987654321', 'jane@example.com', '456 Second Street, District 2, HCMC');
 
 -- 4. Insert Products
 -- Smartphones (category_id = 1)
@@ -48,9 +48,9 @@ INSERT INTO PRODUCT (sku, name, price, stock, description, images, supplier, cat
 -- NOTE: Add more products to reach the minimum of 22 products per category required by the project spec.
 
 -- 5. Insert Orders
-INSERT INTO ORDERS (final_price, status, customer_id, account_id, shipping_address) VALUES
-(29000000, 'Paid', 1, 2, '123 Main Street, District 1, HCMC'),       -- Order created by sale1
-(35000000, 'Created', 2, 1, 'Company X, Building Y, District 3, HCMC'); -- Order created by admin
+INSERT INTO ORDERS (final_price, status, customer_id, account_id, shipping_address, recipient_name, recipient_phone, recipient_email, is_deleted) VALUES
+(29000000, 'Delivered', 1, 2, '123 Main Street, District 1, HCMC', 'John Smith', '0901234567', 'john@example.com', false),       -- Order created by sale1
+(35000000, 'Created', 2, 1, 'Company X, Building Y, District 3, HCMC', 'Jane Doe', '0987654321', 'jane@example.com', false); -- Order created by admin
 
 -- 6. Insert Order Items
 INSERT INTO ORDER_ITEM (order_id, product_id, quantity, unit_sale_price, total_price) VALUES

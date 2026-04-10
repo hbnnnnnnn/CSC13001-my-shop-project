@@ -130,6 +130,21 @@ class ProductRepository extends BaseRepository {
 
     return result.rows;
   }
+  // dùng để tìm ids để update stock trong order service, dùng lệnh FOR UPDATE để khóa các dòng
+  async findByIdsForUpdate(ids, client) {
+    const db = client || this.db;
+    if (!ids || ids.length === 0) return [];
+
+    // Sort IDs to prevent deadlocks when locking multiple rows concurrently
+    const sortedIds = [...new Set(ids)].sort((a, b) => a - b);
+
+    const result = await db.query(
+      'SELECT * FROM product WHERE product_id = ANY($1) ORDER BY product_id FOR UPDATE',
+      [sortedIds]
+    );
+
+    return result.rows;
+  }
 }
 
 module.exports = new ProductRepository();

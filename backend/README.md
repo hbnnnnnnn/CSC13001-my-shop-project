@@ -21,7 +21,9 @@ Default values work out of the box for local development.
 ### 2. Start the backend
 
 ```bash
-docker-compose up -d
+cd backend
+npm install (if run docker-compose up --build before npm install and get error, run npm install and docker compose down before run docker-compose up --build)
+docker-compose up --build
 ```
 
 This starts three services:
@@ -111,6 +113,7 @@ backend/
 │   ├── graphql/
 │   │   ├── schema/          # GraphQL type definitions
 │   │   ├── resolvers/       # GraphQL resolvers
+│   │   ├── loaders/         # GraphQL loaders
 │   │   └── index.js         # Auto-merges all schemas and resolvers
 │   ├── scripts/
 │   │   ├── initDb.js        # Manual seed script (npm run db:seed)
@@ -118,6 +121,18 @@ backend/
 │   ├── services/
 │   │   ├── product.service.js  # Product business logic + ES sync on CRUD
 │   │   └── search.service.js   # Elasticsearch index and search operations
+│   ├── utils/
+│   │   ├── image.js          # Image upload utilities
+│   │   └── cache.utils.js    # Cache utilities
+│   ├── repositories/
+│   │   ├── base.repository.js  # Base repository for all repositories
+│   │   ├── product.repository.js # Product repository
+│   │   └── search.repository.js  # Search repository
+│   ├── middlewares/
+│   │   ├── auth.middleware.js  # Authentication middleware
+│   │   └── upload.middleware.js  # Upload middleware
+│   ├── routes/
+│   │   └── upload.routes.js  # Upload routes
 │   ├── app.js               # Express app setup and REST routes
 │   └── server.js            # Entry point: Apollo Server bootstrap
 ├── .env.example             # Environment template (commit this)

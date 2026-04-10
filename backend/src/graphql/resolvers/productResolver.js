@@ -11,7 +11,8 @@ const {
 const { searchProducts } = require("../../services/search.service");
 
 const { getCategoryById } = require("../../services/category.service");
-const { generateProductDetailsFromImage } = require("../../services/aiService");
+const { generateProductDetailsFromImage } = require("../../services/ai.service");
+const { requireRole } = require("../../middlewares/auth.middleware");
 
 const productResolver = {
   Query: {
@@ -32,18 +33,20 @@ const productResolver = {
     },
   },
   Mutation: {
-    createProduct: async (_, { input }) => {
+    createProduct: requireRole(['Admin', 'Sale'], async (_, { input }) => {
       return await createProduct(input);
-    },
-    updateProduct: async (_, { id, input }) => {
+    }),
+    updateProduct: requireRole(['Admin', 'Sale'], async (_, { id, input }) => {
       return await updateProduct(id, input);
-    },
-    deleteProduct: async (_, { id }) => {
+    }),
+    deleteProduct: requireRole(['Admin'], async (_, { id }) => {
       return await deleteProduct(id);
-    },
-    generateProductDetailsFromImage: async (_, { imageUrl }) => {
-      return await generateProductDetailsFromImage(imageUrl);
-    },
+    }),
+    generateProductDetailsFromImage: requireRole(['Admin', 'Sale'], async (_, { imageUrl }, context) => {
+      // Vì đã qua requireRole nên chắc chắn context.user tồn tại
+      const identifier = `user:${context.user.account_id}`;
+      return await generateProductDetailsFromImage(imageUrl, identifier);
+    }),
   },
   Product: {
     category: (parent, _, { loaders }) => {

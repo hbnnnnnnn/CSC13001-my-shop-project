@@ -55,6 +55,17 @@ const getProductById = async (id, client) => {
   }
 };
 
+// dùng để tìm ids để update stock trong order service, dùng lệnh FOR UPDATE để khóa các dòng
+const getProductsByIdsForUpdate = async (ids, client) => {
+  try {
+    // Không dùng Cache khi gọi For Update để bảo đảm dữ liệu RAM là mới nhất từ DB
+    const products = await productRepository.findByIdsForUpdate(ids, client);
+    return products;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const createProduct = async (product, client) => {
   try {
     const newProduct = await productRepository.create(product, client);
@@ -63,7 +74,7 @@ const createProduct = async (product, client) => {
       client
     );
     await indexProduct(productWithCategory);
-    
+
     // Invalidate product lists and dashboard stats
     await cacheService.delByPrefix("products:p:");
     await cacheService.delByPrefix("products:low_stock:");
@@ -122,12 +133,12 @@ const updateProductStock = async (productId, newStock, client) => {
     // Note: If calling from a transaction, ES sync should be handled by the caller after commit
     // But for standalone calls, we can sync here. 
     // We'll return the full product data so the caller can choose to sync.
-    
+
     // Invalidate caches
     await cacheService.del(`product:${productId}`);
     await cacheService.delByPrefix("products:p:");
     await cacheService.delByPrefix("products:low_stock:");
-    
+
     return productWithCategory;
   } catch (error) {
     throw error;
@@ -171,6 +182,7 @@ const getTopSellingProducts = async (limit = 5, client) => {
 module.exports = {
   getProducts,
   getProductById,
+  getProductsByIdsForUpdate,
   createProduct,
   updateProduct,
   deleteProduct,

@@ -16,6 +16,15 @@ class CustomerRepository extends BaseRepository {
         const result = await this.db.query(query, [phone]);
         return result.rows[0];
     }
+
+    async findByEmail(email) {
+        const query = format(
+            "SELECT * FROM %I WHERE email = $1",
+            this.tableName
+        );
+        const result = await this.db.query(query, [email]);
+        return result.rows[0];
+    }
 }
 
 module.exports = new CustomerRepository();
