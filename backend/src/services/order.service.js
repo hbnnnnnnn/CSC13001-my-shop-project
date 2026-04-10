@@ -170,12 +170,19 @@ const _validateTransition = (currentStatus, targetStatus) => {
 };
 
 const _checkUpdatePermissions = (targetStatus, updateInput) => {
+    const hasInfoUpdate = ['shipping_address', 'recipient_name', 'recipient_phone', 'recipient_email']
+        .some(key => updateInput[key] !== undefined);
+    const hasItemsUpdate = !!updateInput.items;
+
     if (targetStatus === 'Delivered' || targetStatus === 'Cancelled') {
-        throw new Error(`Cannot edit an archived order (${targetStatus})`);
+        // Allow status-only transition (e.g. Shipped → Delivered)
+        // Block if caller also tries to modify items or info
+        if (hasItemsUpdate || hasInfoUpdate) {
+            throw new Error(`Cannot update items or info for an archived order (${targetStatus})`);
+        }
     }
     if (targetStatus === 'Shipped') {
-        const hasInfoUpdate = ['shipping_address', 'recipient_name', 'recipient_phone', 'recipient_email'].some(key => updateInput[key] !== undefined);
-        if (updateInput.items || hasInfoUpdate) {
+        if (hasItemsUpdate || hasInfoUpdate) {
             throw new Error(`Cannot update items or info for a shipped order`);
         }
     }
