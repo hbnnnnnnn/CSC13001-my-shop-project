@@ -9,9 +9,19 @@ namespace CSC13001_my_shop_project.Presentation.OrderList;
 
 public partial class CreateOrderViewModel : ObservableObject
 {
+<<<<<<< Updated upstream
     private readonly OrderService? _orderService;
     private readonly AuthService? _authService;
 
+=======
+<<<<<<< Updated upstream
+=======
+    private readonly OrderService? _orderService;
+    private readonly AuthService? _authService;
+    private readonly string? _editOrderId;
+
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     [ObservableProperty]
     private string _dialogTitle = "CREATE ORDER";
 
@@ -67,20 +77,31 @@ public partial class CreateOrderViewModel : ObservableObject
             ? Microsoft.UI.Xaml.Visibility.Visible
             : Microsoft.UI.Xaml.Visibility.Collapsed;
 
-    public List<string> StatusOptions { get; } = new()
+    public List<string> StatusOptions { get; set; } = new()
     {
         "Created",
         "Processing",
         "Shipped",
         "Delivered",
-        "Pending",
         "Cancelled"
     };
 
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+    public CreateOrderViewModel()
+=======
+    public bool IsEditMode => _editOrderId is not null;
+
+>>>>>>> Stashed changes
     /// <summary>
     /// Constructor for Create mode with API services.
     /// </summary>
     public CreateOrderViewModel(OrderService orderService, AuthService authService)
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     {
         _orderService = orderService;
         _authService = authService;
@@ -93,9 +114,19 @@ public partial class CreateOrderViewModel : ObservableObject
     /// </summary>
     public CreateOrderViewModel(OrderItem order, OrderService orderService, AuthService authService)
     {
+<<<<<<< Updated upstream
         _orderService = orderService;
         _authService = authService;
 
+=======
+<<<<<<< Updated upstream
+=======
+        _orderService = orderService;
+        _authService = authService;
+        _editOrderId = order.Id.TrimStart('#');
+
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
         DialogTitle = $"EDIT ORDER {order.Id}";
         SubmitButtonText = "Update Order";
         CustomerName = order.CustomerName;
@@ -103,6 +134,9 @@ public partial class CreateOrderViewModel : ObservableObject
         Email = order.Email;
         Address = order.Address;
         SelectedStatus = order.Status;
+
+        // Restrict status options based on state machine
+        StatusOptions = GetAllowedStatuses(order.Status);
 
         // Parse date
         if (DateTimeOffset.TryParse(order.Date, out var parsed))
@@ -126,10 +160,38 @@ public partial class CreateOrderViewModel : ObservableObject
         );
 
         RefreshTotals();
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
         _ = LoadPickerDataAsync();
     }
 
     /// <summary>
+<<<<<<< Updated upstream
+=======
+    /// Returns the list of statuses reachable from the current status.
+    /// Follows backend state machine transitions.
+    /// </summary>
+    private static List<string> GetAllowedStatuses(string currentStatus)
+    {
+        var transitions = new Dictionary<string, List<string>>
+        {
+            ["Created"] = ["Created", "Processing", "Cancelled"],
+            ["Processing"] = ["Processing", "Shipped", "Cancelled"],
+            ["Shipped"] = ["Shipped", "Delivered"],
+            ["Delivered"] = ["Delivered"],
+            ["Cancelled"] = ["Cancelled"]
+        };
+
+        return transitions.TryGetValue(currentStatus, out var allowed)
+            ? allowed
+            : [currentStatus];
+    }
+
+    /// <summary>
+>>>>>>> Stashed changes
     /// When a customer is selected from the picker, auto-fill their details.
     /// </summary>
     partial void OnSelectedCustomerChanged(CustomerPickerItem? value)
@@ -166,6 +228,10 @@ public partial class CreateOrderViewModel : ObservableObject
         {
             IsLoadingPickers = false;
         }
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     }
 
     public void RefreshTotals()
@@ -188,9 +254,18 @@ public partial class CreateOrderViewModel : ObservableObject
 
     public async Task<bool> SaveAsync()
     {
+<<<<<<< Updated upstream
         ErrorMessage = null;
         Debug.WriteLine("[CreateOrder] SaveAsync called");
 
+=======
+<<<<<<< Updated upstream
+=======
+        ErrorMessage = null;
+        Debug.WriteLine($"[CreateOrder] SaveAsync called (IsEditMode={IsEditMode})");
+
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
         if (!ValidateInput())
         {
             Debug.WriteLine($"[CreateOrder] Validation failed: {ErrorMessage}");
@@ -207,6 +282,7 @@ public partial class CreateOrderViewModel : ObservableObject
         IsSaving = true;
         try
         {
+<<<<<<< Updated upstream
             // Build items list: product_id + quantity
             var items = Products
                 .Where(p => !string.IsNullOrEmpty(p.ProductId))
@@ -239,6 +315,75 @@ public partial class CreateOrderViewModel : ObservableObject
             Debug.WriteLine($"[CreateOrder] SUCCESS - Created order: {result.Id}");
             return true;
         }
+=======
+<<<<<<< Updated upstream
+            await Task.CompletedTask;
+            return true;
+        }
+=======
+            // Build items list: product_id + quantity
+            var items = Products
+                .Where(p => !string.IsNullOrEmpty(p.ProductId))
+                .Select(p => (p.ProductId, p.Quantity))
+                .ToList();
+
+            Debug.WriteLine($"[CreateOrder] Items count: {items.Count}");
+
+            if (items.Count == 0)
+            {
+                ErrorMessage = "No valid products to submit.";
+                return false;
+            }
+
+            if (IsEditMode)
+            {
+                // ── Edit mode: call updateOrderFull ──
+                Debug.WriteLine($"[CreateOrder] Updating order {_editOrderId}");
+
+                // Backend blocks items/info edits when target status is Shipped or Delivered.
+                // Only send status in that case, send full payload otherwise.
+                var isStatusOnly = SelectedStatus is "Shipped" or "Delivered" or "Cancelled";
+
+                if (isStatusOnly)
+                {
+                    Debug.WriteLine($"[CreateOrder] Status-only update → {SelectedStatus}");
+                    var result = await _orderService.UpdateOrderFullAsync(
+                        _editOrderId!,
+                        status: SelectedStatus
+                    );
+                    Debug.WriteLine($"[CreateOrder] SUCCESS - Updated order: {result.Id}");
+                }
+                else
+                {
+                    var result = await _orderService.UpdateOrderFullAsync(
+                        _editOrderId!,
+                        status: SelectedStatus,
+                        shippingAddress: string.IsNullOrWhiteSpace(Address) ? null : Address,
+                        recipientName: string.IsNullOrWhiteSpace(CustomerName) ? null : CustomerName,
+                        recipientPhone: string.IsNullOrWhiteSpace(Phone) ? null : Phone,
+                        recipientEmail: string.IsNullOrWhiteSpace(Email) ? null : Email,
+                        items: items
+                    );
+                    Debug.WriteLine($"[CreateOrder] SUCCESS - Updated order: {result.Id}");
+                }
+            }
+            else
+            {
+                // ── Create mode: call createOrder ──
+                var customerId = SelectedCustomer?.CustomerId;
+                Debug.WriteLine($"[CreateOrder] Creating order, CustomerId={customerId}");
+
+                var result = await _orderService.CreateOrderAsync(
+                    customerId,
+                    string.IsNullOrWhiteSpace(Address) ? null : Address,
+                    items
+                );
+                Debug.WriteLine($"[CreateOrder] SUCCESS - Created order: {result.Id}");
+            }
+
+            return true;
+        }
+>>>>>>> Stashed changes
         catch (GraphqlException ex)
         {
             ErrorMessage = ex.Message;
@@ -253,10 +398,18 @@ public partial class CreateOrderViewModel : ObservableObject
         }
         catch (Exception ex)
         {
+<<<<<<< Updated upstream
             ErrorMessage = $"Failed to create order: {ex.Message}";
             Debug.WriteLine($"[CreateOrder] Exception: {ex}");
             return false;
         }
+=======
+            ErrorMessage = $"Failed to save order: {ex.Message}";
+            Debug.WriteLine($"[CreateOrder] Exception: {ex}");
+            return false;
+        }
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
         finally
         {
             IsSaving = false;

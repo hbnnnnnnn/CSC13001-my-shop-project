@@ -109,6 +109,7 @@ public sealed partial class OrderListPage : Page
     {
         if (sender is MenuFlyoutItem item && item.DataContext is OrderItem order)
         {
+<<<<<<< Updated upstream
             var orderService = GetService<OrderService>();
             var authService = GetService<AuthService>();
             if (orderService is null || authService is null) return;
@@ -117,9 +118,58 @@ public sealed partial class OrderListPage : Page
             {
                 XamlRoot = this.XamlRoot,
                 DataContext = new CreateOrderViewModel(order, orderService, authService)
+=======
+<<<<<<< Updated upstream
+            var dialog = new CreateOrderDialog
+            {
+                XamlRoot = this.XamlRoot,
+                DataContext = new CreateOrderViewModel(order)
+=======
+            var orderService = GetService<OrderService>();
+            var authService = GetService<AuthService>();
+            if (orderService is null || authService is null) return;
+
+            // Fetch full details for edit
+            OrderItem detailedOrder = order;
+            try
+            {
+                var rawId = order.Id.TrimStart('#');
+                detailedOrder = await orderService.GetOrderByIdAsync(rawId);
+            }
+            catch
+            {
+                detailedOrder = order;
+            }
+
+            var dialog = new CreateOrderDialog
+            {
+                XamlRoot = this.XamlRoot,
+                DataContext = new CreateOrderViewModel(detailedOrder, orderService, authService)
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
             };
 
-            await dialog.ShowAsync();
+            // Show dialog and wait for result
+            _ = dialog.ShowAsync();
+            var success = await dialog.WaitForResultAsync();
+
+            if (success)
+            {
+                var successDialog = new ContentDialog
+                {
+                    XamlRoot = this.XamlRoot,
+                    Title = "Success",
+                    Content = "Order has been updated successfully!",
+                    CloseButtonText = "OK"
+                };
+                await successDialog.ShowAsync();
+
+                // Refresh order list
+                if (DataContext is OrderListViewModel vm)
+                {
+                    await vm.LoadOrdersAsync();
+                }
+            }
         }
     }
 
@@ -148,20 +198,35 @@ public sealed partial class OrderListPage : Page
 
             if (confirmDialog.IsConfirmed)
             {
-                // Delete the order from ViewModel
                 if (DataContext is OrderListViewModel vm)
                 {
-                    vm.DeleteOrder(order);
+                    // Call backend soft-delete
+                    var deleted = await vm.DeleteOrderAsync(order);
+
+                    if (deleted)
+                    {
+                        // Show success dialog
+                        var successDialog = new DeleteSuccessDialog
+                        {
+                            XamlRoot = this.XamlRoot
+                        };
+                        successDialog.SetOrderId(order.Id);
+                        await successDialog.ShowAsync();
+                    }
+                    else if (!string.IsNullOrEmpty(vm.ErrorMessage))
+                    {
+                        // Show error dialog (e.g., cannot delete shipped/delivered order)
+                        var errorDialog = new ContentDialog
+                        {
+                            XamlRoot = this.XamlRoot,
+                            Title = "Cannot Delete Order",
+                            Content = vm.ErrorMessage,
+                            CloseButtonText = "OK"
+                        };
+                        await errorDialog.ShowAsync();
+                        vm.ErrorMessage = null;
+                    }
                 }
-
-                // Show success dialog
-                var successDialog = new DeleteSuccessDialog
-                {
-                    XamlRoot = this.XamlRoot
-                };
-                successDialog.SetOrderId(order.Id);
-
-                await successDialog.ShowAsync();
             }
         }
         catch (System.Exception ex)

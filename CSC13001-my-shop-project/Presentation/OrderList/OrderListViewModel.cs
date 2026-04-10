@@ -54,7 +54,6 @@ public partial class OrderListViewModel : ObservableObject
         "Processing",
         "Shipped",
         "Delivered",
-        "Pending",
         "Cancelled"
     };
 
@@ -137,10 +136,34 @@ public partial class OrderListViewModel : ObservableObject
             CurrentPage++;
     }
 
-    public void DeleteOrder(OrderItem order)
+    /// <summary>
+    /// Deletes an order via the backend (soft delete) and refreshes the list.
+    /// </summary>
+    public async Task<bool> DeleteOrderAsync(OrderItem order)
     {
-        _allOrders.Remove(order);
-        ApplyFilters();
+        try
+        {
+            var rawId = order.Id.TrimStart('#');
+            await _orderService.DeleteOrderAsync(rawId);
+            _allOrders.Remove(order);
+            ApplyFilters();
+            return true;
+        }
+        catch (GraphqlException ex)
+        {
+            ErrorMessage = ex.Message;
+            return false;
+        }
+        catch (HttpRequestException)
+        {
+            ErrorMessage = "Cannot connect to server.";
+            return false;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Failed to delete order: {ex.Message}";
+            return false;
+        }
     }
 
     private void ApplyFilters()

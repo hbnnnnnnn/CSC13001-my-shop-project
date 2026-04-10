@@ -27,6 +27,14 @@ public sealed partial class CreateOrderDialog : ContentDialog
     {
         UpdateEmptyState();
         UpdateDateDisplay();
+<<<<<<< Updated upstream
+=======
+<<<<<<< Updated upstream
+        UpdateStatusDisplay();
+=======
+        UpdateSelectedStatusColors();
+>>>>>>> Stashed changes
+>>>>>>> Stashed changes
     }
 
     private void UpdateEmptyState()
@@ -196,5 +204,83 @@ public sealed partial class CreateOrderDialog : ContentDialog
             vm.RefreshTotals();
             UpdateEmptyState();
         }
+    }
+
+    // ─── Status picker ───
+    private void StatusOptionsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is ListView lv && lv.SelectedItem is string status && DataContext is CreateOrderViewModel vm)
+        {
+            vm.SelectedStatus = status;
+            UpdateSelectedStatusColors();
+
+            // Close the flyout
+            if (StatusPickerButton.Flyout is Flyout flyout)
+            {
+                flyout.Hide();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Applies the matching status color to the selected status dot + text,
+    /// and shows the status picker panel when in edit mode.
+    /// </summary>
+    private void UpdateSelectedStatusColors()
+    {
+        if (DataContext is not CreateOrderViewModel vm) return;
+
+        if (vm.IsEditMode)
+        {
+            StatusPickerPanel.Visibility = Visibility.Visible;
+            var brush = GetStatusFgBrush(vm.SelectedStatus);
+            SelectedStatusDot.Fill = brush;
+            SelectedStatusText.Foreground = brush;
+
+            // Apply colors to dropdown items when they load
+            StatusOptionsList.ContainerContentChanging -= OnStatusItemContentChanging;
+            StatusOptionsList.ContainerContentChanging += OnStatusItemContentChanging;
+        }
+    }
+
+    /// <summary>
+    /// Colors each dropdown item's dot + text with the matching status color.
+    /// </summary>
+    private void OnStatusItemContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
+    {
+        if (args.Item is string status && args.ItemContainer?.ContentTemplateRoot is StackPanel panel)
+        {
+            var brush = GetStatusFgBrush(status);
+            foreach (var child in panel.Children)
+            {
+                if (child is Microsoft.UI.Xaml.Shapes.Ellipse dot)
+                    dot.Fill = brush;
+                else if (child is TextBlock label)
+                    label.Foreground = brush;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Resolves the foreground brush for a given status from App.xaml resources.
+    /// </summary>
+    private static SolidColorBrush GetStatusFgBrush(string status)
+    {
+        var key = status switch
+        {
+            "Created" => "StatusCreatedFgBrush",
+            "Processing" => "StatusProcessingFgBrush",
+            "Shipped" => "StatusShippedFgBrush",
+            "Delivered" => "StatusDeliveredFgBrush",
+            "Cancelled" => "StatusCancelledFgBrush",
+            _ => "StatusCreatedFgBrush"
+        };
+
+        if (Application.Current.Resources.TryGetValue(key, out var resource) && resource is SolidColorBrush brush)
+        {
+            return brush;
+        }
+
+        return new SolidColorBrush(Microsoft.UI.Colors.Gray);
     }
 }

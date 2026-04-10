@@ -161,6 +161,7 @@ public class OrderService
     }
 
     /// <summary>
+<<<<<<< Updated upstream
     /// Updates the status of an existing order.
     /// </summary>
     public async Task UpdateOrderStatusAsync(string orderId, string status)
@@ -174,6 +175,86 @@ public class OrderService
             }",
             new { id = orderId, status }
         );
+=======
+    /// Full update of an order: status, info, and/or items via <c>updateOrderFull</c>.
+    /// This is the recommended mutation (replaces deprecated updateOrderStatus/updateOrder).
+    /// </summary>
+    public async Task<OrderItem> UpdateOrderFullAsync(
+        string orderId,
+        string? status = null,
+        string? shippingAddress = null,
+        string? recipientName = null,
+        string? recipientPhone = null,
+        string? recipientEmail = null,
+        List<(string ProductId, int Quantity)>? items = null
+    )
+    {
+        // Build input object – only include non-null fields
+        var input = new Dictionary<string, object?>();
+        if (status is not null) input["status"] = status;
+        if (shippingAddress is not null) input["shipping_address"] = shippingAddress;
+        if (recipientName is not null) input["recipient_name"] = recipientName;
+        if (recipientPhone is not null) input["recipient_phone"] = recipientPhone;
+        if (recipientEmail is not null) input["recipient_email"] = recipientEmail;
+        if (items is not null)
+        {
+            input["items"] = items.Select(i => new { product_id = i.ProductId, quantity = i.Quantity }).ToArray();
+        }
+
+        var data = await _graphql.QueryAsync(
+            @"mutation UpdateOrderFull($id: ID!, $input: UpdateOrderFullInput!) {
+                updateOrderFull(id: $id, input: $input) {
+                    order_id
+                    created_time
+                    updated_time
+                    final_price
+                    status
+                    customer_id
+                    shipping_address
+                    recipient_name
+                    recipient_phone
+                    recipient_email
+                    customer { name phone address }
+                    items {
+                        order_item_id
+                        product_id
+                        quantity
+                        unit_sale_price
+                        total_price
+                        product { name }
+                    }
+                }
+            }",
+            new { id = orderId, input }
+        );
+
+        return MapOrderItem(data.GetProperty("updateOrderFull"));
+    }
+
+    /// <summary>
+    /// Soft-deletes an order via <c>deleteOrder</c>.
+    /// Only works for orders with status Created or Processing.
+    /// </summary>
+    public async Task<bool> DeleteOrderAsync(string orderId)
+    {
+        var data = await _graphql.QueryAsync(
+            @"mutation DeleteOrder($id: ID!) {
+                deleteOrder(id: $id)
+            }",
+            new { id = orderId }
+        );
+
+        return data.GetProperty("deleteOrder").GetBoolean();
+    }
+
+    /// <summary>
+    /// Updates the status of an existing order.
+    /// </summary>
+    [Obsolete("Use UpdateOrderFullAsync instead")]
+    public async Task UpdateOrderStatusAsync(string orderId, string status)
+    {
+        await UpdateOrderFullAsync(orderId, status: status);
+>>>>>>> Stashed changes
     }
 
     // ────────────────────────────────────────────────────
