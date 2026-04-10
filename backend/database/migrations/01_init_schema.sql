@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS CUSTOMER (
     customer_id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     phone VARCHAR(20),
+    email VARCHAR(255) UNIQUE, -- Thêm email cho khách hàng
     address TEXT
 );
 
@@ -38,10 +39,15 @@ CREATE TABLE IF NOT EXISTS ORDERS (
     created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     final_price INTEGER NOT NULL,
-    status VARCHAR(50) NOT NULL, -- 'Created', 'Paid', 'Cancelled'
+    status VARCHAR(50) NOT NULL, -- 'Created', 'Processing', 'Shipped', 'Delivered', 'Cancelled'
     customer_id INTEGER REFERENCES CUSTOMER(customer_id) ON DELETE SET NULL,
     account_id INTEGER REFERENCES ACCOUNT(account_id) ON DELETE SET NULL,
-    shipping_address TEXT
+    shipping_address TEXT,
+    recipient_name VARCHAR(255),  -- Thông tin snapshot lúc đặt hàng
+    recipient_phone VARCHAR(20),
+    recipient_email VARCHAR(255),
+    is_deleted BOOLEAN DEFAULT FALSE, -- Flag cho Soft Delete
+    deleted_at TIMESTAMP              -- Thời điểm xóa để Audit
 );
 
 CREATE TABLE IF NOT EXISTS ORDER_ITEM (

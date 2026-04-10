@@ -11,14 +11,17 @@ const customerResolver = {
         },
         customerByPhone: async (_, { phone }) => {
             return await customerService.getCustomerByPhone(phone);
+        },
+        customerByEmail: async (_, { email }) => {
+            return await customerService.getCustomerByEmail(email);
         }
     },
     Mutation: {
-        createCustomer: requireRole(['Admin'], async (_, { name, phone, address }) => {
-            return await customerService.createCustomer(name, phone, address);
+        createCustomer: requireRole(['Admin'], async (_, { name, phone, email, address }) => {
+            return await customerService.createCustomer(name, phone, address, email);
         }),
-        updateCustomer: requireRole(['Admin'], async (_, { id, name, phone, address }) => {
-            return await customerService.updateCustomer(id, name, phone, address);
+        updateCustomer: requireRole(['Admin'], async (_, { id, name, phone, email, address }) => {
+            return await customerService.updateCustomer(id, name, phone, address, email);
         }),
         deleteCustomer: requireRole(['Admin'], async (_, { id }) => {
             return await customerService.deleteCustomer(id);

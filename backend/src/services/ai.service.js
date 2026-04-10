@@ -1,5 +1,9 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { convertImageUrlToBase64 } = require("../utils/image");
+const { convertImageUrlToBase64 } = require("../utils/image.js");
+const cacheService = require("../utils/cache.util.js");
+
+const AI_RATE_LIMIT = 5;
+const WINDOW_SECONDS = 60;
 
 const parseJsonFromModelResponse = (text) => {
   const cleaned = text.trim();
@@ -19,11 +23,22 @@ const parseJsonFromModelResponse = (text) => {
   }
 };
 
-const generateProductDetailsFromImage = async (imageUrl) => {
+const generateProductDetailsFromImage = async (imageUrl, identifier = "global") => {
+  const rateLimitKey = `ratelimit:ai:${identifier}`;
+
   try {
+    // 1. Check Rate Limit
+    const currentAttempts = await cacheService.get(rateLimitKey) || 0;
+    if (currentAttempts >= AI_RATE_LIMIT) {
+      throw new Error(`AI Quota exceeded. Please wait a moment before trying again.`);
+    }
+
     if (!process.env.GEMINI_API_KEY) {
       throw new Error("Missing GEMINI_API_KEY environment variable");
     }
+
+    // 2. Tăng counter (đặt TTL 60s)
+    await cacheService.set(rateLimitKey, currentAttempts + 1, WINDOW_SECONDS);
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({

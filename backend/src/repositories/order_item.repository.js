@@ -26,6 +26,16 @@ class OrderItemRepository extends BaseRepository {
 
         return result.rows;
     }
+
+    async deleteByOrderId(orderId, client) {
+        const db = client || this.db;
+        const result = await db.query(
+            "DELETE FROM order_item WHERE order_id = $1 RETURNING *",
+            [orderId]
+        );
+
+        return result.rows;
+    }
 }
 
 module.exports = new OrderItemRepository();

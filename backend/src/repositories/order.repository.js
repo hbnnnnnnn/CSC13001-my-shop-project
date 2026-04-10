@@ -4,7 +4,7 @@ const db = require("../config/db.js");
 
 class OrderRepository extends BaseRepository {
     constructor() {
-        super("orders", "order_id", db);
+        super("orders", "order_id", db, true); // true = use soft delete
     }
 
     async getOrderItems(orderId, client) {
