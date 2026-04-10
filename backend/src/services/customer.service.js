@@ -26,7 +26,7 @@ const getCustomerById = async (id) => {
     if (!customer) {
         throw new Error('Customer not found');
     }
-    
+
     await cacheService.set(cacheKey, customer, 1800); // 30 mins
     return customer;
 };
@@ -48,7 +48,30 @@ const getCustomerByPhone = async (phone) => {
     return customer;
 };
 
-const createCustomer = async (name, phone, address) => {
+const getCustomerByEmail = async (email) => {
+    const cacheKey = `customer:email:${email}`;
+    const cachedCustomer = await cacheService.get(cacheKey);
+    if (cachedCustomer) {
+        console.log(`[Cache Hit] ${cacheKey}`);
+        return cachedCustomer;
+    }
+
+    const customer = await customerRepository.findByEmail(email);
+
+    if (!customer) {
+        throw new Error('Customer with this email not found');
+    }
+
+    await cacheService.set(cacheKey, customer, 1800); // 30 mins
+    return customer;
+};
+
+const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
+};
+
+const createCustomer = async (name, phone, address, email) => {
     if (phone) {
         const existing = await customerRepository.findByPhone(phone);
         if (existing) {
@@ -56,10 +79,22 @@ const createCustomer = async (name, phone, address) => {
         }
     }
 
+    if (email) {
+        if (!validateEmail(email)) {
+            throw new Error('Invalid email format');
+        }
+        // Check unique email
+        const existingEmail = await customerRepository.findByEmail(email);
+        if (existingEmail) {
+            throw new Error('Customer email already exists');
+        }
+    }
+
     const newCustomer = await customerRepository.create({
         name,
         phone,
-        address
+        address,
+        email
     });
 
     // Invalidate pagination cache
@@ -67,7 +102,7 @@ const createCustomer = async (name, phone, address) => {
     return newCustomer;
 };
 
-const updateCustomer = async (id, name, phone, address) => {
+const updateCustomer = async (id, name, phone, address, email) => {
     const existing = await customerRepository.findById(id);
     if (!existing) {
         throw new Error('Customer not found');
@@ -80,10 +115,21 @@ const updateCustomer = async (id, name, phone, address) => {
         }
     }
 
+    if (email && email !== existing.email) {
+        if (!validateEmail(email)) {
+            throw new Error('Invalid email format');
+        }
+        const emailExists = await customerRepository.findByEmail(email);
+        if (emailExists) {
+            throw new Error('Customer email already exists');
+        }
+    }
+
     const dataToUpdate = {};
     if (name !== undefined) dataToUpdate.name = name;
     if (phone !== undefined) dataToUpdate.phone = phone;
     if (address !== undefined) dataToUpdate.address = address;
+    if (email !== undefined) dataToUpdate.email = email;
 
     const updatedCustomer = await customerRepository.update(id, dataToUpdate);
 
@@ -91,6 +137,8 @@ const updateCustomer = async (id, name, phone, address) => {
     await cacheService.del(`customer:${id}`);
     if (existing.phone) await cacheService.del(`customer:phone:${existing.phone}`);
     if (phone) await cacheService.del(`customer:phone:${phone}`);
+    if (existing.email) await cacheService.del(`customer:email:${existing.email}`);
+    if (email) await cacheService.del(`customer:email:${email}`);
     await cacheService.delByPrefix("customers:all:p:");
 
     return updatedCustomer;
@@ -107,6 +155,7 @@ const deleteCustomer = async (id) => {
     // Invalidate caches
     await cacheService.del(`customer:${id}`);
     if (existing.phone) await cacheService.del(`customer:phone:${existing.phone}`);
+    if (existing.email) await cacheService.del(`customer:email:${existing.email}`);
     await cacheService.delByPrefix("customers:all:p:");
 
     return deletedCustomer;
@@ -116,6 +165,7 @@ module.exports = {
     getAllCustomers,
     getCustomerById,
     getCustomerByPhone,
+    getCustomerByEmail,
     createCustomer,
     updateCustomer,
     deleteCustomer

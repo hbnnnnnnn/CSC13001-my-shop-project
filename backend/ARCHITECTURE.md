@@ -26,12 +26,19 @@ backend/
 │   │   │   ├── accountResolver.js
 │   │   │   ├── productResolver.js
 │   │   │   └── orderResolver.js
+│   │   ├── loaders/            # Nơi dùng để tối ưu truy vấn CSDL (Batching)
 │   │   └── index.js            # Nơi tự động quét và gom tất cả schema/resolvers lại thành 1 cục
 │   ├── middleware/             # Xử lý trung gian (Kiểm tra token đăng nhập, báo lỗi)
-│   ├── models/                 # Lớp tương tác CSDL trực tiếp (Tách biệt khỏi GraphQL)
-│   │   └── (ví dụ) ProductBase.js # Chứa hàm getProducts(), createProduct(),...
+│   ├── repositories/           # Lớp tương tác CSDL trực tiếp (Tách biệt khỏi GraphQL)
+│   │   └── (ví dụ) ProductRepository.js # Chứa hàm getProducts(), createProduct(),...
+│   ├── services/               # Lớp xử lý logic nghiệp vụ
+│   │   └── (ví dụ) ProductService.js # Chứa hàm getProducts(), createProduct(),...
 │   ├── scripts/                # Kịch bản dòng lệnh hỗ trợ dev
 │   │   └── initDb.js           # Định dạng lại DB tự động từ thư mục database/
+│   ├── utils/                  # Các hàm tiện ích dùng chung
+│   │   └── cache.js            # Chứa hàm getCache(), setCache(), delCache(),...
+│   ├── routes/                 # Các route cho REST API
+│   │   └── upload.routes.js    # Các route cho upload file
 │   ├── app.js                  # Khởi tạo khung Express và middlewares cơ bản
 │   └── server.js               # Entry point: Cột sống kết nối Express và Apollo Server
 ├── docker-compose.yml          # File hệ thống giúp chạy cả Node và Postgres chỉ bằng 1 lệnh
