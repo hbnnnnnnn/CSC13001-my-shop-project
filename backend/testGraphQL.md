@@ -473,6 +473,35 @@ query Orders {
 }
 ```
 
+### 6.2.1 Lọc & Sắp xếp Order (Filter by Status, Date và Top Recent)
+
+```graphql
+query OrdersFiltered {
+  orders(
+    page: 1,
+    limit: 10,
+    filter: {
+      status: "Processing",
+      startDate: "2026-04-01",
+      endDate: "2026-04-30"
+    },
+    sort: {
+      field: CREATED_TIME,
+      order: DESC
+    }
+  ) {
+    data {
+      order_id
+      created_time
+      final_price
+      status
+    }
+    total
+    totalPages
+  }
+}
+```
+
 ### 6.3 Order theo id (Admin/Sale)
 
 ```graphql
