@@ -13,6 +13,7 @@ public partial class OrderListViewModel : ObservableObject
 {
     private readonly OrderService _orderService;
     private List<OrderItem> _allOrders = [];
+    private bool _isLoadingInProgress;
 
     [ObservableProperty]
     private ObservableCollection<OrderItem> _filteredOrders = new();
@@ -69,21 +70,51 @@ public partial class OrderListViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Fetches all orders from backend and applies client-side filters.
+    /// Fetches orders from backend with server-side filters and pagination.
     /// </summary>
     public async Task LoadOrdersAsync()
     {
+        // Prevent re-entrant calls (filter changes can cascade)
+        if (_isLoadingInProgress) return;
+        _isLoadingInProgress = true;
+
         IsLoading = true;
         ErrorMessage = null;
 
         try
         {
             Console.Error.WriteLine("[OrderListVM] Loading orders...");
-            var (orders, _, _) = await _orderService.GetOrdersAsync(page: 1, limit: 500);
-            Console.Error.WriteLine($"[OrderListVM] Got {orders.Count} orders");
+
+            // Build server-side filter params
+            string? statusFilter = (SelectedStatusFilter != "All Status")
+                ? SelectedStatusFilter
+                : null;
+
+            string? startDate = FromDate?.UtcDateTime.ToString("o");
+            string? endDate = ToDate?.UtcDateTime.Date.AddDays(1).AddTicks(-1).ToString("o");
+
+            var (orders, total, totalPages) = await _orderService.GetOrdersAsync(
+                page: CurrentPage,
+                limit: PageSize,
+                statusFilter: statusFilter,
+                startDate: startDate,
+                endDate: endDate,
+                sortField: "CREATED_TIME",
+                sortOrder: "DESC"
+            );
+
+            Console.Error.WriteLine($"[OrderListVM] Got {orders.Count} orders (total: {total})");
+
             _allOrders = orders;
-            ApplyFilters();
-            Console.Error.WriteLine($"[OrderListVM] After filter: {FilteredOrders.Count} displayed");
+            TotalPages = Math.Max(1, totalPages);
+
+            // Rebuild page options for ComboBox
+            PageOptions.Clear();
+            for (int i = 1; i <= TotalPages; i++)
+                PageOptions.Add(i);
+
+            // Client-side search only (backend has no full-text search for orders)
+            ApplyClientSearch();
         }
         catch (GraphqlException ex)
         {
@@ -103,15 +134,21 @@ public partial class OrderListViewModel : ObservableObject
         finally
         {
             IsLoading = false;
+            _isLoadingInProgress = false;
         }
     }
 
-    partial void OnSearchTextChanged(string value) => ApplyFilters();
-    partial void OnSelectedStatusFilterChanged(string value) => ApplyFilters();
-    partial void OnCurrentPageChanged(int value) => ApplyFilters();
-    partial void OnPageSizeChanged(int value) { CurrentPage = 1; ApplyFilters(); }
-    partial void OnFromDateChanged(DateTimeOffset? value) => ApplyFilters();
-    partial void OnToDateChanged(DateTimeOffset? value) => ApplyFilters();
+    // Status/date filter changes → reload from backend (reset to page 1)
+    partial void OnSelectedStatusFilterChanged(string value) { CurrentPage = 1; _ = LoadOrdersAsync(); }
+    partial void OnFromDateChanged(DateTimeOffset? value) { CurrentPage = 1; _ = LoadOrdersAsync(); }
+    partial void OnToDateChanged(DateTimeOffset? value) { CurrentPage = 1; _ = LoadOrdersAsync(); }
+
+    // Pagination changes → reload from backend
+    partial void OnCurrentPageChanged(int value) => _ = LoadOrdersAsync();
+    partial void OnPageSizeChanged(int value) { CurrentPage = 1; _ = LoadOrdersAsync(); }
+
+    // Search text → client-side only (no backend full-text search for orders)
+    partial void OnSearchTextChanged(string value) => ApplyClientSearch();
 
     [RelayCommand]
     private void GoToPage(int page)
@@ -145,8 +182,7 @@ public partial class OrderListViewModel : ObservableObject
         {
             var rawId = order.Id.TrimStart('#');
             await _orderService.DeleteOrderAsync(rawId);
-            _allOrders.Remove(order);
-            ApplyFilters();
+            await LoadOrdersAsync(); // Refresh from server
             return true;
         }
         catch (GraphqlException ex)
@@ -166,11 +202,13 @@ public partial class OrderListViewModel : ObservableObject
         }
     }
 
-    private void ApplyFilters()
+    /// <summary>
+    /// Client-side search within the already-fetched page of orders.
+    /// </summary>
+    private void ApplyClientSearch()
     {
         var query = _allOrders.AsEnumerable();
 
-        // Search filter
         if (!string.IsNullOrWhiteSpace(SearchText))
         {
             var search = SearchText.Trim().ToLowerInvariant();
@@ -180,30 +218,8 @@ public partial class OrderListViewModel : ObservableObject
                 o.Amount.ToLowerInvariant().Contains(search));
         }
 
-        // Status filter
-        if (!string.IsNullOrEmpty(SelectedStatusFilter) && SelectedStatusFilter != "All Status")
-        {
-            query = query.Where(o => o.Status == SelectedStatusFilter);
-        }
-
-        var filtered = query.ToList();
-        TotalPages = Math.Max(1, (int)Math.Ceiling(filtered.Count / (double)PageSize));
-
-        // Rebuild page options for ComboBox
-        PageOptions.Clear();
-        for (int i = 1; i <= TotalPages; i++)
-            PageOptions.Add(i);
-
-        if (CurrentPage > TotalPages)
-            CurrentPage = TotalPages;
-
-        var paged = filtered
-            .Skip((CurrentPage - 1) * PageSize)
-            .Take(PageSize)
-            .ToList();
-
         FilteredOrders.Clear();
-        foreach (var item in paged)
+        foreach (var item in query)
         {
             FilteredOrders.Add(item);
         }

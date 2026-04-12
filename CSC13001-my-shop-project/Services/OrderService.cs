@@ -39,16 +39,35 @@ public class OrderService
 
     /// <summary>
     /// Fetches a paginated list of orders with nested customer data.
-    /// Uses backend nested resolvers — no separate customer query needed.
+    /// Supports server-side filter (status, date range) and sort.
     /// </summary>
     public async Task<(List<OrderItem> Orders, int Total, int TotalPages)> GetOrdersAsync(
         int page = 1,
-        int limit = 100
+        int limit = 100,
+        string? statusFilter = null,
+        string? startDate = null,
+        string? endDate = null,
+        string? sortField = null,
+        string? sortOrder = null
     )
     {
+        // Build filter input — always send object (backend crashes on null)
+        var filterDict = new Dictionary<string, object>();
+        if (statusFilter != null) filterDict["status"] = statusFilter;
+        if (startDate != null) filterDict["startDate"] = startDate;
+        if (endDate != null) filterDict["endDate"] = endDate;
+        object filter = filterDict;
+
+        // Build sort input
+        object? sort = null;
+        if (sortField != null && sortOrder != null)
+        {
+            sort = new { field = sortField, order = sortOrder };
+        }
+
         var data = await _graphql.QueryAsync(
-            @"query Orders($page: Int, $limit: Int) {
-                orders(page: $page, limit: $limit) {
+            @"query Orders($page: Int, $limit: Int, $filter: OrderFilterInput, $sort: OrderSortInput) {
+                orders(page: $page, limit: $limit, filter: $filter, sort: $sort) {
                     data {
                         order_id
                         created_time
@@ -73,7 +92,7 @@ public class OrderService
                     totalPages
                 }
             }",
-            new { page, limit }
+            new { page, limit, filter, sort }
         );
 
         var ordersData = data.GetProperty("orders");
