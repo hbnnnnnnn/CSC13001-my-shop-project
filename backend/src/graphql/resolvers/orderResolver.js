@@ -3,8 +3,8 @@ const { requireRole } = require('../../middlewares/auth.middleware.js');
 
 const orderResolver = {
     Query: {
-        orders: requireRole(['Admin', 'Sale'], async (_, { page, limit }) => {
-            return await orderService.getAllOrders({ page, limit });
+        orders: requireRole(['Admin', 'Sale'], async (_, { page, limit, filter, sort }) => {
+            return await orderService.getAllOrders({ page, limit, filter, sort });
         }),
         order: requireRole(['Admin', 'Sale'], async (_, { id }) => {
             return await orderService.getOrderById(id);

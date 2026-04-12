@@ -90,15 +90,15 @@ const createOrder = async (orderData, items) => {
     }
 };
 
-const getAllOrders = async ({ page = 1, limit = 10 } = {}) => {
-    const cacheKey = `orders:all:p:${page}:l:${limit}`;
+const getAllOrders = async ({ page = 1, limit = 10, filter = {}, sort = {} } = {}) => {
+    const cacheKey = `orders:all:p:${page}:l:${limit}:f:${JSON.stringify(filter)}:s:${JSON.stringify(sort)}`;
     const cachedOrders = await cacheService.get(cacheKey);
     if (cachedOrders) {
         console.log(`[Cache Hit] ${cacheKey}`);
         return cachedOrders;
     }
 
-    const orders = await orderRepository.findAll({ page, limit });
+    const orders = await orderRepository.findAllFiltered({ page, limit, filter, sort });
     await cacheService.set(cacheKey, orders, 300); // Cache for 5 mins
     return orders;
 };

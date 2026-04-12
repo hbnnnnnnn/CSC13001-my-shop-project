@@ -55,8 +55,24 @@ const orderSchema = `#graphql
     items: [OrderItemInput!]
   }
 
+  input OrderFilterInput {
+    status: String
+    startDate: String
+    endDate: String
+  }
+
+  enum OrderSortField {
+    CREATED_TIME
+    FINAL_PRICE
+  }
+
+  input OrderSortInput {
+    field: OrderSortField!
+    order: SortOrder!
+  }
+
   type Query {
-    orders(page: Int, limit: Int): OrderList!
+    orders(page: Int, limit: Int, filter: OrderFilterInput, sort: OrderSortInput): OrderList!
     order(id: ID!): Order
   }
 
