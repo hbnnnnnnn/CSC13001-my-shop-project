@@ -96,79 +96,7 @@
             </Setter>
         </Style>
 
-        <!-- ── Restock outline button: no default purple hover ── -->
-        <Style x:Key="RestockButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="6" />
-            <Setter Property="Padding" Value="12,6" />
-            <Setter Property="UseSystemFocusVisuals" Value="False" />
-            <Setter Property="HorizontalContentAlignment" Value="Center" />
-            <Setter Property="VerticalContentAlignment" Value="Center" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border
-                            x:Name="Root"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="{TemplateBinding CornerRadius}"
-                            Padding="{TemplateBinding Padding}"
-                        >
-                            <VisualStateManager.VisualStateGroups>
-                                <VisualStateGroup x:Name="CommonStates">
-                                    <VisualState x:Name="Normal">
-                                        <Storyboard>
-                                            <DoubleAnimation
-                                                Storyboard.TargetName="Root"
-                                                Storyboard.TargetProperty="Opacity"
-                                                To="1"
-                                                Duration="0:0:0.12"
-                                            />
-                                        </Storyboard>
-                                    </VisualState>
-                                    <VisualState x:Name="PointerOver">
-                                        <Storyboard>
-                                            <DoubleAnimation
-                                                Storyboard.TargetName="Root"
-                                                Storyboard.TargetProperty="Opacity"
-                                                To="0.65"
-                                                Duration="0:0:0.12"
-                                            />
-                                        </Storyboard>
-                                    </VisualState>
-                                    <VisualState x:Name="Pressed">
-                                        <Storyboard>
-                                            <DoubleAnimation
-                                                Storyboard.TargetName="Root"
-                                                Storyboard.TargetProperty="Opacity"
-                                                To="0.45"
-                                                Duration="0:0:0"
-                                            />
-                                        </Storyboard>
-                                    </VisualState>
-                                    <VisualState x:Name="Disabled">
-                                        <Storyboard>
-                                            <DoubleAnimation
-                                                Storyboard.TargetName="Root"
-                                                Storyboard.TargetProperty="Opacity"
-                                                To="0.38"
-                                                Duration="0:0:0"
-                                            />
-                                        </Storyboard>
-                                    </VisualState>
-                                </VisualStateGroup>
-                            </VisualStateManager.VisualStateGroups>
-                            <ContentPresenter
-                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-                            />
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+
     </Page.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -920,7 +848,6 @@
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto" />
                                                     <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
 
                                                 <!-- Thumbnail: placeholder + real image overlay -->
@@ -971,48 +898,6 @@
                                                         />
                                                     </Border>
                                                 </StackPanel>
-
-                                                <!-- Restock button (outline / ghost style) -->
-                                                <Button
-                                                    Grid.Column="2"
-                                                    Style="{StaticResource RestockButtonStyle}"
-                                                    VerticalAlignment="Center"
-                                                    BorderBrush="#80F3B55C"
-                                                >
-                                                    <StackPanel
-                                                        Orientation="Horizontal"
-                                                        Spacing="5"
-                                                    >
-                                                        <Canvas
-                                                            Width="13"
-                                                            Height="13"
-                                                            VerticalAlignment="Center"
-                                                        >
-                                                            <Path
-                                                                Data="M11.5 7.5C11.5 9.71 9.71 11.5 7.5 11.5C5.29 11.5 3.5 9.71 3.5 7.5C3.5 5.29 5.29 3.5 7.5 3.5C8.73 3.5 9.83 4.07 10.56 4.96"
-                                                                Stroke="{StaticResource ShellAccentBrush}"
-                                                                StrokeThickness="1.4"
-                                                                StrokeStartLineCap="Round"
-                                                                StrokeEndLineCap="Round"
-                                                                StrokeLineJoin="Round"
-                                                            />
-                                                            <Path
-                                                                Data="M11.5 2.5V5.5H8.5"
-                                                                Stroke="{StaticResource ShellAccentBrush}"
-                                                                StrokeThickness="1.4"
-                                                                StrokeStartLineCap="Round"
-                                                                StrokeEndLineCap="Round"
-                                                                StrokeLineJoin="Round"
-                                                            />
-                                                        </Canvas>
-                                                        <TextBlock
-                                                            Text="Restock"
-                                                            FontSize="12"
-                                                            FontWeight="SemiBold"
-                                                            Foreground="{StaticResource ShellAccentBrush}"
-                                                        />
-                                                    </StackPanel>
-                                                </Button>
                                             </Grid>
                                         </Border>
                                     </DataTemplate>
