@@ -19,6 +19,21 @@ const productSchema = `#graphql
     updated_time: String
   }
 
+  type TopSellingProduct {
+    product_id: ID!
+    sku: String!
+    name: String!
+    price: Int!
+    stock: Int!
+    description: String
+    images: [String]
+    supplier: String
+    category: Category
+    created_time: String
+    updated_time: String
+    total_sold: Int!
+  }
+
   type ProductPage {
     data: [Product!]!
     total: Int!
@@ -85,7 +100,7 @@ const productSchema = `#graphql
     products(page: Int, limit: Int, filter: ProductFilter, sort: ProductSort): ProductPage!
     product(id: ID!): Product
     topLowStockProducts(limit: Int): [Product!]!
-    topSellingProducts(limit: Int): [Product!]!
+    topSellingProducts(limit: Int): [TopSellingProduct!]!
     productSearch(query: String!, page: Int, limit: Int, filter: ProductFilter, sort: ProductSort): SearchResult!
   }
 
