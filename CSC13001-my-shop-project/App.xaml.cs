@@ -205,8 +205,6 @@ public partial class App : Application
 
                 return;
             }
-
-            Console.WriteLine("Stored token is invalid.");
         }
 
         // No valid token — show login

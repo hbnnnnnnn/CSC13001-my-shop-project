@@ -6,27 +6,27 @@ namespace CSC13001_my_shop_project.Presentation.ServerConfiguration;
 
 public partial class ServerConfigurationViewModel : ObservableObject
 {
-    private const string ServerUrlKey = "ServerConfig.ServerUrl";
-    private const string PortKey = "ServerConfig.Port";
-    private const string DatabaseKey = "ServerConfig.Database";
-    private const string UsernameKey = "ServerConfig.Username";
-    private const string PasswordKey = "ServerConfig.Password";
-    private const string EnableSslKey = "ServerConfig.EnableSsl";
+    private const string ServerUrlKey = "server_config.server_url";
+    private const string PortKey = "server_config.port";
+    private const string DatabaseKey = "server_config.database";
+    private const string UsernameKey = "server_config.username";
+    private const string PasswordKey = "server_config.password";
+    private const string EnableSslKey = "server_config.enable_ssl";
 
     private readonly INavigator _navigator;
     private readonly ApplicationDataContainer _localSettings;
 
     [ObservableProperty]
-    private string serverUrl = "http://localhost";
+    private string serverUrl = "";
 
     [ObservableProperty]
-    private string port = "5432";
+    private string port = "";
 
     [ObservableProperty]
-    private string database = "luminahaven_db";
+    private string database = "";
 
     [ObservableProperty]
-    private string username = "admin";
+    private string username = "";
 
     [ObservableProperty]
     private string password = string.Empty;
