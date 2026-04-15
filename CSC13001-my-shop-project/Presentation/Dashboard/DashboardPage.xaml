@@ -728,7 +728,8 @@
                                         <Border
                                             BorderBrush="{StaticResource ShellBorderBrush}"
                                             BorderThickness="0,0,0,1"
-                                            Padding="0,12"
+                                            CornerRadius="8"
+                                            Padding="8,12"
                                             PointerEntered="RowBorder_PointerEntered"
                                             PointerExited="RowBorder_PointerExited"
                                         >
@@ -840,7 +841,8 @@
                                         <Border
                                             BorderBrush="{StaticResource ShellBorderBrush}"
                                             BorderThickness="0,0,0,1"
-                                            Padding="0,14"
+                                            CornerRadius="8"
+                                            Padding="8,14"
                                             PointerEntered="RowBorder_PointerEntered"
                                             PointerExited="RowBorder_PointerExited"
                                         >
@@ -947,7 +949,8 @@
                                     <Border
                                         BorderBrush="{StaticResource ShellBorderBrush}"
                                         BorderThickness="0,0,0,1"
-                                        Padding="0,10"
+                                        CornerRadius="8"
+                                        Padding="8,10"
                                         PointerEntered="RowBorder_PointerEntered"
                                         PointerExited="RowBorder_PointerExited"
                                     >
