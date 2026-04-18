@@ -11,7 +11,9 @@ const {
 const { searchProducts } = require("../../services/search.service");
 
 const { getCategoryById } = require("../../services/category.service");
-const { generateProductDetailsFromImage } = require("../../services/ai.service");
+const {
+  generateProductDetailsFromImage,
+} = require("../../services/ai.service");
 const { requireRole } = require("../../middlewares/auth.middleware");
 
 const productResolver = {
@@ -33,22 +35,31 @@ const productResolver = {
     },
   },
   Mutation: {
-    createProduct: requireRole(['Admin', 'Sale'], async (_, { input }) => {
+    createProduct: requireRole(["Admin", "Sale"], async (_, { input }) => {
       return await createProduct(input);
     }),
-    updateProduct: requireRole(['Admin', 'Sale'], async (_, { id, input }) => {
+    updateProduct: requireRole(["Admin", "Sale"], async (_, { id, input }) => {
       return await updateProduct(id, input);
     }),
-    deleteProduct: requireRole(['Admin'], async (_, { id }) => {
+    deleteProduct: requireRole(["Admin"], async (_, { id }) => {
       return await deleteProduct(id);
     }),
-    generateProductDetailsFromImage: requireRole(['Admin', 'Sale'], async (_, { imageUrl }, context) => {
-      // Vì đã qua requireRole nên chắc chắn context.user tồn tại
-      const identifier = `user:${context.user.account_id}`;
-      return await generateProductDetailsFromImage(imageUrl, identifier);
-    }),
+    generateProductDetailsFromImage: requireRole(
+      ["Admin", "Sale"],
+      async (_, { imageUrl }, context) => {
+        // Vì đã qua requireRole nên chắc chắn context.user tồn tại
+        const identifier = `user:${context.user.account_id}`;
+        return await generateProductDetailsFromImage(imageUrl, identifier);
+      },
+    ),
   },
   Product: {
+    category: (parent, _, { loaders }) => {
+      if (!parent.category_id) return null;
+      return loaders.category.load(parent.category_id);
+    },
+  },
+  TopSellingProduct: {
     category: (parent, _, { loaders }) => {
       if (!parent.category_id) return null;
       return loaders.category.load(parent.category_id);
