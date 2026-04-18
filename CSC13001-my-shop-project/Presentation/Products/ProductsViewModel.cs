@@ -23,15 +23,8 @@ public partial class ProductsViewModel : ObservableObject
     {
         _productService = productService;
         _imageUpload = imageUpload;
-        _catalog = ProductCatalogData.Items.ToList();
-        CategoryOptions = new ObservableCollection<string>(
-            new[] { "All categories" }.Concat(
-                _catalog
-                    .Select(p => p.Category)
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .OrderBy(c => c)
-            )
-        );
+        _catalog = [];
+        CategoryOptions = new ObservableCollection<string>(["All categories"]);
         StatusFilterOptions = new ObservableCollection<string>([
             "All status",
             "Active",
@@ -105,6 +98,14 @@ public partial class ProductsViewModel : ObservableObject
     [ObservableProperty]
     private string lowStockStat = "0";
 
+    [ObservableProperty]
+    private bool isLoadingCatalog = true;
+
+    [ObservableProperty]
+    private string catalogLoadError = string.Empty;
+
+    public bool HasCatalogLoadError => !string.IsNullOrEmpty(CatalogLoadError);
+
     public ObservableCollection<ProductListItem> PagedItems { get; } = new();
 
     public ObservableCollection<PageButtonModel> PageButtons { get; } = new();
@@ -146,6 +147,9 @@ public partial class ProductsViewModel : ObservableObject
 
     partial void OnIsCreateDialogOpenChanged(bool value) =>
         OpenCreateProductDialogCommand.NotifyCanExecuteChanged();
+
+    partial void OnCatalogLoadErrorChanged(string value) =>
+        OnPropertyChanged(nameof(HasCatalogLoadError));
 
     public void BulkRestoreState(
         string? search,
@@ -191,11 +195,11 @@ public partial class ProductsViewModel : ObservableObject
 
     private async Task ReloadCatalogFromApiAsync()
     {
+        IsLoadingCatalog = true;
+        CatalogLoadError = string.Empty;
         try
         {
-            var sort = new ProductSortInput("CREATED_AT", "DESC");
-            var page = await _productService.GetProductsAsync(1, 500, null, sort).ConfigureAwait(false);
-            var data = page.Data ?? [];
+            var data = await FetchAllProductDtosAsync().ConfigureAwait(false);
             var list = data.ConvertAll(ProductDtoMapping.ToListItem);
             var dq = DispatcherQueue.GetForCurrentThread();
             if (dq is not null)
@@ -203,10 +207,38 @@ public partial class ProductsViewModel : ObservableObject
             else
                 ApplyCatalogFromApi(list);
         }
-        catch
+        catch (Exception ex)
         {
-            /* keep existing catalog (mock or last good fetch) */
+            CatalogLoadError = ex.Message;
         }
+        finally
+        {
+            var dq = DispatcherQueue.GetForCurrentThread();
+            if (dq is not null)
+                dq.TryEnqueue(() => IsLoadingCatalog = false);
+            else
+                IsLoadingCatalog = false;
+        }
+    }
+
+    /// <summary>Loads every page from the GraphQL <c>products</c> query so filters work on the full catalog.</summary>
+    private async Task<List<ProductDto>> FetchAllProductDtosAsync(CancellationToken ct = default)
+    {
+        const int pageSize = 200;
+        var sort = new ProductSortInput("CREATED_AT", "DESC");
+        var first = await _productService
+            .GetProductsAsync(1, pageSize, null, sort, ct)
+            .ConfigureAwait(false);
+        var acc = new List<ProductDto>(first.Data);
+        for (var p = 2; p <= first.TotalPages; p++)
+        {
+            var next = await _productService
+                .GetProductsAsync(p, pageSize, null, sort, ct)
+                .ConfigureAwait(false);
+            acc.AddRange(next.Data);
+        }
+
+        return acc;
     }
 
     private void ApplyCatalogFromApi(List<ProductListItem> list)
@@ -338,7 +370,9 @@ public partial class ProductsViewModel : ObservableObject
             "Name: Z to A" => q.OrderByDescending(p => p.Name, StringComparer.OrdinalIgnoreCase),
             "Price: Low to High" => q.OrderBy(p => p.Price).ThenBy(p => p.Name),
             "Price: High to Low" => q.OrderByDescending(p => p.Price).ThenBy(p => p.Name),
-            _ => q.OrderByDescending(p => p.Id),
+            _ => q
+                .OrderByDescending(p => p.ApiCreatedAt ?? DateTime.MinValue)
+                .ThenBy(p => p.Name, StringComparer.OrdinalIgnoreCase),
         };
 
         _filtered = q.ToList();

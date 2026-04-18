@@ -25,7 +25,9 @@ public sealed class ProductListItem
         decimal price,
         decimal? compareAtPrice,
         int stockLeft,
-        ProductShelfStatus status
+        ProductShelfStatus status,
+        DateTime? apiCreatedAt = null,
+        string? graphQlProductId = null
     )
     {
         Id = id;
@@ -39,9 +41,17 @@ public sealed class ProductListItem
         CompareAtPrice = compareAtPrice;
         StockLeft = stockLeft;
         Status = status;
+        ApiCreatedAt = apiCreatedAt;
+        GraphQlProductId = graphQlProductId;
     }
 
     public int Id { get; }
+
+    /// <summary>Server <c>created_time</c> when loaded from GraphQL; used for client-side sort.</summary>
+    public DateTime? ApiCreatedAt { get; }
+
+    /// <summary>Backend <c>product_id</c>; use for navigation/API instead of <see cref="Id"/> when set.</summary>
+    public string? GraphQlProductId { get; }
     public string Name { get; }
     public string Category { get; }
     public string Sku { get; }

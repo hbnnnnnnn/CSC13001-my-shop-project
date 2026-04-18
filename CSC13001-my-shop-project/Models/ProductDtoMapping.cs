@@ -8,7 +8,18 @@ public static class ProductDtoMapping
     {
         var id = int.TryParse(p.ProductId, NumberStyles.Integer, CultureInfo.InvariantCulture, out var n)
             ? n
-            : Math.Abs(p.ProductId.GetHashCode());
+            : 0;
+
+        DateTime? created = null;
+        if (!string.IsNullOrWhiteSpace(p.CreatedTime)
+            && DateTime.TryParse(
+                p.CreatedTime,
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.RoundtripKind,
+                out var parsed))
+        {
+            created = parsed;
+        }
 
         var status = p.Stock <= 0
             ? ProductShelfStatus.OutOfStock
@@ -30,7 +41,9 @@ public static class ProductDtoMapping
             p.Price,
             null,
             p.Stock,
-            status
+            status,
+            created,
+            string.IsNullOrEmpty(p.ProductId) ? null : p.ProductId
         );
     }
 }
