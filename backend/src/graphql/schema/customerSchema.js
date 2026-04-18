@@ -3,6 +3,7 @@ const customerSchema = `#graphql
     customer_id: ID!
     name: String!
     phone: String
+    email: String
     address: String
   }
 
@@ -18,11 +19,12 @@ const customerSchema = `#graphql
     customers(page: Int, limit: Int): CustomerList!
     customer(id: ID!): Customer
     customerByPhone(phone: String!): Customer
+    customerByEmail(email: String!): Customer
   }
 
   type Mutation {
-    createCustomer(name: String!, phone: String!, address: String): Customer!
-    updateCustomer(id: ID!, name: String, phone: String, address: String): Customer!
+    createCustomer(name: String!, phone: String!, email: String, address: String): Customer!
+    updateCustomer(id: ID!, name: String, phone: String, email: String, address: String): Customer!
     deleteCustomer(id: ID!): Boolean!
   }
 `;

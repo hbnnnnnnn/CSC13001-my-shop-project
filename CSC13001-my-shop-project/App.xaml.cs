@@ -2,12 +2,13 @@ using System.Diagnostics.CodeAnalysis;
 using CommunityToolkit.Mvvm.Messaging;
 using CSC13001_my_shop_project.Models;
 using CSC13001_my_shop_project.Presentation.Dashboard;
-using CSC13001_my_shop_project.Presentation.OrderList;
 using CSC13001_my_shop_project.Presentation.Login;
+using CSC13001_my_shop_project.Presentation.OrderList;
 using CSC13001_my_shop_project.Presentation.Products;
 using CSC13001_my_shop_project.Presentation.ServerConfiguration;
 using CSC13001_my_shop_project.Services;
 using Microsoft.Extensions.Options;
+using CSC13001_my_shop_project.Services.Endpoints;
 using Uno.Extensions.Navigation;
 using Uno.Resizetizer;
 
@@ -86,8 +87,25 @@ public partial class App : Application
                     .UseHttp(
                         (context, services) =>
                         {
+                            services.AddTransient<AuthTokenHandler>();
+                            services
+                                .AddHttpClient(
+                                    "BackendApi",
+                                    client =>
+                                    {
+                                        var baseUrl =
+                                            context.Configuration["ApiClient:Url"]
+                                            ?? "http://localhost:4000";
+                                        client.BaseAddress = new Uri(baseUrl);
+                                        client.DefaultRequestHeaders.Add(
+                                            "Accept",
+                                            "application/json"
+                                        );
+                                    }
+                                )
+                                .AddHttpMessageHandler<AuthTokenHandler>();
+
 #if DEBUG
-                            // DelegatingHandler will be automatically injected
                             services.AddTransient<DelegatingHandler, DebugHttpHandler>();
 #endif
                         }
@@ -114,6 +132,10 @@ public partial class App : Application
                         services.AddTransient<ProductsViewModel>();
                             services.AddTransient<ProductDetailViewModel>();
                             services.AddSingleton<AppStateService>();
+
+                            // API services
+                            services.AddSingleton<GraphqlService>();
+                            services.AddSingleton<AuthService>();
                         }
                     )
                     .UseNavigation(RegisterRoutes)
@@ -136,7 +158,6 @@ public partial class App : Application
         var shellMap = new ViewMap();
 
         views.Register(
-            new ViewMap(ViewModel: typeof(ShellViewModel)),
             shellMap,
             new ViewMap<DashboardPage, DashboardViewModel>(),
             new ViewMap<OrderListPage, OrderListViewModel>(),
@@ -181,19 +202,29 @@ public partial class App : Application
 
     private async void NavigateOnStartup()
     {
-        var appStateService = Host?.Services.GetRequiredService<AppStateService>();
+        var authService = Host?.Services.GetRequiredService<AuthService>();
+        var appState = Host?.Services.GetRequiredService<AppStateService>();
 
-        var lastPage = appStateService?.LastPage;
+        // If the user has a stored token ("Remember Me"), validate it
+        if (authService?.IsLoggedIn == true)
+        {
+            var account = await authService.GetCurrentAccountAsync();
+            if (account is not null)
+            {
+                if (appState?.LastPage is string lastPage)
+                {
+                    WeakReferenceMessenger.Default.Send(new NavigateToPageMessage(lastPage));
+                }
+                else
+                {
+                    WeakReferenceMessenger.Default.Send(new NavigateToPageMessage("Dashboard"));
+                }
 
-        if (lastPage != null)
-        {
-            WeakReferenceMessenger.Default.Send(new NavigateToPageMessage(lastPage));
-            await Task.CompletedTask;
+                return;
+            }
         }
-        else
-        {
-            WeakReferenceMessenger.Default.Send(new NavigateToPageMessage("Login"));
-            await Task.CompletedTask;
-        }
+
+        // No valid token — show login
+        WeakReferenceMessenger.Default.Send(new NavigateToPageMessage("Login"));
     }
 }

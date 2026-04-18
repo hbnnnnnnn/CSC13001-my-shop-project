@@ -157,12 +157,12 @@ public sealed partial class DashboardPage : Page
     private void RowBorder_PointerEntered(object sender, PointerRoutedEventArgs e)
     {
         if (sender is Border b)
-            b.Background = Application.Current.Resources["ShellNavHoverBackgroundBrush"] as Brush;
+            b.Background = new SolidColorBrush(Windows.UI.Color.FromArgb(0x08, 0x00, 0x00, 0x00));
     }
 
     private void RowBorder_PointerExited(object sender, PointerRoutedEventArgs e)
     {
         if (sender is Border b)
-            b.Background = null;
+            b.Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent);
     }
 }

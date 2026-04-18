@@ -2,24 +2,29 @@
 const format = require('pg-format');
 
 class BaseRepository {
-  constructor(tableName, idColumn, db) {
+  constructor(tableName, idColumn, db, useSoftDelete = false) {
     this.tableName = tableName;
     this.idColumn = idColumn;
     this.db = db;
+    this.useSoftDelete = useSoftDelete;
   }
 
   async findAll({ page = 1, limit = 10 } = {}, client) {
     const db = client || this.db;
     const offset = (page - 1) * limit;
 
+    const whereClause = this.useSoftDelete ? 'WHERE is_deleted = false' : '';
+
     const dataQuery = format(
-      'SELECT * FROM %I LIMIT $1 OFFSET $2',
-      this.tableName
+      'SELECT * FROM %I %s LIMIT $1 OFFSET $2',
+      this.tableName,
+      whereClause
     );
 
     const countQuery = format(
-      'SELECT COUNT(*) FROM %I',
-      this.tableName
+      'SELECT COUNT(*) FROM %I %s',
+      this.tableName,
+      whereClause
     );
 
     const [dataResult, countResult] = await Promise.all([
@@ -38,9 +43,18 @@ class BaseRepository {
 
   async findById(id, client) {
     const db = client || this.db;
-    const query = format('SELECT * FROM %I WHERE %I = $1', this.tableName, this.idColumn);
+    const whereClause = this.useSoftDelete ? 'AND is_deleted = false' : '';
+    const query = format('SELECT * FROM %I WHERE %I = $1 %s', this.tableName, this.idColumn, whereClause);
     const result = await db.query(query, [id]);
     return result.rows[0];
+  }
+
+  async findByIds(ids, client) {
+    const db = client || this.db;
+    const whereClause = this.useSoftDelete ? 'AND is_deleted = false' : '';
+    const query = format('SELECT * FROM %I WHERE %I = ANY($1) %s', this.tableName, this.idColumn, whereClause);
+    const result = await db.query(query, [ids]);
+    return result.rows;
   }
 
   async create(data, client) {

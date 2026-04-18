@@ -245,6 +245,7 @@
                                         <TextBox
                                             x:Name="ServerUrlInput"
                                             Style="{StaticResource AuthFieldTextBoxStyle}"
+                                            PlaceholderText="http://localhost"
                                             VerticalAlignment="Center"
                                             Text="{Binding ServerUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                             Tag="ServerUrl"
@@ -327,6 +328,7 @@
                                             <TextBox
                                                 x:Name="PortInput"
                                                 Style="{StaticResource AuthFieldTextBoxStyle}"
+                                                PlaceholderText="5432"
                                                 VerticalAlignment="Center"
                                                 Text="{Binding Port, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                 Tag="Port"
@@ -403,6 +405,7 @@
                                             <TextBox
                                                 x:Name="DatabaseInput"
                                                 Style="{StaticResource AuthFieldTextBoxStyle}"
+                                                PlaceholderText="luminahaven_db"
                                                 VerticalAlignment="Center"
                                                 Text="{Binding Database, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                 Tag="Database"
@@ -480,6 +483,7 @@
                                         <TextBox
                                             x:Name="UsernameInput"
                                             Style="{StaticResource AuthFieldTextBoxStyle}"
+                                            PlaceholderText="admin"
                                             VerticalAlignment="Center"
                                             Text="{Binding Username, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                             Tag="Username"

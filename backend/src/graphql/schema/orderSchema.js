@@ -6,6 +6,7 @@ const orderSchema = `#graphql
     quantity: Int!
     unit_sale_price: Int!
     total_price: Int!
+    product: Product
   }
 
   type Order {
@@ -17,7 +18,12 @@ const orderSchema = `#graphql
     customer_id: ID
     account_id: ID
     shipping_address: String
+    recipient_name: String
+    recipient_phone: String
+    recipient_email: String
     items: [OrderItem!]
+    customer: Customer
+    account: Account
   }
 
   type OrderList {
@@ -33,8 +39,40 @@ const orderSchema = `#graphql
     quantity: Int!
   }
 
+  input UpdateOrderInput {
+    shipping_address: String
+    recipient_name: String
+    recipient_phone: String
+    recipient_email: String
+  }
+
+  input UpdateOrderFullInput {
+    shipping_address: String
+    recipient_name: String
+    recipient_phone: String
+    recipient_email: String
+    status: String
+    items: [OrderItemInput!]
+  }
+
+  input OrderFilterInput {
+    status: String
+    startDate: String
+    endDate: String
+  }
+
+  enum OrderSortField {
+    CREATED_TIME
+    FINAL_PRICE
+  }
+
+  input OrderSortInput {
+    field: OrderSortField!
+    order: SortOrder!
+  }
+
   type Query {
-    orders(page: Int, limit: Int): OrderList!
+    orders(page: Int, limit: Int, filter: OrderFilterInput, sort: OrderSortInput): OrderList!
     order(id: ID!): Order
   }
 
@@ -43,10 +81,16 @@ const orderSchema = `#graphql
       customer_id: ID
       account_id: ID
       shipping_address: String
+      recipient_name: String
+      recipient_phone: String
+      recipient_email: String
       items: [OrderItemInput!]!
     ): Order!
     
-    updateOrderStatus(id: ID!, status: String!): Order!
+    updateOrderStatus(id: ID!, status: String!): Order! @deprecated(reason: "Use updateOrderFull instead")
+    updateOrder(id: ID!, input: UpdateOrderInput!): Order! @deprecated(reason: "Use updateOrderFull instead")
+    updateOrderFull(id: ID!, input: UpdateOrderFullInput!): Order!
+    deleteOrder(id: ID!): Boolean!
   }
 `;
 
