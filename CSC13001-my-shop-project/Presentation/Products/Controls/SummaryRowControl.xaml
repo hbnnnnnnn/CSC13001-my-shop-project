@@ -1,0 +1,38 @@
+<UserControl
+    x:Class="CSC13001_my_shop_project.Presentation.Products.Controls.SummaryRowControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:CSC13001_my_shop_project.Presentation.Products.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="Root"
+    mc:Ignorable="d"
+>
+    <StackPanel Spacing="0">
+        <Grid Padding="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock
+                Grid.Column="0"
+                FontSize="13"
+                Foreground="#FF9CA3AF"
+                Text="{Binding Label, ElementName=Root, Mode=OneWay}"
+            />
+            <TextBlock
+                Grid.Column="1"
+                FontSize="13"
+                FontWeight="SemiBold"
+                Foreground="#FF1A1A1A"
+                Text="{Binding Value, ElementName=Root, Mode=OneWay}"
+            />
+        </Grid>
+        <Rectangle
+            x:Name="BottomRule"
+            Height="1"
+            HorizontalAlignment="Stretch"
+            Fill="#FFF0EDE8"
+        />
+    </StackPanel>
+</UserControl>

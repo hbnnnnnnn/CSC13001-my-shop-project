@@ -140,6 +140,7 @@
         </Style>
     </Page.Resources>
 
+    <Grid>
     <ScrollViewer
         x:Name="ProductsScrollViewer"
         VerticalScrollBarVisibility="Auto"
@@ -170,7 +171,7 @@
                     Grid.Column="1"
                     VerticalAlignment="Center"
                     Style="{StaticResource ProductsPrimaryButtonStyle}"
-                    Command="{Binding AddNewProductCommand}"
+                    Command="{Binding OpenCreateProductDialogCommand}"
                 >
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon
@@ -1069,4 +1070,19 @@
             </Grid>
         </StackPanel>
     </ScrollViewer>
+
+    <Grid
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        Visibility="{Binding IsCreateDialogOpen, Converter={StaticResource BoolToVis}, FallbackValue=Collapsed, TargetNullValue=Collapsed}"
+    >
+        <Border Background="#99000000" Tapped="CreateBackdrop_Tapped" />
+        <products:CreateProductDialog
+            Margin="24"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            DataContext="{Binding CreateDialogViewModel, Mode=OneWay}"
+        />
+    </Grid>
+    </Grid>
 </Page>
