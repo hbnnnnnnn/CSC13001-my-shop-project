@@ -21,7 +21,9 @@ public partial class ProductsViewModel : ObservableObject
 
     public ProductsViewModel(IProductService productService, IImageUploadService imageUpload)
     {
-        _catalog = ProductCatalogData.Items;
+        _productService = productService;
+        _imageUpload = imageUpload;
+        _catalog = ProductCatalogData.Items.ToList();
         CategoryOptions = new ObservableCollection<string>(
             new[] { "All categories" }.Concat(
                 _catalog
