@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CSC13001_my_shop_project.Models;
 using CSC13001_my_shop_project.Services;
-using Microsoft.UI.Dispatching;
 
 namespace CSC13001_my_shop_project.Presentation.Products;
 
@@ -195,29 +194,24 @@ public partial class ProductsViewModel : ObservableObject
 
     private async Task ReloadCatalogFromApiAsync()
     {
-        IsLoadingCatalog = true;
-        CatalogLoadError = string.Empty;
+        App.RunOnUIThread(() =>
+        {
+            IsLoadingCatalog = true;
+            CatalogLoadError = string.Empty;
+        });
         try
         {
             var data = await FetchAllProductDtosAsync().ConfigureAwait(false);
             var list = data.ConvertAll(ProductDtoMapping.ToListItem);
-            var dq = DispatcherQueue.GetForCurrentThread();
-            if (dq is not null)
-                dq.TryEnqueue(() => ApplyCatalogFromApi(list));
-            else
-                ApplyCatalogFromApi(list);
+            App.RunOnUIThread(() => ApplyCatalogFromApi(list));
         }
         catch (Exception ex)
         {
-            CatalogLoadError = ex.Message;
+            App.RunOnUIThread(() => CatalogLoadError = ex.Message);
         }
         finally
         {
-            var dq = DispatcherQueue.GetForCurrentThread();
-            if (dq is not null)
-                dq.TryEnqueue(() => IsLoadingCatalog = false);
-            else
-                IsLoadingCatalog = false;
+            App.RunOnUIThread(() => IsLoadingCatalog = false);
         }
     }
 

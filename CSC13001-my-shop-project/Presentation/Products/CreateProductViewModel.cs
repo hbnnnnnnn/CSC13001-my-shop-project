@@ -287,25 +287,38 @@ public partial class CreateProductViewModel : ObservableObject
             if (_onCreated is not null)
                 await _onCreated().ConfigureAwait(false);
 
-            Reset();
-            _onClose();
+            App.RunOnUIThread(() =>
+            {
+                Reset();
+                _onClose();
+            });
         }
         catch (GraphQlException ex)
         {
-            ErrorMessage = ex.Errors.FirstOrDefault()?.Message ?? "Could not create product.";
+            var msg = ex.Errors.FirstOrDefault()?.Message ?? "Could not create product.";
+            var display = msg.StartsWith("Unauthenticated:", StringComparison.OrdinalIgnoreCase)
+                ? "Sign in first. createProduct requires a JWT (Authorization: Bearer) — see backend testGraphQL.md §1 and §5.1."
+                : msg.StartsWith("Unauthorized:", StringComparison.OrdinalIgnoreCase)
+                    ? "Your role cannot create products. Use an Admin or Sale account."
+                    : msg;
+            App.RunOnUIThread(() => ErrorMessage = display);
         }
         catch (HttpRequestException)
         {
-            ErrorMessage = "Cannot reach the server. Check your connection.";
+            App.RunOnUIThread(() =>
+                ErrorMessage = "Cannot reach the server. Check your connection.");
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            App.RunOnUIThread(() => ErrorMessage = ex.Message);
         }
         finally
         {
-            IsBusy = false;
-            OnPropertyChanged(nameof(CanSubmitProduct));
+            App.RunOnUIThread(() =>
+            {
+                IsBusy = false;
+                OnPropertyChanged(nameof(CanSubmitProduct));
+            });
         }
     }
 

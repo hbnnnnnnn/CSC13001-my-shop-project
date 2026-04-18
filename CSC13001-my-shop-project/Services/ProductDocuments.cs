@@ -73,6 +73,7 @@ public static class ProductDocuments
             supplier
             category { category_id name }
             created_time
+            updated_time
           }
         }
         """;
