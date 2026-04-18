@@ -9,7 +9,6 @@ using CSC13001_my_shop_project.Presentation.ServerConfiguration;
 using CSC13001_my_shop_project.Services;
 using CSC13001_my_shop_project.Services.Endpoints;
 using Uno.Extensions.Navigation;
-using CSC13001_my_shop_project.Presentation.OrderList;
 using Uno.Resizetizer;
 
 namespace CSC13001_my_shop_project;
@@ -120,6 +119,8 @@ public partial class App : Application
                             // API services
                             services.AddSingleton<GraphqlService>();
                             services.AddSingleton<AuthService>();
+                            services.AddSingleton<IProductService, ProductService>();
+                            services.AddSingleton<IImageUploadService, ImageUploadService>();
                         }
                     )
                     .UseNavigation(RegisterRoutes)
@@ -147,7 +148,6 @@ public partial class App : Application
             new ViewMap<OrderListPage, OrderListViewModel>(),
             new ViewMap<ProductsPage, ProductsViewModel>(),
             new DataViewMap<ProductDetailPage, ProductDetailViewModel, ProductDetailArgs>(),
-                new ViewMap<OrderListPage, OrderListViewModel>(),
             new ViewMap<LoginPage, LoginViewModel>(),
             new ViewMap<ServerConfigurationPage, ServerConfigurationViewModel>()
         );
@@ -180,37 +180,37 @@ public partial class App : Application
                             ),
                         ]
                     ),
-                    new RouteMap("Orders", View: views.FindByViewModel<OrderListViewModel>()),
                 ]
             )
         );
     }
 
-    private async void NavigateOnStartup()
+    /// <summary>Same route selection as startup navigation; used to replay if Shell loads after the first message.</summary>
+    internal static async Task<string> ResolveStartupRouteAsync()
     {
-        var authService = Host?.Services.GetRequiredService<AuthService>();
-        var appState = Host?.Services.GetRequiredService<AppStateService>();
+        if (AppHost is null)
+            return "Login";
 
-        // If the user has a stored token ("Remember Me"), validate it
-        if (authService?.IsLoggedIn == true)
+        var authService = AppHost.Services.GetRequiredService<AuthService>();
+        var appState = AppHost.Services.GetRequiredService<AppStateService>();
+
+        if (authService.IsLoggedIn)
         {
             var account = await authService.GetCurrentAccountAsync();
             if (account is not null)
             {
-                if (appState?.LastPage is string lastPage)
-                {
-                    WeakReferenceMessenger.Default.Send(new NavigateToPageMessage(lastPage));
-                }
-                else
-                {
-                    WeakReferenceMessenger.Default.Send(new NavigateToPageMessage("Dashboard"));
-                }
-
-                return;
+                if (appState.LastPage is string lastPage && !string.IsNullOrWhiteSpace(lastPage))
+                    return lastPage;
+                return "Dashboard";
             }
         }
 
-        // No valid token — show login
-        WeakReferenceMessenger.Default.Send(new NavigateToPageMessage("Login"));
+        return "Login";
+    }
+
+    private async void NavigateOnStartup()
+    {
+        var route = await ResolveStartupRouteAsync();
+        WeakReferenceMessenger.Default.Send(new NavigateToPageMessage(route));
     }
 }

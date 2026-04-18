@@ -11,6 +11,16 @@ public enum ProductShelfStatus
     OutOfStock,
 }
 
+/// <summary>Values collected from the create-product dialog before building a <see cref="ProductListItem"/>.</summary>
+public sealed record NewProductForm(
+    string Name,
+    string Category,
+    string Sku,
+    decimal Price,
+    int Stock,
+    ProductShelfStatus Status
+);
+
 /// <summary>Row model for the All Products grid/list (sample / future API mapping).</summary>
 public sealed class ProductListItem
 {

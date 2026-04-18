@@ -1,17 +1,11 @@
 using CommunityToolkit.Mvvm.Messaging;
+using CSC13001_my_shop_project;
 using CSC13001_my_shop_project.Presentation.Dashboard;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Uno.Extensions.Navigation;
 
 namespace CSC13001_my_shop_project.Presentation;
-
-using System;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using CSC13001_my_shop_project.Presentation.Dashboard;
-using CSC13001_my_shop_project.Presentation.OrderList;
-using CommunityToolkit.Mvvm.Messaging;
-using Uno.Extensions.Navigation;
 
 public sealed partial class Shell : UserControl, IContentControlProvider
 {
@@ -28,29 +22,27 @@ public sealed partial class Shell : UserControl, IContentControlProvider
             if (e.PropertyName == nameof(ShellViewModel.SelectedSidebarItem))
                 SyncContentVisibility();
         };
-        
-        this.Loaded += (_, _) => SyncContentVisibility();
+
+        Loaded += OnShellLoaded;
     }
 
     public ContentControl ContentControl => MainContent;
 
     private async void OnShellLoaded(object sender, RoutedEventArgs e)
     {
-        MainContent.Visibility = Visibility.Visible;
-        if (string.IsNullOrEmpty(_vm.SelectedSidebarItem)) return;
+        ShellViewModel.AttachNavigatorResolver(() => this.Navigator() ?? MainContent?.Navigator());
+        SyncContentVisibility();
 
-        switch (_vm.SelectedSidebarItem)
+        // First NavigateToPageMessage can run before Loaded, so INavigator was null and nothing was shown.
+        if (MainContent.Content is null)
         {
-            case "Dashboard":
-                await MainContent.Navigator().NavigateViewModelAsync<DashboardViewModel>(this);
-                break;
-            case "Orders":
-                await MainContent.Navigator().NavigateViewModelAsync<OrderListViewModel>(this);
-                break;
-            default:
-                await MainContent.Navigator().NavigateRouteAsync(this, _vm.SelectedSidebarItem);
-                break;
+            var route = await App.ResolveStartupRouteAsync();
+            WeakReferenceMessenger.Default.Send(new NavigateToPageMessage(route));
         }
     }
+
+    private void SyncContentVisibility()
+    {
+        _vm.UpdateChromeVisibility(_vm.SelectedSidebarItem);
     }
 }

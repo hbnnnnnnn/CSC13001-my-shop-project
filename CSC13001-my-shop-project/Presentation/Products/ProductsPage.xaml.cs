@@ -1,4 +1,6 @@
+using System.Linq;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.DependencyInjection;
 using CSC13001_my_shop_project.Models;
 using CSC13001_my_shop_project.Presentation.Dashboard;
 using CSC13001_my_shop_project.Services;
@@ -6,6 +8,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Navigation;
 using Uno.Extensions.Navigation;
 using Uno.Extensions.Navigation.UI;
 
@@ -40,6 +43,13 @@ public sealed partial class ProductsPage : Page
         DataContextChanged += OnDataContextChanged;
         Loaded += OnLoaded;
         ProductsGridView.ContainerContentChanging += ProductsGridView_ContainerContentChanging;
+        CreateProductOverlay.SizeChanged += CreateProductOverlay_SizeChanged;
+    }
+
+    protected override void OnNavigatedFrom(NavigationEventArgs e)
+    {
+        HideCreateProductOverlay();
+        base.OnNavigatedFrom(e);
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -47,6 +57,64 @@ public sealed partial class ProductsPage : Page
         WeakReferenceMessenger.Default.Send(new ChromeVisibilityMessage(true));
         UpdateProductGridTileWidth(ProductsGridView.ActualWidth);
         ApplyPendingScrollOffset();
+    }
+
+    private async void AddNewProduct_Click(object sender, RoutedEventArgs e)
+    {
+        if (VM is null || App.AppHost is null)
+            return;
+
+        var productService = App.AppHost.Services.GetRequiredService<IProductService>();
+        var imageUpload = App.AppHost.Services.GetRequiredService<IImageUploadService>();
+
+        var dq = Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread();
+
+        var createVm = new CreateProductViewModel(
+            productService,
+            imageUpload,
+            onClose: () =>
+                dq?.TryEnqueue(() =>
+                {
+                    HideCreateProductOverlay();
+                }),
+            onCreated: async summary =>
+            {
+                if (summary is null)
+                    return;
+                await Task.Yield();
+                dq?.TryEnqueue(() => VM.MergeCreatedProduct(summary));
+            }
+        );
+
+        await createVm.InitializeAsync();
+
+        CreateProductSurface.DataContext = createVm;
+        CreateProductOverlay.Visibility = Visibility.Visible;
+        ApplyCreateProductSurfaceLayout();
+
+        dq?.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, ApplyCreateProductSurfaceLayout);
+    }
+
+    private void CreateProductOverlay_SizeChanged(object sender, SizeChangedEventArgs e) =>
+        ApplyCreateProductSurfaceLayout();
+
+    private void ApplyCreateProductSurfaceLayout()
+    {
+        if (CreateProductOverlay.Visibility != Visibility.Visible)
+            return;
+
+        var w = CreateProductOverlay.ActualWidth;
+        var h = CreateProductOverlay.ActualHeight;
+        if (w < 2 || h < 2)
+            return;
+
+        CreateProductSurface.ApplyLayoutBudget(w, h);
+    }
+
+    private void HideCreateProductOverlay()
+    {
+        CreateProductOverlay.Visibility = Visibility.Collapsed;
+        CreateProductSurface.DataContext = null;
     }
 
     private async void ApplyPendingScrollOffset()

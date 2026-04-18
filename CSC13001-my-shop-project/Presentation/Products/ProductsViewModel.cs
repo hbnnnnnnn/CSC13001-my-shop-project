@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using CSC13001_my_shop_project.Models;
+using CSC13001_my_shop_project.Services;
 
 namespace CSC13001_my_shop_project.Presentation.Products;
 
@@ -9,12 +11,12 @@ public partial class ProductsViewModel : ObservableObject
 {
     private const int DefaultPageSize = 8;
 
-    private readonly IReadOnlyList<ProductListItem> _catalog;
+    private readonly List<ProductListItem> _catalog;
     private List<ProductListItem> _filtered = [];
 
     public ProductsViewModel()
     {
-        _catalog = ProductCatalogData.Items;
+        _catalog = [..ProductCatalogData.Items];
         CategoryOptions = new ObservableCollection<string>(
             new[] { "All categories" }.Concat(
                 _catalog
@@ -196,10 +198,80 @@ public partial class ProductsViewModel : ObservableObject
         RebuildCurrentPage();
     }
 
-    [RelayCommand]
-    private void AddNewProduct()
+    /// <summary>Appends a user-created product and refreshes filters and category list.</summary>
+    public void AddProduct(NewProductForm form)
     {
-        // Placeholder for future create-product flow
+        var nextId = _catalog.Count == 0 ? 1 : _catalog.Max(p => p.Id) + 1;
+        var image = ProductCatalogData.PickImageByIndex(nextId);
+        _catalog.Add(
+            new ProductListItem(
+                nextId,
+                form.Name,
+                form.Category,
+                form.Sku,
+                image,
+                4.5,
+                0,
+                form.Price,
+                null,
+                form.Stock,
+                form.Status
+            )
+        );
+        RebuildCategoryOptions();
+        UpdateStats();
+        ApplyFilters();
+    }
+
+    /// <summary>Merges a product returned from the API after <see cref="CreateProductViewModel"/> succeeds.</summary>
+    public void MergeCreatedProduct(CreatedProductSummary p)
+    {
+        var status =
+            p.Stock == 0
+                ? ProductShelfStatus.OutOfStock
+                : p.Stock < 10
+                    ? ProductShelfStatus.LowStock
+                    : ProductShelfStatus.Active;
+        var thumb =
+            string.IsNullOrEmpty(p.FirstImageUrl)
+                ? ProductCatalogData.PickImageByIndex(p.Id)
+                : p.FirstImageUrl;
+        _catalog.Add(
+            new ProductListItem(
+                p.Id,
+                p.Name,
+                p.CategoryName,
+                p.Sku,
+                thumb,
+                4.5,
+                0,
+                (decimal)p.Price,
+                null,
+                p.Stock,
+                status
+            )
+        );
+        RebuildCategoryOptions();
+        UpdateStats();
+        ApplyFilters();
+    }
+
+    private void RebuildCategoryOptions()
+    {
+        var keepCategory = SelectedCategory;
+        CategoryOptions.Clear();
+        CategoryOptions.Add("All categories");
+        foreach (
+            var c in _catalog
+                .Select(p => p.Category)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(c => c, StringComparer.OrdinalIgnoreCase)
+        )
+            CategoryOptions.Add(c);
+
+        SelectedCategory = CategoryOptions.Contains(keepCategory)
+            ? keepCategory
+            : CategoryOptions[0];
     }
 
     private void UpdateStats()

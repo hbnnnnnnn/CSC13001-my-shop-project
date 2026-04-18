@@ -1,0 +1,33 @@
+<UserControl
+    x:Class="CSC13001_my_shop_project.Presentation.Products.Controls.CurrencyInputControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+>
+    <Grid MinWidth="0" ColumnSpacing="8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="88" MinWidth="0" />
+            <ColumnDefinition Width="*" MinWidth="0" />
+        </Grid.ColumnDefinitions>
+        <ComboBox
+            Grid.Column="0"
+            VerticalAlignment="Stretch"
+            Padding="8,10"
+            Background="#FFFAFAF8"
+            BorderBrush="#FFE5E1D8"
+            BorderThickness="1"
+            CornerRadius="12"
+            ItemsSource="{x:Bind CurrencyChoices, Mode=OneTime}"
+            SelectedItem="{x:Bind Currency, Mode=TwoWay}"
+        />
+        <TextBox
+            Grid.Column="1"
+            Padding="12,10"
+            Background="#FFFAFAF8"
+            BorderBrush="#FFE5E1D8"
+            BorderThickness="1"
+            CornerRadius="12"
+            PlaceholderText="0.00"
+            Text="{x:Bind Amount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+        />
+    </Grid>
+</UserControl>

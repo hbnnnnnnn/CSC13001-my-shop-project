@@ -7,18 +7,21 @@ public static class ProductCatalogData
 
     public static ProductListItem? FindById(int id) => Items.FirstOrDefault(p => p.Id == id);
 
+    /// <summary>Rotating placeholder image for new catalog rows (same order as seed data).</summary>
+    public static string PickImageByIndex(int index) =>
+        (index % 6) switch
+        {
+            0 => "ms-appx:///Assets/Products/woven-basket.png",
+            1 => "ms-appx:///Assets/Products/teak-coffee-table.png",
+            2 => "ms-appx:///Assets/Products/bamboo-floor-lamp.png",
+            3 => "ms-appx:///Assets/Products/ceramic-planter.png",
+            4 => "ms-appx:///Assets/Products/beige-modular-sofa.png",
+            _ => "ms-appx:///Assets/Products/woven-basket.png",
+        };
+
     private static IReadOnlyList<ProductListItem> BuildItems()
     {
-        static string PickImage(int index) =>
-            (index % 6) switch
-            {
-                0 => "ms-appx:///Assets/Products/woven-basket.png",
-                1 => "ms-appx:///Assets/Products/teak-coffee-table.png",
-                2 => "ms-appx:///Assets/Products/bamboo-floor-lamp.png",
-                3 => "ms-appx:///Assets/Products/ceramic-planter.png",
-                4 => "ms-appx:///Assets/Products/beige-modular-sofa.png",
-                _ => "ms-appx:///Assets/Products/woven-basket.png",
-            };
+        static string PickImage(int index) => PickImageByIndex(index);
 
         return
         [

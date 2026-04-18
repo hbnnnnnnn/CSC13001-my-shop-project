@@ -6,6 +6,8 @@
     xmlns:products="using:CSC13001_my_shop_project.Presentation.Products"
     xmlns:utu="using:Uno.Toolkit.UI"
     NavigationCacheMode="Required"
+    HorizontalAlignment="Stretch"
+    VerticalAlignment="Stretch"
     Background="{StaticResource ShellBackgroundBrush}"
 >
     <Page.Resources>
@@ -140,8 +142,15 @@
         </Style>
     </Page.Resources>
 
+    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
     <ScrollViewer
+        Grid.Row="0"
         x:Name="ProductsScrollViewer"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
         VerticalScrollBarVisibility="Auto"
         HorizontalScrollBarVisibility="Disabled"
     >
@@ -170,7 +179,7 @@
                     Grid.Column="1"
                     VerticalAlignment="Center"
                     Style="{StaticResource ProductsPrimaryButtonStyle}"
-                    Command="{Binding AddNewProductCommand}"
+                    Click="AddNewProduct_Click"
                 >
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <FontIcon
@@ -1069,4 +1078,23 @@
             </Grid>
         </StackPanel>
     </ScrollViewer>
+
+    <!-- Full-bleed over the page = same bounds as shell main content (gray frame), not a centered window dialog. -->
+    <Grid
+        x:Name="CreateProductOverlay"
+        Grid.Row="0"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        Background="#662C2118"
+        Canvas.ZIndex="100"
+        IsHitTestVisible="True"
+        Visibility="Collapsed"
+    >
+        <products:CreateProductDialog
+            x:Name="CreateProductSurface"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+        />
+    </Grid>
+    </Grid>
 </Page>
