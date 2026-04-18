@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using CSC13001_my_shop_project.Services;
 using Uno.Extensions.Navigation;
 using Windows.ApplicationModel.DataTransfer;
 
@@ -8,28 +9,67 @@ namespace CSC13001_my_shop_project.Presentation.Products;
 public partial class ProductDetailViewModel : ObservableObject
 {
     private readonly INavigator _navigator;
+    private readonly IProductService _productService;
+    private readonly ProductDetailArgs _args;
 
-    public ProductDetailViewModel(INavigator navigator, ProductDetailArgs args)
+    public ProductDetailViewModel(
+        INavigator navigator,
+        IProductService productService,
+        ProductDetailArgs args
+    )
     {
         _navigator = navigator;
-        var (p, orders) = ProductDetailFactory.Build(args.ProductId);
-        Product = p;
-        foreach (var o in orders)
-            RecentOrders.Add(o);
-
-        Breadcrumbs =
+        _productService = productService;
+        _args = args;
+        Product = ProductDtoMapping.DetailLoadingModel();
+        breadcrumbs =
         [
             new BreadcrumbItem { Label = "All Products", IsClickable = true },
-            new BreadcrumbItem { Label = p.Name, IsClickable = false },
+            new BreadcrumbItem { Label = "…", IsClickable = false },
         ];
+        _ = LoadProductAsync();
     }
 
     [ObservableProperty]
     private ProductModel product = null!;
 
+    [ObservableProperty]
+    private List<BreadcrumbItem> breadcrumbs;
+
     public ObservableCollection<OrderModel> RecentOrders { get; } = new();
 
-    public List<BreadcrumbItem> Breadcrumbs { get; }
+    private async Task LoadProductAsync()
+    {
+        try
+        {
+            var dto = await _productService
+                .GetByIdAsync(_args.GraphQlProductId)
+                .ConfigureAwait(false);
+            App.RunOnUIThread(() =>
+            {
+                Product = dto is null
+                    ? ProductDtoMapping.DetailNotFoundModel(_args.GraphQlProductId)
+                    : ProductDtoMapping.ToDetailModel(dto);
+                Breadcrumbs =
+                [
+                    new BreadcrumbItem { Label = "All Products", IsClickable = true },
+                    new BreadcrumbItem { Label = Product.Name, IsClickable = false },
+                ];
+            });
+        }
+        catch (Exception ex)
+        {
+            App.RunOnUIThread(() =>
+            {
+                Product = ProductDtoMapping.DetailErrorModel(ex.Message);
+                Breadcrumbs =
+                [
+                    new BreadcrumbItem { Label = "All Products", IsClickable = true },
+                    new BreadcrumbItem { Label = "Error", IsClickable = false },
+                ];
+            });
+        }
+    }
 
     [RelayCommand]
     private async Task GoBackAsync()
