@@ -82,6 +82,23 @@
                 <RowDefinition Height="73" />
             </Grid.RowDefinitions>
 
+            <Border
+                Grid.RowSpan="3"
+                Width="22"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Stretch"
+                Margin="0,0,-22,0"
+                IsHitTestVisible="False"
+                Opacity="0.02"
+            >
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Offset="0" Color="{StaticResource ShellTextStrongColor}" />
+                        <GradientStop Offset="1" Color="Transparent" />
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+
             <!-- Brand Header -->
             <Grid
                 BorderBrush="{StaticResource ShellHeaderDividerBrush}"
@@ -114,7 +131,7 @@
                 <Button
                     Grid.Column="1"
                     Style="{StaticResource ShellIconButtonStyle}"
-                    Width="36"
+                    Width="18"
                     Height="36"
                     VerticalAlignment="Center"
                     Click="OnCloseSidebarClicked"
@@ -271,23 +288,12 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <Border
-                    Width="40"
-                    Height="40"
-                    Background="{StaticResource ShellAvatarSoftBrush}"
-                    BorderBrush="{StaticResource ShellAvatarBorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="999"
-                >
-                    <TextBlock
-                        Text="LH"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center"
-                        FontSize="16"
-                        FontWeight="Bold"
-                        Foreground="{StaticResource ShellAccentBrush}"
-                    />
-                </Border>
+                <layout:AvatarBadgeControl
+                    AvatarSize="40"
+                    InitialsFontSize="13"
+                    DisplayName="{Binding UserName}"
+                    VerticalAlignment="Center"
+                />
 
                 <StackPanel
                     x:Name="FooterIdentity"
@@ -296,13 +302,13 @@
                     Spacing="1"
                 >
                     <TextBlock
-                        Text="Admin User"
+                        Text="{Binding UserName}"
                         FontSize="14"
                         FontWeight="SemiBold"
                         Foreground="{StaticResource ShellTextStrongBrush}"
                     />
                     <TextBlock
-                        Text="admin@luminahaven.com"
+                        Text="{Binding UserEmail}"
                         FontSize="12"
                         Foreground="{StaticResource ShellTextSubtleBrush}"
                     />
