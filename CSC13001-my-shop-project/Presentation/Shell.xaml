@@ -22,6 +22,7 @@
         <layout:SidebarControl
             x:Name="Sidebar"
             Grid.Column="0"
+            Canvas.ZIndex="10"
             Visibility="{Binding IsChromeVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
             IsExpanded="{Binding IsSidebarExpanded, Mode=TwoWay}"
             SelectedItem="{Binding SelectedSidebarItem, Mode=TwoWay}"
