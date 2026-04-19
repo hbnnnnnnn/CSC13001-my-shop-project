@@ -9,11 +9,63 @@ namespace CSC13001_my_shop_project.Presentation.ServerConfiguration;
 
 public sealed partial class ServerConfigurationPage : Page
 {
+    private Brush? _saveConfigurationDefaultBackground;
+    private Brush? _saveConfigurationHoverBackground;
+    private Brush? _saveConfigurationDefaultForeground;
+    private readonly Brush _saveConfigurationHoverForeground = new SolidColorBrush(Colors.White);
+    private Brush? _cancelConfigurationDefaultBackground;
+    private Brush? _cancelConfigurationHoverBackground;
+
     public ServerConfigurationPage()
     {
         this.InitializeComponent();
+        _saveConfigurationDefaultBackground = SaveConfigurationButton.Background;
+        _saveConfigurationHoverBackground = ResolveBrush("AuthPrimaryButtonHoverBrush");
+        _saveConfigurationDefaultForeground = SaveConfigurationButton.Foreground;
+        _cancelConfigurationDefaultBackground = CancelConfigurationButton.Background;
+        _cancelConfigurationHoverBackground = ResolveBrush("AuthSecondaryButtonHoverBrush");
         SizeChanged += OnSizeChanged;
         Loaded += (_, _) => WeakReferenceMessenger.Default.Send(new ChromeVisibilityMessage(false));
+    }
+
+    private void OnSaveConfigurationPointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+        if (sender is Button button)
+        {
+            button.Background =
+                _saveConfigurationHoverBackground ?? ResolveBrush("AuthPrimaryButtonHoverBrush");
+            button.Foreground = _saveConfigurationHoverForeground;
+        }
+    }
+
+    private void OnSaveConfigurationPointerExited(object sender, PointerRoutedEventArgs e)
+    {
+        if (sender is Button button)
+        {
+            button.Background =
+                _saveConfigurationDefaultBackground ?? ResolveBrush("AuthPrimaryButtonBrush");
+            button.Foreground =
+                _saveConfigurationDefaultForeground ?? _saveConfigurationHoverForeground;
+        }
+    }
+
+    private void OnCancelConfigurationPointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+        if (sender is Button button)
+        {
+            button.Background =
+                _cancelConfigurationHoverBackground
+                ?? ResolveBrush("AuthSecondaryButtonHoverBrush");
+        }
+    }
+
+    private void OnCancelConfigurationPointerExited(object sender, PointerRoutedEventArgs e)
+    {
+        if (sender is Button button)
+        {
+            button.Background =
+                _cancelConfigurationDefaultBackground ?? new SolidColorBrush(Colors.White);
+        }
     }
 
     private void OnSizeChanged(object sender, SizeChangedEventArgs e)
