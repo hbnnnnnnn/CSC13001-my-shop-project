@@ -16,6 +16,68 @@
         <SolidColorBrush x:Key="AuthInputFocusBackgroundBrush" Color="White" />
         <SolidColorBrush x:Key="AuthInputFocusRingBrush" Color="{StaticResource BrandColor}" />
         <SolidColorBrush x:Key="AuthInputPlaceholderBrush" Color="#D0D0D0" />
+        <SolidColorBrush x:Key="AuthPrimaryButtonHoverBrush" Color="#db860d" />
+        <SolidColorBrush x:Key="AuthSecondaryButtonHoverBrush" Color="#e6e6e6" />
+
+        <Style x:Key="AuthPrimaryButtonNoStateStyle" TargetType="Button">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                        >
+                            <ContentPresenter
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                            />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="AuthSecondaryButtonNoStateStyle" TargetType="Button">
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="Foreground" Value="{StaticResource AuthTextStrongBrush}" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                        >
+                            <ContentPresenter
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                            />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
         <Style x:Key="AuthFieldTextBoxStyle" TargetType="TextBox">
             <Setter Property="Background" Value="Transparent" />
@@ -678,16 +740,15 @@
                             </Grid.ColumnDefinitions>
 
                             <Button
+                                x:Name="SaveConfigurationButton"
                                 Grid.Column="0"
+                                Style="{StaticResource AuthPrimaryButtonNoStateStyle}"
                                 Height="50"
                                 Command="{Binding SaveConfiguration}"
                                 Background="{StaticResource AuthPrimaryButtonBrush}"
-                                BorderThickness="0"
-                                CornerRadius="14"
-                                Foreground="White"
-                                FontSize="15"
-                                FontWeight="SemiBold"
-                                HorizontalAlignment="Stretch"
+                                PointerEntered="OnSaveConfigurationPointerEntered"
+                                PointerExited="OnSaveConfigurationPointerExited"
+                                PointerCanceled="OnSaveConfigurationPointerExited"
                             >
                                 <Grid Width="168" HorizontalAlignment="Center">
                                     <Grid.ColumnDefinitions>
@@ -737,17 +798,17 @@
                             </Button>
 
                             <Button
+                                x:Name="CancelConfigurationButton"
                                 Grid.Column="1"
+                                Style="{StaticResource AuthSecondaryButtonNoStateStyle}"
                                 Height="50"
                                 Command="{Binding Cancel}"
                                 Background="White"
                                 BorderBrush="{StaticResource AuthInputBorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="14"
-                                Foreground="{StaticResource AuthTextStrongBrush}"
-                                FontSize="15"
-                                FontWeight="SemiBold"
                                 Content="Cancel"
+                                PointerEntered="OnCancelConfigurationPointerEntered"
+                                PointerExited="OnCancelConfigurationPointerExited"
+                                PointerCanceled="OnCancelConfigurationPointerExited"
                             />
                         </Grid>
                     </StackPanel>

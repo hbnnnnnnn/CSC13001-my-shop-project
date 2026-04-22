@@ -4,16 +4,86 @@ using CSC13001_my_shop_project.Presentation.Helpers;
 using Microsoft.UI;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Shapes;
 
 namespace CSC13001_my_shop_project.Presentation.Login;
 
 public sealed partial class LoginPage : Page
 {
+    private Brush? _signInDefaultBackground;
+    private Brush? _signInHoverBackground;
+    private Brush? _signInDefaultForeground;
+    private readonly Brush _signInHoverForeground = new SolidColorBrush(Colors.White);
+    private Brush? _configurationButtonDefaultBackground;
+    private Brush? _configurationButtonDefaultBorder;
+    private Brush? _configurationButtonDefaultIcon;
+    private Brush? _configurationButtonHoverBackground;
+    private Brush? _configurationButtonHoverIcon;
+
     public LoginPage()
     {
         this.InitializeComponent();
+        _signInDefaultBackground = SignInButton.Background;
+        _signInHoverBackground = ResolveBrush("AuthPrimaryButtonHoverBrush");
+        _signInDefaultForeground = SignInButton.Foreground;
+        _configurationButtonDefaultBackground = ConfigurationButton.Background;
+        _configurationButtonDefaultBorder = ConfigurationButton.BorderBrush;
+        _configurationButtonDefaultIcon = ConfigurationButtonOuterIcon.Stroke;
+        _configurationButtonHoverBackground = ResolveBrush(
+            "AuthSettingsButtonHoverBackgroundBrush"
+        );
+        _configurationButtonHoverIcon = ResolveBrush("AuthSettingsButtonHoverIconBrush");
         SizeChanged += OnSizeChanged;
         Loaded += (_, _) => WeakReferenceMessenger.Default.Send(new ChromeVisibilityMessage(false));
+    }
+
+    private void OnSignInPointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+        if (sender is Button button)
+        {
+            button.Background =
+                _signInHoverBackground ?? ResolveBrush("AuthPrimaryButtonHoverBrush");
+            button.Foreground = _signInHoverForeground;
+        }
+    }
+
+    private void OnSignInPointerExited(object sender, PointerRoutedEventArgs e)
+    {
+        if (sender is Button button)
+        {
+            button.Background = _signInDefaultBackground ?? ResolveBrush("AuthPrimaryButtonBrush");
+            button.Foreground = _signInDefaultForeground ?? _signInHoverForeground;
+        }
+    }
+
+    private void OnConfigurationButtonPointerEntered(object sender, PointerRoutedEventArgs e)
+    {
+        if (sender is not Button button)
+        {
+            return;
+        }
+
+        button.Background = _configurationButtonHoverBackground ?? ResolveBrush("BrandColor");
+        button.BorderBrush = _configurationButtonHoverBackground ?? ResolveBrush("BrandColor");
+        var hoverIconBrush = _configurationButtonHoverIcon ?? new SolidColorBrush(Colors.White);
+        ConfigurationButtonOuterIcon.Stroke = hoverIconBrush;
+        ConfigurationButtonInnerIcon.Stroke = hoverIconBrush;
+    }
+
+    private void OnConfigurationButtonPointerExited(object sender, PointerRoutedEventArgs e)
+    {
+        if (sender is not Button button)
+        {
+            return;
+        }
+
+        button.Background =
+            _configurationButtonDefaultBackground
+            ?? ResolveBrush("AuthSettingsButtonBackgroundBrush");
+        button.BorderBrush = _configurationButtonDefaultBorder ?? ResolveBrush("BrandColor");
+        var defaultIconBrush = _configurationButtonDefaultIcon ?? ResolveBrush("BrandColor");
+        ConfigurationButtonOuterIcon.Stroke = defaultIconBrush;
+        ConfigurationButtonInnerIcon.Stroke = defaultIconBrush;
     }
 
     private void OnSizeChanged(object sender, SizeChangedEventArgs e) =>

@@ -198,7 +198,7 @@
                         >
                             <layout:AvatarBadgeControl
                                 AvatarSize="32"
-                                InitialsFontSize="12"
+                                InitialsFontSize="11"
                                 DisplayName="{Binding UserName}"
                             />
                             <TextBlock
