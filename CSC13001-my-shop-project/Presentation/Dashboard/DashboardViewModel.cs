@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Text.Json;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
@@ -10,15 +11,16 @@ namespace CSC13001_my_shop_project.Presentation.Dashboard;
 public partial class DashboardViewModel : ObservableObject
 {
     private readonly OrderService? _orderService;
+    private readonly GraphqlService? _graphql;
 
     [ObservableProperty]
-    private string totalProducts = "1,248";
+    private string totalProducts = "—";
 
     [ObservableProperty]
-    private string totalOrders = "567";
+    private string totalOrders = "—";
 
     [ObservableProperty]
-    private string totalRevenue = "$124,560";
+    private string totalRevenue = "—";
 
     [ObservableProperty]
     private ObservableCollection<DashboardOrderItem> _recentOrders = new();
@@ -26,37 +28,14 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty]
     private bool _isLoadingOrders;
 
-    public IReadOnlyList<LowStockItem> LowStockItems { get; } =
-        new List<LowStockItem>
-        {
-            new("Teak Coffee Table", 3, "ms-appx:///Assets/Products/teak-coffee-table.png"),
-            new("Bamboo Floor Lamp", 5, "ms-appx:///Assets/Products/bamboo-floor-lamp.png"),
-            new("Ceramic Planter", 2, "ms-appx:///Assets/Products/ceramic-planter.png"),
-            new("Woven Basket", 4, "ms-appx:///Assets/Products/woven-basket.png"),
-            new("Oak Side Table", 1, ""),
-        };
+    [ObservableProperty]
+    private ObservableCollection<LowStockItem> _lowStockItems = new();
 
-    public IReadOnlyList<BestSellingItem> BestSellingItems { get; } =
-        new List<BestSellingItem>
-        {
-            new("Nordic Lounge Chair", 324, "$249", ""),
-            new("Minimalist Wooden Lamp", 212, "$89", ""),
-            new(
-                "Beige Modular Sofa",
-                156,
-                "$899",
-                "ms-appx:///Assets/Products/beige-modular-sofa.png"
-            ),
-            new(
-                "Ceramic Artisan Vase",
-                98,
-                "$45",
-                "ms-appx:///Assets/Products/ceramic-planter.png"
-            ),
-            new("Linen Woven Rug", 74, "$120", "ms-appx:///Assets/Products/woven-basket.png"),
-        };
+    [ObservableProperty]
+    private ObservableCollection<BestSellingItem> _bestSellingItems = new();
 
-    public string LowStockBadgeText => $"{LowStockItems.Count} items";
+    [ObservableProperty]
+    private string _lowStockBadgeText = "0 items";
 
     /// <summary>
     /// Parameterless constructor for design-time / fallback.
@@ -73,12 +52,26 @@ public partial class DashboardViewModel : ObservableObject
     }
 
     /// <summary>
-    /// Constructor with DI — receives OrderService to fetch real data.
+    /// Constructor with DI — receives OrderService and GraphqlService to fetch real data.
     /// </summary>
-    public DashboardViewModel(OrderService orderService) : this()
+    public DashboardViewModel(OrderService orderService, GraphqlService graphqlService) : this()
     {
         _orderService = orderService;
-        _ = LoadRecentOrdersAsync();
+        _graphql = graphqlService;
+        _ = LoadAllDashboardDataAsync();
+    }
+
+    /// <summary>
+    /// Loads all dashboard data in parallel.
+    /// </summary>
+    private async Task LoadAllDashboardDataAsync()
+    {
+        await Task.WhenAll(
+            LoadRecentOrdersAsync(),
+            LoadTopLowStockProductsAsync(),
+            LoadTopSellingProductsAsync(),
+            LoadTotalProductsAsync()
+        );
     }
 
     /// <summary>
@@ -116,12 +109,126 @@ public partial class DashboardViewModel : ObservableObject
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[Dashboard] Failed to load recent orders: {ex.Message}");
-            // Keep fallback data on error
         }
         finally
         {
             IsLoadingOrders = false;
         }
+    }
+
+    /// <summary>
+    /// Fetches top 5 low stock products from the backend.
+    /// </summary>
+    private async Task LoadTopLowStockProductsAsync()
+    {
+        if (_graphql is null) return;
+
+        try
+        {
+            var data = await _graphql.QueryAsync(
+                @"query TopLowStock($limit: Int) {
+                    topLowStockProducts(limit: $limit) {
+                        product_id name stock images
+                    }
+                }",
+                new { limit = 5 }
+            );
+
+            var products = data.GetProperty("topLowStockProducts").EnumerateArray();
+
+            LowStockItems.Clear();
+            foreach (var p in products)
+            {
+                var name = p.GetProperty("name").GetString() ?? "";
+                var stock = p.GetProperty("stock").GetInt32();
+                var imageUrl = GetFirstImage(p);
+
+                LowStockItems.Add(new LowStockItem(name, stock, imageUrl));
+            }
+
+            LowStockBadgeText = $"{LowStockItems.Count} items";
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Dashboard] Failed to load low stock products: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Fetches top 5 best selling products from the backend (uses TopSellingProduct type with total_sold).
+    /// </summary>
+    private async Task LoadTopSellingProductsAsync()
+    {
+        if (_graphql is null) return;
+
+        try
+        {
+            var data = await _graphql.QueryAsync(
+                @"query TopSelling($limit: Int) {
+                    topSellingProducts(limit: $limit) {
+                        product_id name price images total_sold
+                    }
+                }",
+                new { limit = 5 }
+            );
+
+            var products = data.GetProperty("topSellingProducts").EnumerateArray();
+
+            BestSellingItems.Clear();
+            foreach (var p in products)
+            {
+                var name = p.GetProperty("name").GetString() ?? "";
+                var sold = p.GetProperty("total_sold").GetInt32();
+                var price = p.GetProperty("price").GetInt32();
+                var priceText = $"{price:N0} ₫";
+                var imageUrl = GetFirstImage(p);
+
+                BestSellingItems.Add(new BestSellingItem(name, sold, priceText, imageUrl));
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Dashboard] Failed to load best selling products: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Fetches total product count for the stat card.
+    /// </summary>
+    private async Task LoadTotalProductsAsync()
+    {
+        if (_graphql is null) return;
+
+        try
+        {
+            var data = await _graphql.QueryAsync(
+                @"query { products(page: 1, limit: 1) { total } }"
+            );
+
+            var total = data.GetProperty("products").GetProperty("total").GetInt32();
+            TotalProducts = total.ToString("N0");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Dashboard] Failed to load total products: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Extracts the first image URL from a product's images array, or empty string.
+    /// </summary>
+    private static string GetFirstImage(JsonElement product)
+    {
+        if (product.TryGetProperty("images", out var images)
+            && images.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var img in images.EnumerateArray())
+            {
+                var url = img.GetString();
+                if (!string.IsNullOrEmpty(url)) return url;
+            }
+        }
+        return "";
     }
 
     /// <summary>
@@ -197,3 +304,4 @@ public record BestSellingItem(string Name, int Sold, string Price, string ImageP
     public BitmapImage? Thumbnail =>
         string.IsNullOrEmpty(ImagePath) ? null : new BitmapImage(new Uri(ImagePath));
 }
+
