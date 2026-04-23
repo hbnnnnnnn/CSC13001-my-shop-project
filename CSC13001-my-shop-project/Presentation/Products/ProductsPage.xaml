@@ -710,6 +710,35 @@
                 </Grid>
             </Border>
 
+            <!-- GraphQL catalog load -->
+            <StackPanel Margin="0,0,0,12" Spacing="8">
+                <StackPanel
+                    Orientation="Horizontal"
+                    Spacing="10"
+                    Visibility="{Binding IsLoadingCatalog, Converter={StaticResource BoolToVis}}"
+                >
+                    <ProgressRing
+                        Width="22"
+                        Height="22"
+                        IsActive="True"
+                        VerticalAlignment="Center"
+                    />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        FontSize="14"
+                        Foreground="#FF6B7280"
+                        Text="Loading products from server…"
+                    />
+                </StackPanel>
+                <TextBlock
+                    FontSize="13"
+                    Foreground="#FFDC2626"
+                    Text="{Binding CatalogLoadError}"
+                    TextWrapping="Wrap"
+                    Visibility="{Binding HasCatalogLoadError, Converter={StaticResource BoolToVis}}"
+                />
+            </StackPanel>
+
             <!-- Grid view: tile width from page (four columns, fills available width) -->
             <GridView
                 x:Name="ProductsGridView"

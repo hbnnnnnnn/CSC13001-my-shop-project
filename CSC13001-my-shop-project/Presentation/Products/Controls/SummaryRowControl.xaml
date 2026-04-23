@@ -24,7 +24,7 @@
                 Grid.Column="1"
                 FontSize="13"
                 FontWeight="SemiBold"
-                Foreground="#FF1A1A1A"
+                Foreground="#FF000000"
                 Text="{Binding Value, ElementName=Root, Mode=OneWay}"
             />
         </Grid>

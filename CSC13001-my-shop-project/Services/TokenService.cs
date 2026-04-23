@@ -1,7 +1,7 @@
 namespace CSC13001_my_shop_project.Services;
 
-/// <summary>Placeholder until login stores a JWT; GraphQL product flows work without auth.</summary>
-public sealed class TokenService : ITokenService
+/// <summary>Forwards the JWT from <see cref="AuthService"/> so <see cref="GraphQlClient"/> sends the same Bearer token as <c>BackendApi</c>.</summary>
+public sealed class TokenService(AuthService auth) : ITokenService
 {
-    public string? GetToken() => null;
+    public string? GetToken() => auth.Token;
 }
