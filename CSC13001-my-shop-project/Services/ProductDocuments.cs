@@ -100,4 +100,13 @@ public static class ProductDocuments
           deleteProduct(id: $id)
         }
         """;
+
+    public const string GenerateProductDetailsFromImage = """
+        mutation GenerateProductDetailsFromImage($imageUrl: String!) {
+          generateProductDetailsFromImage(imageUrl: $imageUrl) {
+            name
+            description
+          }
+        }
+        """;
 }

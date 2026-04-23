@@ -7,12 +7,64 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="DialogRoot"
+    RequestedTheme="Light"
     mc:Ignorable="d"
 >
     <UserControl.Resources>
-        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
-        <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVis" />
-        <conv:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVis" />
+        <ResourceDictionary>
+            <!-- Material ComboBox reads placeholder/chevron via ThemeResource; set brushes in theme dicts. -->
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="ComboBoxPlaceHolderForeground" Color="#FF6B7280" />
+                    <SolidColorBrush x:Key="ComboBoxPlaceHolderForegroundPointerOver" Color="#FF6B7280" />
+                    <SolidColorBrush x:Key="ComboBoxPlaceHolderForegroundPressed" Color="#FF6B7280" />
+                    <SolidColorBrush x:Key="ComboBoxPlaceHolderForegroundDisabled" Color="#996B7280" />
+                    <SolidColorBrush x:Key="ComboBoxPlaceHolderForegroundFocused" Color="#FF6B7280" />
+                    <SolidColorBrush x:Key="ComboBoxPlaceHolderForegroundFocusedPressed" Color="#FF6B7280" />
+                    <SolidColorBrush x:Key="ComboBoxArrowForeground" Color="#FF6B7280" />
+                    <SolidColorBrush x:Key="ComboBoxArrowForegroundOpened" Color="#FF6B7280" />
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="ComboBoxPlaceHolderForeground" Color="#FF6B7280" />
+                    <SolidColorBrush x:Key="ComboBoxPlaceHolderForegroundPointerOver" Color="#FF6B7280" />
+                    <SolidColorBrush x:Key="ComboBoxPlaceHolderForegroundPressed" Color="#FF6B7280" />
+                    <SolidColorBrush x:Key="ComboBoxPlaceHolderForegroundDisabled" Color="#996B7280" />
+                    <SolidColorBrush x:Key="ComboBoxPlaceHolderForegroundFocused" Color="#FF6B7280" />
+                    <SolidColorBrush x:Key="ComboBoxPlaceHolderForegroundFocusedPressed" Color="#FF6B7280" />
+                    <SolidColorBrush x:Key="ComboBoxArrowForeground" Color="#FF6B7280" />
+                    <SolidColorBrush x:Key="ComboBoxArrowForegroundOpened" Color="#FF6B7280" />
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
+            <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+            <conv:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVis" />
+
+            <!-- Keep typed text dark on hover/focus (theme defaults can flip to light foreground). -->
+            <SolidColorBrush x:Key="TextControlForeground" Color="#FF000000" />
+            <SolidColorBrush x:Key="TextControlForegroundPointerOver" Color="#FF000000" />
+            <SolidColorBrush x:Key="TextControlForegroundFocused" Color="#FF000000" />
+            <SolidColorBrush x:Key="TextControlForegroundDisabled" Color="#66000000" />
+            <SolidColorBrush x:Key="TextControlPlaceholderForeground" Color="#FF9CA3AF" />
+            <SolidColorBrush x:Key="TextControlPlaceholderForegroundPointerOver" Color="#FF9CA3AF" />
+            <SolidColorBrush x:Key="TextControlPlaceholderForegroundFocused" Color="#FF9CA3AF" />
+            <SolidColorBrush x:Key="TextControlCaretBrush" Color="#FF000000" />
+            <SolidColorBrush x:Key="TextControlBackgroundPointerOver" Color="#FFFAFAF8" />
+            <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="#FFFAFAF8" />
+            <SolidColorBrush x:Key="ComboBoxForeground" Color="#FF000000" />
+            <SolidColorBrush x:Key="ComboBoxForegroundPointerOver" Color="#FF000000" />
+            <SolidColorBrush x:Key="ComboBoxForegroundPressed" Color="#FF000000" />
+            <SolidColorBrush x:Key="ComboBoxForegroundFocused" Color="#FF000000" />
+            <SolidColorBrush x:Key="ComboBoxForegroundDisabled" Color="#66000000" />
+
+            <Style x:Key="CreateFormTextBoxStyle" TargetType="TextBox">
+                <Setter Property="Foreground" Value="#FF000000" />
+                <Setter Property="PlaceholderForeground" Value="#FF9CA3AF" />
+            </Style>
+            <Style x:Key="CreateFormComboBoxStyle" TargetType="ComboBox">
+                <Setter Property="Foreground" Value="#FF000000" />
+                <Setter Property="PlaceholderForeground" Value="#FF6B7280" />
+            </Style>
+        </ResourceDictionary>
     </UserControl.Resources>
 
     <Border
@@ -27,6 +79,7 @@
     >
         <Grid>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
@@ -60,7 +113,7 @@
                     BorderThickness="0"
                     Command="{Binding CancelCommand}"
                     Content="Cancel"
-                    Foreground="#FF9CA3AF"
+                    Foreground="#FF6B7280"
                     FontSize="14"
                 />
                 <Button
@@ -77,8 +130,24 @@
                 />
             </Grid>
 
-            <ScrollViewer
+            <Border
                 Grid.Row="1"
+                Padding="24,10"
+                Background="#FFFFF7ED"
+                BorderBrush="#66F59E0B"
+                BorderThickness="0,0,0,1"
+                Visibility="{Binding TopBannerMessage, Converter={StaticResource StringNotEmptyToVis}}"
+            >
+                <TextBlock
+                    FontSize="14"
+                    Foreground="#FFB45309"
+                    Text="{Binding TopBannerMessage, Mode=OneWay}"
+                    TextWrapping="Wrap"
+                />
+            </Border>
+
+            <ScrollViewer
+                Grid.Row="2"
                 HorizontalScrollBarVisibility="Disabled"
                 VerticalScrollBarVisibility="Auto"
             >
@@ -90,14 +159,123 @@
 
                     <!-- Left column -->
                     <StackPanel Grid.Column="0" Spacing="0">
-                        <controls:SectionHeaderControl Title="Basic Information" />
+                        <StackPanel Spacing="0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    FontSize="16"
+                                    FontWeight="SemiBold"
+                                    Foreground="#FF1A1A1A"
+                                    Text="Basic Information"
+                                />
+                                <Button
+                                    Grid.Column="1"
+                                    Margin="8,0,0,0"
+                                    Padding="0"
+                                    MinWidth="0"
+                                    MinHeight="0"
+                                    VerticalAlignment="Center"
+                                    HorizontalContentAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Command="{Binding RequestAiSuggestionCommand}"
+                                    ToolTipService.ToolTip="Suggest name and description from the cover image"
+                                    AutomationProperties.Name="Sparkle: suggest from cover image"
+                                >
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Grid>
+                                                <VisualStateManager.VisualStateGroups>
+                                                    <VisualStateGroup x:Name="CommonStates">
+                                                        <VisualState x:Name="Normal">
+                                                            <Storyboard>
+                                                                <ColorAnimation
+                                                                    EnableDependentAnimation="True"
+                                                                    Storyboard.TargetName="SparkleFillBrush"
+                                                                    Storyboard.TargetProperty="Color"
+                                                                    To="#FFF59E0B"
+                                                                    Duration="0:0:0.12"
+                                                                />
+                                                                <DoubleAnimation
+                                                                    Storyboard.TargetName="IconRoot"
+                                                                    Storyboard.TargetProperty="Opacity"
+                                                                    To="1"
+                                                                    Duration="0:0:0.08"
+                                                                />
+                                                            </Storyboard>
+                                                        </VisualState>
+                                                        <VisualState x:Name="PointerOver">
+                                                            <Storyboard>
+                                                                <ColorAnimation
+                                                                    EnableDependentAnimation="True"
+                                                                    Storyboard.TargetName="SparkleFillBrush"
+                                                                    Storyboard.TargetProperty="Color"
+                                                                    To="#FFE08A12"
+                                                                    Duration="0:0:0.12"
+                                                                />
+                                                            </Storyboard>
+                                                        </VisualState>
+                                                        <VisualState x:Name="Pressed">
+                                                            <Storyboard>
+                                                                <ColorAnimation
+                                                                    EnableDependentAnimation="True"
+                                                                    Storyboard.TargetName="SparkleFillBrush"
+                                                                    Storyboard.TargetProperty="Color"
+                                                                    To="#FFC76A00"
+                                                                    Duration="0:0:0.06"
+                                                                />
+                                                            </Storyboard>
+                                                        </VisualState>
+                                                        <VisualState x:Name="Disabled">
+                                                            <Storyboard>
+                                                                <DoubleAnimation
+                                                                    Storyboard.TargetName="IconRoot"
+                                                                    Storyboard.TargetProperty="Opacity"
+                                                                    To="0.35"
+                                                                    Duration="0:0:0"
+                                                                />
+                                                            </Storyboard>
+                                                        </VisualState>
+                                                    </VisualStateGroup>
+                                                </VisualStateManager.VisualStateGroups>
+                                                <Viewbox
+                                                    x:Name="IconRoot"
+                                                    Width="20"
+                                                    Height="20"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                >
+                                                    <Path Data="M 12,4 L 16.5,12 L 12,20 L 7.5,12 Z M 5,2.5 L 7.5,6 L 5,9.5 L 2.5,6 Z M 19,1.5 L 21.5,4.5 L 19,7.5 L 16.5,4.5 Z">
+                                                        <Path.Fill>
+                                                            <SolidColorBrush x:Name="SparkleFillBrush" Color="#FFF59E0B" />
+                                                        </Path.Fill>
+                                                    </Path>
+                                                </Viewbox>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                </Button>
+                            </Grid>
+                            <Rectangle
+                                Height="1"
+                                Margin="0,8,0,16"
+                                HorizontalAlignment="Stretch"
+                                Fill="#FFF0EDE8"
+                            />
+                        </StackPanel>
 
                         <StackPanel Margin="0,0,0,6" Orientation="Horizontal" Spacing="4">
                             <TextBlock
                                 VerticalAlignment="Center"
                                 FontSize="11"
                                 FontWeight="SemiBold"
-                                Foreground="#FF9CA3AF"
+                                Foreground="#FF6B7280"
                                 Text="PRODUCT NAME"
                             />
                             <TextBlock
@@ -108,6 +286,7 @@
                             />
                         </StackPanel>
                         <TextBox
+                            Style="{StaticResource CreateFormTextBoxStyle}"
                             Margin="0,0,0,16"
                             Padding="12,10"
                             Background="#FFFAFAF8"
@@ -122,10 +301,11 @@
                             Margin="0,0,0,6"
                             FontSize="11"
                             FontWeight="SemiBold"
-                            Foreground="#FF9CA3AF"
+                            Foreground="#FF6B7280"
                             Text="DESCRIPTION"
                         />
                         <TextBox
+                            Style="{StaticResource CreateFormTextBoxStyle}"
                             Height="110"
                             Margin="0,0,0,4"
                             Padding="12,10"
@@ -145,54 +325,134 @@
                             Text="Describe the product — materials, dimensions, style."
                         />
 
-                        <Grid Margin="0,0,0,16" ColumnSpacing="12">
+                        <Grid Margin="0,0,0,16" ColumnSpacing="12" RowSpacing="6">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0" Spacing="6">
-                                <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="#FF9CA3AF">
-                                    <Run Text="CATEGORY" />
-                                    <Run Foreground="#FFEF4444" Text=" *" />
-                                </TextBlock>
-                                <ComboBox
-                                    DisplayMemberPath="Name"
-                                    ItemsSource="{Binding Categories, Mode=OneWay}"
-                                    PlaceholderText="Select category"
-                                    SelectedItem="{Binding SelectedCategoryItem, Mode=TwoWay}"
-                                    Background="#FFFAFAF8"
-                                    BorderBrush="#FFE5E1D8"
-                                    CornerRadius="8"
-                                />
-                            </StackPanel>
-                            <StackPanel Grid.Column="1" Spacing="6">
-                                <TextBlock
-                                    Margin="0,0,0,6"
-                                    FontSize="11"
-                                    FontWeight="SemiBold"
-                                    Foreground="#FF9CA3AF"
-                                    Text="SKU"
-                                />
-                                <TextBox
-                                    Padding="12,10"
-                                    Background="#FFFAFAF8"
-                                    BorderBrush="#FFE5E1D8"
-                                    BorderThickness="1"
-                                    CornerRadius="8"
-                                    PlaceholderText="e.g. NLC-001"
-                                    Text="{Binding Sku, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                />
-                            </StackPanel>
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="0"
+                                VerticalAlignment="Bottom"
+                                FontSize="11"
+                                FontWeight="SemiBold"
+                                Foreground="#FF6B7280"
+                            >
+                                <Run Text="CATEGORY" />
+                                <Run Foreground="#FFEF4444" Text=" *" />
+                            </TextBlock>
+                            <TextBlock
+                                Grid.Row="0"
+                                Grid.Column="1"
+                                VerticalAlignment="Bottom"
+                                FontSize="11"
+                                FontWeight="SemiBold"
+                                Foreground="#FF6B7280"
+                                Text="SKU"
+                            />
+                            <Border
+                                x:Name="CategoryPickerHost"
+                                Grid.Row="1"
+                                Grid.Column="0"
+                                VerticalAlignment="Top"
+                                Background="#FFFAFAF8"
+                                BorderBrush="#FFE5E1D8"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                PointerPressed="CategoryPickerHost_PointerPressed"
+                                Tapped="CategoryPickerHost_Tapped"
+                            >
+                                <FlyoutBase.AttachedFlyout>
+                                    <Flyout Placement="BottomEdgeAlignedLeft">
+                                        <Border
+                                            MinWidth="200"
+                                            Width="{Binding ActualWidth, ElementName=CategoryPickerHost}"
+                                            Padding="4"
+                                            Background="#FFFFFFFF"
+                                            BorderBrush="#FFE5E1D8"
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                        >
+                                            <ScrollViewer MaxHeight="280">
+                                                <ItemsControl ItemsSource="{Binding Categories, Mode=OneWay}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Button
+                                                                HorizontalAlignment="Stretch"
+                                                                HorizontalContentAlignment="Left"
+                                                                Background="Transparent"
+                                                                BorderThickness="0"
+                                                                Click="CategoryPickItem_Click"
+                                                                Padding="12,10"
+                                                            >
+                                                                <TextBlock Foreground="#FF1A1A1A" Text="{Binding Name}" />
+                                                            </Button>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </ScrollViewer>
+                                        </Border>
+                                    </Flyout>
+                                </FlyoutBase.AttachedFlyout>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox
+                                        Grid.Column="0"
+                                        Style="{StaticResource CreateFormTextBoxStyle}"
+                                        Padding="12,10,4,10"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        CornerRadius="0"
+                                        IsHitTestVisible="False"
+                                        IsReadOnly="True"
+                                        IsTabStop="False"
+                                        PlaceholderText="Select category"
+                                        Text="{Binding CategorySelectionDisplay, Mode=OneWay}"
+                                    />
+                                    <Path
+                                        Grid.Column="1"
+                                        Margin="0,0,12,0"
+                                        VerticalAlignment="Center"
+                                        Data="M0 0L5 5L10 0H0Z"
+                                        Fill="#FF6B7280"
+                                        IsHitTestVisible="False"
+                                        Stretch="Uniform"
+                                        Width="10"
+                                        Height="5"
+                                    />
+                                </Grid>
+                            </Border>
+                            <TextBox
+                                Grid.Row="1"
+                                Grid.Column="1"
+                                VerticalAlignment="Top"
+                                Style="{StaticResource CreateFormTextBoxStyle}"
+                                Padding="12,10"
+                                Background="#FFFAFAF8"
+                                BorderBrush="#FFE5E1D8"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                PlaceholderText="e.g. NLC-001"
+                                Text="{Binding Sku, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            />
                         </Grid>
 
                         <TextBlock
                             Margin="0,0,0,6"
                             FontSize="11"
                             FontWeight="SemiBold"
-                            Foreground="#FF9CA3AF"
+                            Foreground="#FF6B7280"
                             Text="SUPPLIER (OPTIONAL)"
                         />
                         <TextBox
+                            Style="{StaticResource CreateFormTextBoxStyle}"
                             Margin="0,0,0,16"
                             Padding="12,10"
                             Background="#FFFAFAF8"
@@ -207,7 +467,7 @@
                             Margin="0,0,0,6"
                             FontSize="11"
                             FontWeight="SemiBold"
-                            Foreground="#FF9CA3AF"
+                            Foreground="#FF6B7280"
                             Text="TAGS"
                         />
                         <Grid Margin="0,0,0,4" ColumnSpacing="8">
@@ -217,6 +477,7 @@
                             </Grid.ColumnDefinitions>
                             <TextBox
                                 x:Name="TagEntryBox"
+                                Style="{StaticResource CreateFormTextBoxStyle}"
                                 Grid.Column="0"
                                 Padding="12,10"
                                 Background="#FFFAFAF8"
@@ -263,7 +524,11 @@
                                         CornerRadius="20"
                                     >
                                         <StackPanel Orientation="Horizontal" Spacing="6">
-                                            <TextBlock VerticalAlignment="Center" Text="{Binding}" />
+                                            <TextBlock
+                                                VerticalAlignment="Center"
+                                                Foreground="#FF000000"
+                                                Text="{Binding}"
+                                            />
                                             <Button
                                                 Padding="4"
                                                 MinWidth="24"
@@ -290,7 +555,7 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Spacing="6">
-                                <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="#FF9CA3AF">
+                                <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="#FF6B7280">
                                     <Run Text="PRICE" />
                                     <Run Foreground="#FFEF4444" Text=" *" />
                                 </TextBlock>
@@ -303,7 +568,7 @@
                                 <TextBlock
                                     FontSize="11"
                                     FontWeight="SemiBold"
-                                    Foreground="#FF9CA3AF"
+                                    Foreground="#FF6B7280"
                                     Text="COMPARE PRICE"
                                 />
                                 <controls:CurrencyInputControl
@@ -316,7 +581,7 @@
                                 <TextBlock
                                     FontSize="11"
                                     FontWeight="SemiBold"
-                                    Foreground="#FF9CA3AF"
+                                    Foreground="#FF6B7280"
                                     Text="COST PER ITEM"
                                 />
                                 <controls:CurrencyInputControl
@@ -352,10 +617,11 @@
                                 <TextBlock
                                     FontSize="11"
                                     FontWeight="SemiBold"
-                                    Foreground="#FF9CA3AF"
+                                    Foreground="#FF6B7280"
                                     Text="QUANTITY"
                                 />
                                 <TextBox
+                                    Style="{StaticResource CreateFormTextBoxStyle}"
                                     Padding="12,10"
                                     Background="#FFFAFAF8"
                                     BorderBrush="#FFE5E1D8"
@@ -370,7 +636,7 @@
                                 <TextBlock
                                     FontSize="11"
                                     FontWeight="SemiBold"
-                                    Foreground="#FF9CA3AF"
+                                    Foreground="#FF6B7280"
                                     Text="WEIGHT"
                                 />
                                 <Grid ColumnSpacing="8">
@@ -380,6 +646,7 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBox
                                         Grid.Column="0"
+                                        Style="{StaticResource CreateFormTextBoxStyle}"
                                         Padding="12,10"
                                         Background="#FFFAFAF8"
                                         BorderBrush="#FFE5E1D8"
@@ -390,7 +657,11 @@
                                     />
                                     <ComboBox
                                         Grid.Column="1"
+                                        Style="{StaticResource CreateFormComboBoxStyle}"
                                         VerticalAlignment="Center"
+                                        Background="#FFFAFAF8"
+                                        BorderBrush="#FFE5E1D8"
+                                        CornerRadius="8"
                                         ItemsSource="{Binding WeightUnits, Mode=OneWay}"
                                         SelectedItem="{Binding WeightUnit, Mode=TwoWay}"
                                     />
@@ -403,10 +674,11 @@
                             Margin="0,0,0,6"
                             FontSize="11"
                             FontWeight="SemiBold"
-                            Foreground="#FF9CA3AF"
+                            Foreground="#FF6B7280"
                             Text="DIMENSIONS"
                         />
                         <TextBox
+                            Style="{StaticResource CreateFormTextBoxStyle}"
                             Width="260"
                             HorizontalAlignment="Left"
                             Margin="0,0,0,4"
@@ -475,7 +747,7 @@
                                         <TextBlock
                                             HorizontalAlignment="Center"
                                             FontSize="12"
-                                            Foreground="#FF9CA3AF"
+                                            Foreground="#FF6B7280"
                                             Text="Click or drag &amp; drop"
                                         />
                                         <TextBlock
@@ -564,18 +836,31 @@
 
             <Grid
                 Grid.Row="0"
-                Grid.RowSpan="2"
+                Grid.RowSpan="3"
                 Background="#80FFFFFF"
                 IsHitTestVisible="True"
                 Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}"
             >
-                <ProgressRing
-                    Width="48"
-                    Height="48"
+                <StackPanel
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center"
-                    IsActive="{Binding IsBusy, Mode=OneWay}"
-                />
+                    Spacing="14"
+                >
+                    <ProgressRing
+                        Width="48"
+                        Height="48"
+                        HorizontalAlignment="Center"
+                        IsActive="{Binding IsBusy, Mode=OneWay}"
+                    />
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        FontSize="15"
+                        FontWeight="SemiBold"
+                        Foreground="#FF1A1A1A"
+                        Text="Generating...."
+                        Visibility="{Binding IsAiGenerating, Converter={StaticResource BoolToVis}}"
+                    />
+                </StackPanel>
             </Grid>
         </Grid>
     </Border>

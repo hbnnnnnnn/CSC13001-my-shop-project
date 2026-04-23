@@ -1,0 +1,7 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+>
+    <!-- Segoe Fluent Icons glyphs (e.g. Effects E794); required on Skia/macOS. Face name in TTF is "Symbols". -->
+    <FontFamily x:Key="SymbolThemeFontFamily">ms-appx:///Uno.Fonts.Fluent/Fonts/uno-fluentui-assets.ttf#Symbols</FontFamily>
+</ResourceDictionary>

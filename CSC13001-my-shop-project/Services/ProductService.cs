@@ -66,4 +66,17 @@ public sealed class ProductService(GraphQlClient gql) : IProductService
             ct).ConfigureAwait(false);
         return root?.Categories?.Data ?? [];
     }
+
+    public async Task<AIProductSuggestionDto?> GenerateProductDetailsFromImageAsync(
+        string imageUrl,
+        CancellationToken ct = default)
+    {
+        var root = await gql
+            .ExecuteAsync<GenerateAiSuggestionDataRoot>(
+                ProductDocuments.GenerateProductDetailsFromImage,
+                new { imageUrl },
+                ct)
+            .ConfigureAwait(false);
+        return root?.GenerateProductDetailsFromImage;
+    }
 }

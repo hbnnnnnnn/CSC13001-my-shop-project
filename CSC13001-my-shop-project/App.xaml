@@ -23,6 +23,7 @@
                 </utum:MaterialToolkitTheme>
 
                 <ResourceDictionary Source="Assets/Styles/CheckBox.xaml" />
+                <ResourceDictionary Source="Assets/Styles/FluentIconGlyphs.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">

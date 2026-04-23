@@ -20,4 +20,9 @@ public interface IProductService
     Task<bool> DeleteAsync(string id, CancellationToken ct = default);
 
     Task<List<CategoryDto>> GetCategoriesAsync(CancellationToken ct = default);
+
+    /// <summary>GraphQL <c>generateProductDetailsFromImage</c> (Admin/Sale + Gemini).</summary>
+    Task<AIProductSuggestionDto?> GenerateProductDetailsFromImageAsync(
+        string imageUrl,
+        CancellationToken ct = default);
 }

@@ -14,6 +14,9 @@
         BorderThickness="1"
         CornerRadius="8"
     >
+        <Border.Resources>
+            <SolidColorBrush x:Key="TextControlCaretBrush" Color="#FF000000" />
+        </Border.Resources>
         <Grid ColumnSpacing="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="70" />
@@ -26,6 +29,8 @@
                 VerticalAlignment="Center"
                 Background="Transparent"
                 BorderThickness="0"
+                Foreground="#FF000000"
+                PlaceholderForeground="#FF9CA3AF"
                 ItemsSource="{Binding CurrencyOptions, ElementName=Root, Mode=OneWay}"
                 SelectedItem="{Binding Currency, ElementName=Root, Mode=TwoWay}"
             />
@@ -40,6 +45,8 @@
                 Padding="8,10"
                 Background="Transparent"
                 BorderThickness="0"
+                Foreground="#FF000000"
+                PlaceholderForeground="#FF9CA3AF"
                 PlaceholderText="0.00"
                 Text="{Binding Amount, ElementName=Root, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
             />
