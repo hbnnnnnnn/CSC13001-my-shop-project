@@ -34,7 +34,7 @@ class ReportRepository {
                 break;
         }
 
-        let whereClause = `WHERE o.status = 'Paid'`;
+        let whereClause = `WHERE o.status = 'Delivered' AND o.is_deleted = false`;
         const params = [];
 
         if (startDate) {
@@ -97,7 +97,7 @@ class ReportRepository {
                 break;
         }
 
-        let whereClause = `WHERE o.status = 'Paid'`;
+        let whereClause = `WHERE o.status = 'Delivered' AND o.is_deleted = false`;
         const params = [];
 
         if (startDate) {
@@ -130,7 +130,7 @@ class ReportRepository {
     }
 
     async getTopSellingProducts(limit = 10, startDate = null, endDate = null) {
-        let whereClause = `WHERE o.status = 'Paid'`;
+        let whereClause = `WHERE o.status = 'Delivered' AND o.is_deleted = false`;
         const params = [limit];
 
         if (startDate) {
@@ -166,7 +166,7 @@ class ReportRepository {
     }
 
     async getSalesOverview(startDate = null, endDate = null) {
-        let whereClause = `WHERE o.status = 'Paid'`;
+        let whereClause = `WHERE o.status = 'Delivered' AND o.is_deleted = false`;
         const params = [];
 
         if (startDate) {

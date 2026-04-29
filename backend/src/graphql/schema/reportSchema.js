@@ -57,7 +57,7 @@ const reportSchema = `#graphql
       endDate: String
     ): [RevenuePeriod!]!
 
-    topSellingProducts(
+    topSellingProductsReport(
       limit: Int
       startDate: String
       endDate: String

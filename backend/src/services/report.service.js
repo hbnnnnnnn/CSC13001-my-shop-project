@@ -1,9 +1,9 @@
 const reportRepository = require('../repositories/report.repository.js');
-const cacheService = require('./cache.service.js');
+const cacheService = require('../utils/cache.util.js');
 
 const getProductSalesReport = async ({ period = 'day', startDate = null, endDate = null } = {}) => {
     const cacheKey = `report:products:${period}:${startDate || 'all'}:${endDate || 'all'}`;
-    
+
     const cached = await cacheService.get(cacheKey);
     if (cached) {
         console.log(`[Cache Hit] ${cacheKey}`);
@@ -35,13 +35,13 @@ const getProductSalesReport = async ({ period = 'day', startDate = null, endDate
 
     const result = Object.values(groupedData);
     await cacheService.set(cacheKey, result, 600);
-    
+
     return result;
 };
 
 const getRevenueReport = async ({ period = 'day', startDate = null, endDate = null } = {}) => {
     const cacheKey = `report:revenue:${period}:${startDate || 'all'}:${endDate || 'all'}`;
-    
+
     const cached = await cacheService.get(cacheKey);
     if (cached) {
         console.log(`[Cache Hit] ${cacheKey}`);
@@ -49,7 +49,7 @@ const getRevenueReport = async ({ period = 'day', startDate = null, endDate = nu
     }
 
     const data = await reportRepository.getRevenueReport(period, startDate, endDate);
-    
+
     const result = data.map(row => ({
         period: row.period,
         date: row.date,
@@ -60,13 +60,13 @@ const getRevenueReport = async ({ period = 'day', startDate = null, endDate = nu
     }));
 
     await cacheService.set(cacheKey, result, 600);
-    
+
     return result;
 };
 
 const getTopSellingProducts = async ({ limit = 10, startDate = null, endDate = null } = {}) => {
     const cacheKey = `report:top:products:${limit}:${startDate || 'all'}:${endDate || 'all'}`;
-    
+
     const cached = await cacheService.get(cacheKey);
     if (cached) {
         console.log(`[Cache Hit] ${cacheKey}`);
@@ -74,7 +74,7 @@ const getTopSellingProducts = async ({ limit = 10, startDate = null, endDate = n
     }
 
     const data = await reportRepository.getTopSellingProducts(limit, startDate, endDate);
-    
+
     const result = data.map(row => ({
         product_id: row.product_id,
         sku: row.sku,
@@ -86,13 +86,13 @@ const getTopSellingProducts = async ({ limit = 10, startDate = null, endDate = n
     }));
 
     await cacheService.set(cacheKey, result, 600);
-    
+
     return result;
 };
 
 const getSalesOverview = async ({ startDate = null, endDate = null } = {}) => {
     const cacheKey = `report:overview:${startDate || 'all'}:${endDate || 'all'}`;
-    
+
     const cached = await cacheService.get(cacheKey);
     if (cached) {
         console.log(`[Cache Hit] ${cacheKey}`);
@@ -100,7 +100,7 @@ const getSalesOverview = async ({ startDate = null, endDate = null } = {}) => {
     }
 
     const data = await reportRepository.getSalesOverview(startDate, endDate);
-    
+
     const result = {
         totalOrders: Number(data.total_orders ?? 0),
         totalRevenue: Number(data.total_revenue ?? 0),
@@ -112,7 +112,7 @@ const getSalesOverview = async ({ startDate = null, endDate = null } = {}) => {
     };
 
     await cacheService.set(cacheKey, result, 600);
-    
+
     return result;
 };
 

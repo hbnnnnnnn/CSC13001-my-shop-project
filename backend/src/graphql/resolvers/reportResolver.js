@@ -11,7 +11,7 @@ const reportResolver = {
             return await reportService.getRevenueReport({ period, startDate, endDate });
         }),
 
-        topSellingProducts: requireRole(['Admin', 'Sale'], async (_, { limit = 10, startDate = null, endDate = null }) => {
+        topSellingProductsReport: requireRole(['Admin', 'Sale'], async (_, { limit = 10, startDate = null, endDate = null }) => {
             return await reportService.getTopSellingProducts({ limit, startDate, endDate });
         }),
 
