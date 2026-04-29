@@ -91,7 +91,8 @@ Useful things to do in Kibana:
 | `docker-compose up -d`                        | Start backend + database + elasticsearch              |
 | `docker-compose up -d --build`                | Rebuild and start (after Dockerfile changes)          |
 | `docker-compose --profile tools up -d`        | Start everything including pgAdmin and Kibana         |
-| `docker-compose exec backend npm run db:seed` | Reset and re-seed sample data                         |
+| `docker-compose exec backend npm run db:migrate` | Run new SQL migrations and seeds (idempotent)  |
+| `docker-compose exec backend npm run db:seed`    | Alias for db:migrate (legacy support)          |
 | `docker-compose down`                         | Stop all containers                                   |
 | `docker-compose down -v`                      | Stop all and **delete all volumes** (full reset)      |
 | `docker volume rm backend_esdata`             | Delete only the Elasticsearch volume (forces re-sync) |
@@ -104,8 +105,8 @@ Useful things to do in Kibana:
 ```
 backend/
 ├── database/
-│   ├── migrations/          # SQL schema (auto-runs on first DB creation)
-│   └── seeds/               # Sample data (auto-runs on first DB creation)
+│   ├── migrations/          # SQL structural changes (01_init, 02_indexes, etc.)
+│   └── seeds/               # Initial/dummy data (01_dummy_data.sql)
 ├── src/
 │   ├── config/
 │   │   ├── db.js            # PostgreSQL connection pool
@@ -116,7 +117,7 @@ backend/
 │   │   ├── loaders/         # GraphQL loaders
 │   │   └── index.js         # Auto-merges all schemas and resolvers
 │   ├── scripts/
-│   │   ├── initDb.js        # Manual seed script (npm run db:seed)
+│   │   ├── initDb.js        # Migration & seed runner (npm run db:migrate)
 │   │   └── syncElastic.js   # ES sync script (runs on container start)
 │   ├── services/
 │   │   ├── product.service.js  # Product business logic + ES sync on CRUD
@@ -147,4 +148,17 @@ backend/
 - `.env` is gitignored — each team member copies `.env.example` and adjusts if needed.
 - Database data persists in a Docker volume (`pgdata` and `esdata`). To fully reset, run `docker-compose down -v`.
 - The backend container mounts the source code, so file changes trigger auto-reload via nodemon.
+
+## Database Migrations
+
+This project uses a simple, custom migration system located in `src/scripts/initDb.js`.
+
+- **How it works**: It scans `database/migrations` and `database/seeds`, runs any `.sql` file that hasn't been executed yet, and records the execution in a `schema_migrations` table in the database.
+- **Execution**:
+    - **New setup**: Docker automatically runs the files in `/docker-entrypoint-initdb.d/` on first startup.
+    - **Existing setup**: When you pull new `.sql` files, run:
+      ```bash
+      docker-compose exec backend npm run db:migrate
+      ```
+- **Adding new changes**: Simply create a new `.sql` file in `database/migrations/` (e.g., `03_add_new_table.sql`). Use `IF NOT EXISTS` syntax where possible for safety.
 
