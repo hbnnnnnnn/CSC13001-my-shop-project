@@ -600,17 +600,42 @@ mutation DeleteOrder {
 - `startDate` (String): Ngày bắt đầu lọc dữ liệu (Định dạng: `"YYYY-MM-DD"`, ví dụ `"2026-01-01"`).
 - `endDate` (String): Ngày kết thúc lọc dữ liệu (Định dạng: `"YYYY-MM-DD"`).
 - `limit` (Int): Số lượng kết quả trả về, dùng cho Top Selling (Mặc định: `10`).
+- `categoryId` (ID): Lọc theo category cho các query breakdown theo sản phẩm (`productSalesReport`, `topSellingProductsReport`).
 
 Tất cả các query Report đều yêu cầu quyền `Admin` hoặc `Sale` (cần Header `Authorization: Bearer <token>`).
 
-### 7.1 Product sales report (Admin/Sale)
+### 7.1 Category sales report (chart chính cho dashboard)
+
+```graphql
+query CategorySalesReport {
+  categorySalesReport(
+    period: "month"
+    startDate: "2026-01-01"
+    endDate: "2026-12-31"
+  ) {
+    period
+    date
+    totalQuantity
+    totalRevenue
+    categories {
+      category_id
+      category_name
+      quantity
+      revenue
+    }
+  }
+}
+```
+
+### 7.2 Product sales report (breakdown theo category)
 
 ```graphql
 query ProductSalesReport {
   productSalesReport(
-    period: "day"
+    period: "month"
     startDate: "2026-01-01"
     endDate: "2026-12-31"
+    categoryId: "1"
   ) {
     period
     date
@@ -627,7 +652,7 @@ query ProductSalesReport {
 }
 ```
 
-### 7.2 Revenue report (Admin/Sale)
+### 7.3 Revenue report (Admin/Sale)
 
 ```graphql
 query RevenueReport {
@@ -646,18 +671,18 @@ query RevenueReport {
 }
 ```
 
-### 7.3 Top selling products (phiên bản Report)
+### 7.4 Top selling products (phiên bản Report)
 
 _Lưu ý: Query đã được đổi tên thành `topSellingProductsReport` để tránh trùng lặp với query cùng tên của module Product._
 
 ```graphql
 query TopSellingProductsReportModule {
-  topSellingProducts(
+  topSellingProductsReport(
     limit: 10
     startDate: "2026-01-01"
     endDate: "2026-12-31"
+    categoryId: "1"
   ) {
-  topSellingProductsReport(limit: 10, startDate: "2026-01-01", endDate: "2026-12-31") {
     product_id
     sku
     name
@@ -669,7 +694,7 @@ query TopSellingProductsReportModule {
 }
 ```
 
-### 7.4 Sales overview (Admin/Sale)
+### 7.5 Sales overview (Admin/Sale)
 
 ```graphql
 query SalesOverview {
@@ -684,6 +709,13 @@ query SalesOverview {
   }
 }
 ```
+
+### 7.6 Gợi ý luồng query cho FE Dashboard
+
+1. Query `categorySalesReport` để vẽ biểu đồ time-series theo category (tránh quá nhiều line theo từng product).
+2. Khi user chọn 1 category, query `productSalesReport(..., categoryId)` để xem breakdown sản phẩm.
+3. Nếu cần bảng Top theo category, dùng `topSellingProductsReport(..., categoryId)`.
+4. Dùng `revenueReport` + `salesOverview` cho KPI tổng quan.
 
 ## 8) Batch demo gợi ý (để trình bày nhanh)
 
@@ -715,5 +747,5 @@ Neu server bao loi schema conflict hoac field/type khong khop, ban can:
 5. Tạo customer.
 6. Tạo 2-3 product.
 7. Tạo order (status ban đầu là Created), sau đó updateOrderFull -> Status: `Delivered` (Vì báo cáo chỉ tính đơn hàng Delivered).
-8. Chạy các query report (Product Sales, Revenue, Top Selling, Overview) để show dashboard số liệu.
+8. Chạy các query report (Category Sales -> Product Breakdown -> Revenue -> Top Selling -> Overview) để show dashboard số liệu.
 9. Chạy query `me` và `logout` để kết thúc demo auth.

@@ -1,4 +1,19 @@
 const reportSchema = `#graphql
+  type CategorySalesData {
+    category_id: ID
+    category_name: String!
+    quantity: Int!
+    revenue: Int!
+  }
+
+  type CategorySalesPeriod {
+    period: String!
+    date: String!
+    categories: [CategorySalesData!]!
+    totalQuantity: Int!
+    totalRevenue: Int!
+  }
+
   type ProductSalesData {
     product_id: ID!
     sku: String!
@@ -45,10 +60,17 @@ const reportSchema = `#graphql
   }
 
   type Query {
+    categorySalesReport(
+      period: String
+      startDate: String
+      endDate: String
+    ): [CategorySalesPeriod!]!
+
     productSalesReport(
       period: String
       startDate: String
       endDate: String
+      categoryId: ID
     ): [ProductSalesPeriod!]!
 
     revenueReport(
@@ -61,6 +83,7 @@ const reportSchema = `#graphql
       limit: Int
       startDate: String
       endDate: String
+      categoryId: ID
     ): [TopProduct!]!
 
     salesOverview(
