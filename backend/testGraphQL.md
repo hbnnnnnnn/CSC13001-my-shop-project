@@ -592,7 +592,16 @@ mutation DeleteOrder {
 }
 ```
 
-## 7) Report
+## 7) Report (Thống kê & Báo cáo)
+
+**_Lưu ý về tham số (Arguments) có thể truyền vào để query:_**
+
+- `period` (String): Khoảng thời gian gom nhóm dữ liệu. Các giá trị hợp lệ: `"day"`, `"week"`, `"month"`, `"year"`. (Mặc định: `"day"`).
+- `startDate` (String): Ngày bắt đầu lọc dữ liệu (Định dạng: `"YYYY-MM-DD"`, ví dụ `"2026-01-01"`).
+- `endDate` (String): Ngày kết thúc lọc dữ liệu (Định dạng: `"YYYY-MM-DD"`).
+- `limit` (Int): Số lượng kết quả trả về, dùng cho Top Selling (Mặc định: `10`).
+
+Tất cả các query Report đều yêu cầu quyền `Admin` hoặc `Sale` (cần Header `Authorization: Bearer <token>`).
 
 ### 7.1 Product sales report (Admin/Sale)
 
@@ -637,7 +646,9 @@ query RevenueReport {
 }
 ```
 
-### 7.3 Top selling products (phien ban Report)
+### 7.3 Top selling products (phiên bản Report)
+
+_Lưu ý: Query đã được đổi tên thành `topSellingProductsReport` để tránh trùng lặp với query cùng tên của module Product._
 
 ```graphql
 query TopSellingProductsReportModule {
@@ -646,6 +657,7 @@ query TopSellingProductsReportModule {
     startDate: "2026-01-01"
     endDate: "2026-12-31"
   ) {
+  topSellingProductsReport(limit: 10, startDate: "2026-01-01", endDate: "2026-12-31") {
     product_id
     sku
     name
@@ -673,7 +685,7 @@ query SalesOverview {
 }
 ```
 
-## 8) Batch demo goi y (de trinh bay nhanh)
+## 8) Batch demo gợi ý (để trình bày nhanh)
 
 1. Register Admin -> copy token.
 2. Login -> copy token moi.
@@ -696,3 +708,12 @@ Neu server bao loi schema conflict hoac field/type khong khop, ban can:
 
 - Doi ten 1 trong 2 field (vi du topSellingProductsReport) de tranh trung ten.
 - Hoac tam thoi chi demo theo field dang hoat dong trong schema runtime cua ban.
+
+2. Login -> copy token mới.
+3. Thêm header `Authorization: Bearer <token>`.
+4. Tạo category.
+5. Tạo customer.
+6. Tạo 2-3 product.
+7. Tạo order (status ban đầu là Created), sau đó updateOrderFull -> Status: `Delivered` (Vì báo cáo chỉ tính đơn hàng Delivered).
+8. Chạy các query report (Product Sales, Revenue, Top Selling, Overview) để show dashboard số liệu.
+9. Chạy query `me` và `logout` để kết thúc demo auth.

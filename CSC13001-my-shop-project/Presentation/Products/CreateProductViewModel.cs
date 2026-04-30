@@ -3,6 +3,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
+using Microsoft.UI.Dispatching;
 using Windows.Storage.Pickers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -29,6 +31,11 @@ public partial class CreateProductViewModel : ObservableObject
         _onClose = onClose;
         _onCreated = onCreated;
     }
+
+    /// <summary>Invalidate in-flight AI suggestion when resetting or starting a new request.</summary>
+    private int _aiSuggestionGeneration;
+
+    private DispatcherQueueTimer? _topBannerDismissTimer;
 
     [ObservableProperty]
     private string productName = "";
@@ -96,12 +103,21 @@ public partial class CreateProductViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<ImageItem> uploadedImages = new();
 
+    [ObservableProperty]
+    private bool isAiGenerating;
+
+    [ObservableProperty]
+    private string topBannerMessage = "";
+
     public ObservableCollection<string> WeightUnits { get; } = new(["kg", "lb", "g", "oz"]);
 
     public string FormattedPrice =>
         string.IsNullOrWhiteSpace(Price) ? "—" : $"{PriceCurrency} {Price}";
 
     public string SummaryCategoryDisplay => SelectedCategoryItem?.Name ?? "—";
+
+    /// <summary>Shown in the category picker TextBox; empty when none selected so placeholder is visible.</summary>
+    public string CategorySelectionDisplay => SelectedCategoryItem?.Name ?? "";
 
     public string SummaryNameDisplay => string.IsNullOrWhiteSpace(ProductName) ? "—" : ProductName;
 
@@ -145,7 +161,11 @@ public partial class CreateProductViewModel : ObservableObject
         UploadedImages.Clear();
         SelectedCategoryItem = null;
         ErrorMessage = "";
+        ClearTopBannerTimer();
+        TopBannerMessage = "";
         IsBusy = false;
+        IsAiGenerating = false;
+        Interlocked.Increment(ref _aiSuggestionGeneration);
         OnPropertyChanged(nameof(CanSubmitProduct));
         OnPropertyChanged(nameof(FormattedPrice));
         OnPropertyChanged(nameof(SummaryCategoryDisplay));
@@ -155,7 +175,11 @@ public partial class CreateProductViewModel : ObservableObject
 
     partial void OnProductNameChanged(string value) => NotifySummary();
 
-    partial void OnSelectedCategoryItemChanged(CategoryDto? value) => NotifySummary();
+    partial void OnSelectedCategoryItemChanged(CategoryDto? value)
+    {
+        OnPropertyChanged(nameof(CategorySelectionDisplay));
+        NotifySummary();
+    }
 
     partial void OnPriceChanged(string value) => NotifySummary();
 
@@ -233,6 +257,147 @@ public partial class CreateProductViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task RequestAiSuggestionAsync()
+    {
+        if (UploadedImages.Count == 0)
+        {
+            ShowTopBannerTransient("Upload ảnh để sử dụng tính năng");
+            return;
+        }
+
+        var gen = Interlocked.Increment(ref _aiSuggestionGeneration);
+        IsAiGenerating = true;
+        IsBusy = true;
+        ErrorMessage = "";
+        OnPropertyChanged(nameof(CanSubmitProduct));
+        try
+        {
+            var url = await EnsureCoverImageUrlAsync().ConfigureAwait(false);
+            if (gen != Volatile.Read(ref _aiSuggestionGeneration))
+                return;
+            if (string.IsNullOrEmpty(url))
+            {
+                App.RunOnUIThread(() =>
+                    ErrorMessage = "Could not upload image for AI. Try again.");
+                return;
+            }
+
+            var suggestion = await _productService
+                .GenerateProductDetailsFromImageAsync(url)
+                .ConfigureAwait(false);
+            if (gen != Volatile.Read(ref _aiSuggestionGeneration))
+                return;
+            App.RunOnUIThread(() =>
+            {
+                if (suggestion is null)
+                {
+                    ErrorMessage = "AI returned no suggestion.";
+                    return;
+                }
+
+                if (!string.IsNullOrWhiteSpace(suggestion.Name))
+                    ProductName = suggestion.Name.Trim();
+                if (!string.IsNullOrWhiteSpace(suggestion.Description))
+                    Description = suggestion.Description.Trim();
+                NotifySummary();
+            });
+        }
+        catch (GraphQlException ex)
+        {
+            if (gen != Volatile.Read(ref _aiSuggestionGeneration))
+                return;
+            var msg = ex.Errors.FirstOrDefault()?.Message ?? "AI suggestion failed.";
+            var display = msg.StartsWith("Unauthenticated:", StringComparison.OrdinalIgnoreCase)
+                ? "Sign in as Admin or Sale to use AI (Bearer JWT)."
+                : msg.StartsWith("Unauthorized:", StringComparison.OrdinalIgnoreCase)
+                    ? "Your role cannot use AI suggestion."
+                    : msg;
+            App.RunOnUIThread(() => ErrorMessage = display);
+        }
+        catch (HttpRequestException)
+        {
+            if (gen != Volatile.Read(ref _aiSuggestionGeneration))
+                return;
+            App.RunOnUIThread(() =>
+                ErrorMessage = "Cannot reach the server. Check your connection.");
+        }
+        catch (Exception ex)
+        {
+            if (gen != Volatile.Read(ref _aiSuggestionGeneration))
+                return;
+            App.RunOnUIThread(() => ErrorMessage = ex.Message);
+        }
+        finally
+        {
+            if (gen == Volatile.Read(ref _aiSuggestionGeneration))
+            {
+                App.RunOnUIThread(() =>
+                {
+                    IsAiGenerating = false;
+                    IsBusy = false;
+                    OnPropertyChanged(nameof(CanSubmitProduct));
+                });
+            }
+        }
+    }
+
+    private void ClearTopBannerTimer()
+    {
+        if (_topBannerDismissTimer is null)
+            return;
+        _topBannerDismissTimer.Tick -= OnTopBannerDismissTick;
+        _topBannerDismissTimer.Stop();
+        _topBannerDismissTimer = null;
+    }
+
+    private void OnTopBannerDismissTick(DispatcherQueueTimer sender, object args)
+    {
+        sender.Tick -= OnTopBannerDismissTick;
+        sender.Stop();
+        TopBannerMessage = "";
+        _topBannerDismissTimer = null;
+    }
+
+    private void ShowTopBannerTransient(string message)
+    {
+        App.RunOnUIThread(() =>
+        {
+            ClearTopBannerTimer();
+            TopBannerMessage = message;
+            if (string.IsNullOrEmpty(message))
+                return;
+
+            var dq = DispatcherQueue.GetForCurrentThread() ?? App.UiThreadDispatcher;
+            if (dq is null)
+                return;
+
+            _topBannerDismissTimer = dq.CreateTimer();
+            _topBannerDismissTimer.Interval = TimeSpan.FromSeconds(3);
+            _topBannerDismissTimer.IsRepeating = false;
+            _topBannerDismissTimer.Tick += OnTopBannerDismissTick;
+            _topBannerDismissTimer.Start();
+        });
+    }
+
+    /// <summary>Cover image (or first); uploads locally if needed so the server can fetch a public URL.</summary>
+    private async Task<string?> EnsureCoverImageUrlAsync()
+    {
+        var img = UploadedImages.OrderByDescending(i => i.IsCover).FirstOrDefault();
+        if (img is null)
+            return null;
+        if (!string.IsNullOrEmpty(img.RemoteUrl))
+            return img.RemoteUrl;
+        if (string.IsNullOrEmpty(img.LocalPath))
+            return null;
+        await using var fs = File.OpenRead(img.LocalPath);
+        var name = string.IsNullOrEmpty(img.FileName) ? Path.GetFileName(img.LocalPath) : img.FileName;
+        var url = await _imageUpload.UploadImageAsync(fs, name).ConfigureAwait(false);
+        if (!string.IsNullOrEmpty(url))
+            img.RemoteUrl = url;
+        return url;
+    }
+
+    [RelayCommand]
     private async Task SubmitAsync()
     {
         if (!ComputeIsValid())
@@ -287,25 +452,38 @@ public partial class CreateProductViewModel : ObservableObject
             if (_onCreated is not null)
                 await _onCreated().ConfigureAwait(false);
 
-            Reset();
-            _onClose();
+            App.RunOnUIThread(() =>
+            {
+                Reset();
+                _onClose();
+            });
         }
         catch (GraphQlException ex)
         {
-            ErrorMessage = ex.Errors.FirstOrDefault()?.Message ?? "Could not create product.";
+            var msg = ex.Errors.FirstOrDefault()?.Message ?? "Could not create product.";
+            var display = msg.StartsWith("Unauthenticated:", StringComparison.OrdinalIgnoreCase)
+                ? "Sign in first. createProduct requires a JWT (Authorization: Bearer) — see backend testGraphQL.md §1 and §5.1."
+                : msg.StartsWith("Unauthorized:", StringComparison.OrdinalIgnoreCase)
+                    ? "Your role cannot create products. Use an Admin or Sale account."
+                    : msg;
+            App.RunOnUIThread(() => ErrorMessage = display);
         }
         catch (HttpRequestException)
         {
-            ErrorMessage = "Cannot reach the server. Check your connection.";
+            App.RunOnUIThread(() =>
+                ErrorMessage = "Cannot reach the server. Check your connection.");
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            App.RunOnUIThread(() => ErrorMessage = ex.Message);
         }
         finally
         {
-            IsBusy = false;
-            OnPropertyChanged(nameof(CanSubmitProduct));
+            App.RunOnUIThread(() =>
+            {
+                IsBusy = false;
+                OnPropertyChanged(nameof(CanSubmitProduct));
+            });
         }
     }
 

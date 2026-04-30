@@ -1,8 +1,8 @@
 /*
  * GraphQL API — Products (MyShop backend)
  * Endpoint  : http://localhost:4000/graphql (configure via AppConfig:GraphQlEndpoint; docker-compose maps 4000:4000)
- * Auth      : None for product/category queries and product mutations (resolvers do not use requireAuth).
- *             JWT Bearer is parsed in context if present (category mutations require Admin role).
+ * Auth      : Product list/detail queries need no token. createProduct/updateProduct require JWT (Admin or Sale);
+ *             deleteProduct requires Admin. Bearer is attached from ITokenService when set (see testGraphQL.md §1).
  * Server    : Apollo Server 4 + expressMiddleware on Express (see backend/src/server.js)
  * Transport : HTTP POST application/json { "query", "variables" }
  * ---

@@ -145,6 +145,64 @@ class ProductRepository extends BaseRepository {
 
     return result.rows;
   }
+
+  // Tìm products theo danh sách SKU (dùng cho import)
+  async findBySkus(skus, client) {
+    const db = client || this.db;
+    if (!skus || skus.length === 0) return [];
+
+    const result = await db.query(
+      'SELECT * FROM product WHERE sku = ANY($1)',
+      [skus]
+    );
+
+    return result.rows;
+  }
+
+  // Upsert nhiều products cùng lúc (INSERT ... ON CONFLICT DO UPDATE)
+  async upsertMany(products, client) {
+    const db = client || this.db;
+    if (!products || products.length === 0) return [];
+
+    // Build a multi-row INSERT with ON CONFLICT (sku) DO UPDATE
+    // Columns: sku, name, price, stock, description, supplier, category_id
+    const columns = ['sku', 'name', 'price', 'stock', 'description', 'supplier', 'category_id'];
+    const values = [];
+    const placeholders = [];
+
+    products.forEach((product, rowIndex) => {
+      const offset = rowIndex * columns.length;
+      const rowPlaceholders = columns.map((_, colIndex) => `$${offset + colIndex + 1}`);
+      placeholders.push(`(${rowPlaceholders.join(', ')})`);
+
+      values.push(
+        product.sku,
+        product.name,
+        product.price,
+        product.stock,
+        product.description || null,
+        product.supplier || null,
+        product.category_id || null,
+      );
+    });
+
+    const query = `
+      INSERT INTO product (${columns.join(', ')})
+      VALUES ${placeholders.join(', ')}
+      ON CONFLICT (sku) DO UPDATE SET
+        name = EXCLUDED.name,
+        price = EXCLUDED.price,
+        stock = EXCLUDED.stock,
+        description = EXCLUDED.description,
+        supplier = EXCLUDED.supplier,
+        category_id = EXCLUDED.category_id,
+        updated_time = CURRENT_TIMESTAMP
+      RETURNING *
+    `;
+
+    const result = await db.query(query, values);
+    return result.rows;
+  }
 }
 
 module.exports = new ProductRepository();

@@ -22,3 +22,7 @@ internal sealed record CreateProductDataRoot([property: JsonPropertyName("create
 internal sealed record UpdateProductDataRoot([property: JsonPropertyName("updateProduct")] ProductDto? UpdateProduct);
 
 internal sealed record DeleteProductDataRoot([property: JsonPropertyName("deleteProduct")] bool DeleteProduct);
+
+internal sealed record GenerateAiSuggestionDataRoot(
+    [property: JsonPropertyName("generateProductDetailsFromImage")]
+        AIProductSuggestionDto? GenerateProductDetailsFromImage);

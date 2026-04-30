@@ -1,3 +1,4 @@
+using System.Globalization;
 using CommunityToolkit.Mvvm.Messaging;
 using CSC13001_my_shop_project.Models;
 using CSC13001_my_shop_project.Presentation.Dashboard;
@@ -276,7 +277,10 @@ public sealed partial class ProductsPage : Page
         if (nav is null)
             return;
         SaveCurrentState();
-        await nav.NavigateRouteAsync(this, "ProductDetail", data: new ProductDetailArgs(item.Id));
+        var id =
+            item.GraphQlProductId
+            ?? item.Id.ToString(CultureInfo.InvariantCulture);
+        await nav.NavigateRouteAsync(this, "ProductDetail", data: new ProductDetailArgs(id));
     }
 
     private async void ProductListRow_Tapped(object sender, TappedRoutedEventArgs e)
@@ -287,7 +291,10 @@ public sealed partial class ProductsPage : Page
         if (nav is null)
             return;
         SaveCurrentState();
-        await nav.NavigateRouteAsync(this, "ProductDetail", data: new ProductDetailArgs(item.Id));
+        var id =
+            item.GraphQlProductId
+            ?? item.Id.ToString(CultureInfo.InvariantCulture);
+        await nav.NavigateRouteAsync(this, "ProductDetail", data: new ProductDetailArgs(id));
     }
 
     private void CreateBackdrop_Tapped(object sender, TappedRoutedEventArgs e)

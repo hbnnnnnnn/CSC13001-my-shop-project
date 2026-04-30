@@ -73,6 +73,7 @@ public static class ProductDocuments
             supplier
             category { category_id name }
             created_time
+            updated_time
           }
         }
         """;
@@ -97,6 +98,15 @@ public static class ProductDocuments
     public const string DeleteProduct = """
         mutation DeleteProduct($id: ID!) {
           deleteProduct(id: $id)
+        }
+        """;
+
+    public const string GenerateProductDetailsFromImage = """
+        mutation GenerateProductDetailsFromImage($imageUrl: String!) {
+          generateProductDetailsFromImage(imageUrl: $imageUrl) {
+            name
+            description
+          }
         }
         """;
 }

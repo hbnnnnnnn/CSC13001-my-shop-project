@@ -9,6 +9,7 @@ using CSC13001_my_shop_project.Presentation.ServerConfiguration;
 using CSC13001_my_shop_project.Services;
 using Microsoft.Extensions.Options;
 using CSC13001_my_shop_project.Services.Endpoints;
+using Microsoft.UI.Dispatching;
 using Uno.Extensions.Navigation;
 using Uno.Resizetizer;
 
@@ -18,6 +19,24 @@ public partial class App : Application
 {
     /// <summary>Host after launch; used by shell view model to resolve <c>INavigator</c>.</summary>
     internal static IHost? AppHost { get; private set; }
+
+    /// <summary>Main window queue for marshaling work from async continuations (e.g. after <c>ConfigureAwait(false)</c>).</summary>
+    internal static DispatcherQueue? UiThreadDispatcher { get; private set; }
+
+    public static void RunOnUIThread(Action action)
+    {
+        var dq = DispatcherQueue.GetForCurrentThread() ?? UiThreadDispatcher;
+        if (dq is null)
+        {
+            action();
+            return;
+        }
+
+        if (dq.HasThreadAccess)
+            action();
+        else
+            dq.TryEnqueue(() => action());
+    }
 
     /// <summary>
     /// Initializes the singleton application object. This is the first line of authored code
@@ -114,7 +133,9 @@ public partial class App : Application
                         (context, services) =>
                         {
                             services.AddSingleton<NavigationStateStore>();
-                        services.AddSingleton<ITokenService, TokenService>();
+                            services.AddSingleton<GraphqlService>();
+                            services.AddSingleton<AuthService>();
+                            services.AddSingleton<ITokenService, TokenService>();
                         services.AddHttpClient<GraphQlClient>((sp, http) =>
                         {
                             var ep = sp.GetRequiredService<IOptions<AppConfig>>().Value.GraphQlEndpoint
@@ -142,6 +163,7 @@ public partial class App : Application
                     .UseNavigation(RegisterRoutes)
             );
         MainWindow = builder.Window;
+        UiThreadDispatcher = MainWindow?.DispatcherQueue;
 
 #if DEBUG
         MainWindow.UseStudio();

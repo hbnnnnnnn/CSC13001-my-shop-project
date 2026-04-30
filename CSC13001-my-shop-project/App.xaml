@@ -23,6 +23,7 @@
                 </utum:MaterialToolkitTheme>
 
                 <ResourceDictionary Source="Assets/Styles/CheckBox.xaml" />
+                <ResourceDictionary Source="Assets/Styles/FluentIconGlyphs.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
@@ -55,8 +56,7 @@
                 x:Key="SystemColorControlAccentBrush"
                 Color="{StaticResource BrandColor}"
             />
-            <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="Red" />
-            <SolidColorBrush x:Key="SystemColorControlAccentBrush" Color="Red" />
+
 
             <SolidColorBrush
                 x:Key="ShellBackgroundBrush"
