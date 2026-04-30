@@ -33,6 +33,7 @@ public partial class ShellViewModel : ObservableObject
         "Dashboard",
         "Orders",
         "Products",
+        "Reports",
     };
 
     [ObservableProperty]
@@ -124,6 +125,9 @@ public partial class ShellViewModel : ObservableObject
                     break;
                 case "Products":
                     await nav.NavigateRouteAsync(this, "Products");
+                    break;
+                case "Reports":
+                    await nav.NavigateRouteAsync(this, "Reports");
                     break;
                 case "Login":
                     await nav.NavigateRouteAsync(this, "Login");

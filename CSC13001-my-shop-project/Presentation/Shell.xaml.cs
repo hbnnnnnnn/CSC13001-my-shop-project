@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using CSC13001_my_shop_project.Presentation.Dashboard;
 using CSC13001_my_shop_project.Presentation.OrderList;
+using CSC13001_my_shop_project.Presentation.Reports;
 using CommunityToolkit.Mvvm.Messaging;
 using Uno.Extensions.Navigation;
 
@@ -42,6 +43,9 @@ public sealed partial class Shell : UserControl, IContentControlProvider
                 break;
             case "Orders":
                 await MainContent.Navigator().NavigateViewModelAsync<OrderListViewModel>(this);
+                break;
+            case "Reports":
+                await MainContent.Navigator().NavigateViewModelAsync<ReportViewModel>(this);
                 break;
             default:
                 await MainContent.Navigator().NavigateRouteAsync(this, _vm.SelectedSidebarItem);

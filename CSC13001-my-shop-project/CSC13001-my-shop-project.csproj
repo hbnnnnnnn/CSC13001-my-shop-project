@@ -39,6 +39,7 @@
         </UnoFeatures>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="LiveChartsCore.SkiaSharpView.Uno.WinUI" />
         <PackageReference Include="Uno.Fonts.Fluent" />
         <PackageReference Include="Uno.Toolkit.Skia.WinUI" />
     </ItemGroup>
