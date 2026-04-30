@@ -3,8 +3,8 @@ const cacheService = require('../utils/cache.util.js');
 
 const REPORT_CACHE_TTL_SECONDS = 300;
 
-const getProductSalesReport = async ({ period = 'day', startDate = null, endDate = null } = {}) => {
-    const cacheKey = `report:products:${period}:${startDate || 'all'}:${endDate || 'all'}`;
+const getCategorySalesReport = async ({ period = 'day', startDate = null, endDate = null } = {}) => {
+    const cacheKey = `report:categories:${period}:${startDate || 'all'}:${endDate || 'all'}`;
 
     const cached = await cacheService.get(cacheKey);
     if (cached) {
@@ -12,7 +12,47 @@ const getProductSalesReport = async ({ period = 'day', startDate = null, endDate
         return cached;
     }
 
-    const data = await reportRepository.getProductSalesReport(period, startDate, endDate);
+    const data = await reportRepository.getCategorySalesReport(period, startDate, endDate);
+    const groupedData = {};
+
+    data.forEach(row => {
+        if (!groupedData[row.period]) {
+            groupedData[row.period] = {
+                period: row.period,
+                date: row.date,
+                categories: [],
+                totalQuantity: 0,
+                totalRevenue: 0
+            };
+        }
+
+        groupedData[row.period].categories.push({
+            category_id: row.category_id,
+            category_name: row.category_name,
+            quantity: Number(row.total_quantity ?? 0),
+            revenue: Number(row.total_revenue ?? 0)
+        });
+
+        groupedData[row.period].totalQuantity += Number(row.total_quantity ?? 0);
+        groupedData[row.period].totalRevenue += Number(row.total_revenue ?? 0);
+    });
+
+    const result = Object.values(groupedData);
+    await cacheService.set(cacheKey, result, REPORT_CACHE_TTL_SECONDS);
+
+    return result;
+};
+
+const getProductSalesReport = async ({ period = 'day', startDate = null, endDate = null, categoryId = null } = {}) => {
+    const cacheKey = `report:products:${period}:${startDate || 'all'}:${endDate || 'all'}:${categoryId || 'all'}`;
+
+    const cached = await cacheService.get(cacheKey);
+    if (cached) {
+        console.log(`[Cache Hit] ${cacheKey}`);
+        return cached;
+    }
+
+    const data = await reportRepository.getProductSalesReport(period, startDate, endDate, categoryId);
     const groupedData = {};
     data.forEach(row => {
         if (!groupedData[row.period]) {
@@ -66,8 +106,8 @@ const getRevenueReport = async ({ period = 'day', startDate = null, endDate = nu
     return result;
 };
 
-const getTopSellingProducts = async ({ limit = 10, startDate = null, endDate = null } = {}) => {
-    const cacheKey = `report:top:products:${limit}:${startDate || 'all'}:${endDate || 'all'}`;
+const getTopSellingProducts = async ({ limit = 10, startDate = null, endDate = null, categoryId = null } = {}) => {
+    const cacheKey = `report:top:products:${limit}:${startDate || 'all'}:${endDate || 'all'}:${categoryId || 'all'}`;
 
     const cached = await cacheService.get(cacheKey);
     if (cached) {
@@ -75,7 +115,7 @@ const getTopSellingProducts = async ({ limit = 10, startDate = null, endDate = n
         return cached;
     }
 
-    const data = await reportRepository.getTopSellingProducts(limit, startDate, endDate);
+    const data = await reportRepository.getTopSellingProducts(limit, startDate, endDate, categoryId);
 
     const result = data.map(row => ({
         product_id: row.product_id,
@@ -119,6 +159,7 @@ const getSalesOverview = async ({ startDate = null, endDate = null } = {}) => {
 };
 
 module.exports = {
+    getCategorySalesReport,
     getProductSalesReport,
     getRevenueReport,
     getTopSellingProducts,
