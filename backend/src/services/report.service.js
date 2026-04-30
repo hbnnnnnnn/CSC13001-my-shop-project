@@ -3,6 +3,30 @@ const cacheService = require('../utils/cache.util.js');
 
 const REPORT_CACHE_TTL_SECONDS = 300;
 
+const normalizeReportDate = (value) => {
+    if (value == null) return null;
+
+    if (value instanceof Date) {
+        return value.toISOString();
+    }
+
+    if (typeof value === 'number') {
+        return new Date(value).toISOString();
+    }
+
+    if (typeof value === 'string') {
+        if (/^\d+$/.test(value)) {
+            const asNumber = Number(value);
+            if (!Number.isNaN(asNumber)) {
+                return new Date(asNumber).toISOString();
+            }
+        }
+        return value;
+    }
+
+    return String(value);
+};
+
 const getCategorySalesReport = async ({ period = 'day', startDate = null, endDate = null } = {}) => {
     const cacheKey = `report:categories:${period}:${startDate || 'all'}:${endDate || 'all'}`;
 
@@ -19,7 +43,7 @@ const getCategorySalesReport = async ({ period = 'day', startDate = null, endDat
         if (!groupedData[row.period]) {
             groupedData[row.period] = {
                 period: row.period,
-                date: row.date,
+                date: normalizeReportDate(row.date),
                 categories: [],
                 totalQuantity: 0,
                 totalRevenue: 0
@@ -58,7 +82,7 @@ const getProductSalesReport = async ({ period = 'day', startDate = null, endDate
         if (!groupedData[row.period]) {
             groupedData[row.period] = {
                 period: row.period,
-                date: row.date,
+                date: normalizeReportDate(row.date),
                 products: [],
                 totalQuantity: 0,
                 totalRevenue: 0
@@ -94,7 +118,7 @@ const getRevenueReport = async ({ period = 'day', startDate = null, endDate = nu
 
     const result = data.map(row => ({
         period: row.period,
-        date: row.date,
+        date: normalizeReportDate(row.date),
         totalOrders: Number(row.total_orders ?? 0),
         totalRevenue: Number(row.total_revenue ?? 0),
         totalItemsSold: Number(row.total_items_sold ?? 0),
