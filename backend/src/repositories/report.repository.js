@@ -111,18 +111,36 @@ class ReportRepository {
         }
 
         const query = `
-            SELECT 
-                TO_CHAR(o.created_time, '${dateFormat}') AS period,
-                ${dateExpr} AS date,
-                COUNT(DISTINCT o.order_id) AS total_orders,
-                SUM(o.final_price) AS total_revenue,
-                SUM(oi.quantity) AS total_items_sold,
-                ROUND(AVG(o.final_price)::numeric, 2) AS avg_order_value
-            FROM orders o
-            LEFT JOIN order_item oi ON o.order_id = oi.order_id
-            ${whereClause}
-            GROUP BY ${groupByClause}
-            ORDER BY ${dateExpr} DESC
+            WITH order_metrics AS (
+                SELECT
+                    TO_CHAR(o.created_time, '${dateFormat}') AS period,
+                    ${dateExpr} AS date,
+                    o.order_id,
+                    o.final_price
+                FROM orders o
+                ${whereClause}
+            ),
+            item_metrics AS (
+                SELECT
+                    TO_CHAR(o.created_time, '${dateFormat}') AS period,
+                    ${dateExpr} AS date,
+                    COALESCE(SUM(oi.quantity), 0) AS total_items_sold
+                FROM orders o
+                LEFT JOIN order_item oi ON o.order_id = oi.order_id
+                ${whereClause}
+                GROUP BY ${groupByClause}
+            )
+            SELECT
+                om.period,
+                om.date,
+                COUNT(om.order_id) AS total_orders,
+                COALESCE(SUM(om.final_price), 0) AS total_revenue,
+                COALESCE(MAX(im.total_items_sold), 0) AS total_items_sold,
+                ROUND(AVG(om.final_price)::numeric, 2) AS avg_order_value
+            FROM order_metrics om
+            LEFT JOIN item_metrics im ON im.period = om.period AND im.date = om.date
+            GROUP BY om.period, om.date
+            ORDER BY om.date DESC
         `;
 
         const result = await this.db.query(query, params);
@@ -180,17 +198,32 @@ class ReportRepository {
         }
 
         const query = `
-            SELECT 
-                COUNT(DISTINCT o.order_id) AS total_orders,
-                SUM(o.final_price) AS total_revenue,
-                SUM(oi.quantity) AS total_items_sold,
-                COUNT(DISTINCT o.customer_id) AS unique_customers,
-                ROUND(AVG(o.final_price)::numeric, 2) AS avg_order_value,
-                MAX(o.final_price) AS max_order_value,
-                MIN(o.final_price) AS min_order_value
-            FROM orders o
-            LEFT JOIN order_item oi ON o.order_id = oi.order_id
-            ${whereClause}
+            SELECT
+                orders_agg.total_orders,
+                orders_agg.total_revenue,
+                items_agg.total_items_sold,
+                orders_agg.unique_customers,
+                orders_agg.avg_order_value,
+                orders_agg.max_order_value,
+                orders_agg.min_order_value
+            FROM (
+                SELECT
+                    COUNT(*) AS total_orders,
+                    COALESCE(SUM(o.final_price), 0) AS total_revenue,
+                    COUNT(DISTINCT o.customer_id) AS unique_customers,
+                    ROUND(AVG(o.final_price)::numeric, 2) AS avg_order_value,
+                    COALESCE(MAX(o.final_price), 0) AS max_order_value,
+                    COALESCE(MIN(o.final_price), 0) AS min_order_value
+                FROM orders o
+                ${whereClause}
+            ) AS orders_agg
+            CROSS JOIN (
+                SELECT
+                    COALESCE(SUM(oi.quantity), 0) AS total_items_sold
+                FROM orders o
+                LEFT JOIN order_item oi ON o.order_id = oi.order_id
+                ${whereClause}
+            ) AS items_agg
         `;
 
         const result = await this.db.query(query, params);

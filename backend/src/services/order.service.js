@@ -77,6 +77,7 @@ const createOrder = async (orderData, items) => {
 
         // Invalidate orders list cache
         await cacheService.delByPrefix("orders:all:p:");
+        await cacheService.delByPrefix("report:");
 
         return {
             ...newOrder,
@@ -353,6 +354,7 @@ const updateOrderFull = async (id, input) => {
         }
         await cacheService.del(`order:${id}`);
         await cacheService.delByPrefix("orders:all:p:");
+        await cacheService.delByPrefix("report:");
 
         return updatedOrder;
     } catch (error) {
@@ -394,6 +396,7 @@ const softDeleteOrder = async (id) => {
         }
         await cacheService.del(`order:${id}`);
         await cacheService.delByPrefix("orders:all:p:");
+        await cacheService.delByPrefix("report:");
 
         return true;
     } catch (error) {

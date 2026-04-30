@@ -1,6 +1,8 @@
 const reportRepository = require('../repositories/report.repository.js');
 const cacheService = require('../utils/cache.util.js');
 
+const REPORT_CACHE_TTL_SECONDS = 300;
+
 const getProductSalesReport = async ({ period = 'day', startDate = null, endDate = null } = {}) => {
     const cacheKey = `report:products:${period}:${startDate || 'all'}:${endDate || 'all'}`;
 
@@ -34,7 +36,7 @@ const getProductSalesReport = async ({ period = 'day', startDate = null, endDate
     });
 
     const result = Object.values(groupedData);
-    await cacheService.set(cacheKey, result, 600);
+    await cacheService.set(cacheKey, result, REPORT_CACHE_TTL_SECONDS);
 
     return result;
 };
@@ -59,7 +61,7 @@ const getRevenueReport = async ({ period = 'day', startDate = null, endDate = nu
         avgOrderValue: Number(row.avg_order_value ?? 0)
     }));
 
-    await cacheService.set(cacheKey, result, 600);
+    await cacheService.set(cacheKey, result, REPORT_CACHE_TTL_SECONDS);
 
     return result;
 };
@@ -85,7 +87,7 @@ const getTopSellingProducts = async ({ limit = 10, startDate = null, endDate = n
         timesSold: Number(row.times_sold ?? 0)
     }));
 
-    await cacheService.set(cacheKey, result, 600);
+    await cacheService.set(cacheKey, result, REPORT_CACHE_TTL_SECONDS);
 
     return result;
 };
@@ -111,7 +113,7 @@ const getSalesOverview = async ({ startDate = null, endDate = null } = {}) => {
         minOrderValue: Number(data.min_order_value ?? 0)
     };
 
-    await cacheService.set(cacheKey, result, 600);
+    await cacheService.set(cacheKey, result, REPORT_CACHE_TTL_SECONDS);
 
     return result;
 };
