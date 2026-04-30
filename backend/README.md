@@ -92,7 +92,8 @@ Useful things to do in Kibana:
 | `docker-compose up -d --build`                | Rebuild and start (after Dockerfile changes)          |
 | `docker-compose --profile tools up -d`        | Start everything including pgAdmin and Kibana         |
 | `docker-compose exec backend npm run db:migrate` | Run new SQL migrations and seeds (idempotent)  |
-| `docker-compose exec backend npm run db:seed`    | Alias for db:migrate (legacy support)          |
+| `docker-compose exec backend npm run es:sync`    | Re-sync database data to Elasticsearch index   |
+| `docker-compose exec redis redis-cli FLUSHALL`   | Clear all Redis cache (useful after migrations) |
 | `docker-compose down`                         | Stop all containers                                   |
 | `docker-compose down -v`                      | Stop all and **delete all volumes** (full reset)      |
 | `docker volume rm backend_esdata`             | Delete only the Elasticsearch volume (forces re-sync) |
@@ -140,7 +141,7 @@ backend/
 ├── .env                     # Local environment (DO NOT commit)
 ├── docker-compose.yml
 ├── Dockerfile
-└── package.json
+├── package.json
 ```
 
 ## Notes
@@ -156,9 +157,16 @@ This project uses a simple, custom migration system located in `src/scripts/init
 - **How it works**: It scans `database/migrations` and `database/seeds`, runs any `.sql` file that hasn't been executed yet, and records the execution in a `schema_migrations` table in the database.
 - **Execution**:
     - **New setup**: Docker automatically runs the files in `/docker-entrypoint-initdb.d/` on first startup.
-    - **Existing setup**: When you pull new `.sql` files, run:
+    - **Existing setup**: Khi bạn pull code mới có các file `.sql` mới, hãy chạy:
       ```bash
       docker-compose exec backend npm run db:migrate
+      ```
+    - **Sau khi migrate**: Nếu thay đổi liên quan đến dữ liệu Báo cáo hoặc Sản phẩm, hãy chạy:
+      ```bash
+      # 1. Đồng bộ Elasticsearch
+      docker-compose exec backend npm run es:sync
+      # 2. Xóa cache Redis để cập nhật số liệu mới
+      docker-compose exec redis redis-cli FLUSHALL
       ```
 - **Adding new changes**: Simply create a new `.sql` file in `database/migrations/` (e.g., `03_add_new_table.sql`). Use `IF NOT EXISTS` syntax where possible for safety.
 

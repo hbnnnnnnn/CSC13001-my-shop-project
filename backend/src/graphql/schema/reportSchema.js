@@ -4,6 +4,8 @@ const reportSchema = `#graphql
     category_name: String!
     quantity: Int!
     revenue: Int!
+    totalCost: Int!
+    totalProfit: Int!
   }
 
   type CategorySalesPeriod {
@@ -12,6 +14,8 @@ const reportSchema = `#graphql
     categories: [CategorySalesData!]!
     totalQuantity: Int!
     totalRevenue: Int!
+    totalCost: Int!
+    totalProfit: Int!
   }
 
   type ProductSalesData {
@@ -20,6 +24,8 @@ const reportSchema = `#graphql
     name: String!
     quantity: Int!
     revenue: Int!
+    totalCost: Int!
+    totalProfit: Int!
   }
 
   type ProductSalesPeriod {
@@ -28,6 +34,8 @@ const reportSchema = `#graphql
     products: [ProductSalesData!]!
     totalQuantity: Int!
     totalRevenue: Int!
+    totalCost: Int!
+    totalProfit: Int!
   }
 
   type RevenuePeriod {
@@ -44,8 +52,11 @@ const reportSchema = `#graphql
     sku: String!
     name: String!
     price: Int!
+    costPrice: Int!
     totalQuantity: Int!
     totalRevenue: Int!
+    totalCost: Int!
+    totalProfit: Int!
     timesSold: Int!
   }
 

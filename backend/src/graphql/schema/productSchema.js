@@ -59,6 +59,7 @@ const productSchema = `#graphql
     images: [String]
     supplier: String
     category_id: ID!
+    cost_price: Int
   }
 
   input UpdateProductInput {
@@ -70,6 +71,7 @@ const productSchema = `#graphql
     images: [String]
     supplier: String
     category_id: ID
+    cost_price: Int
   }
 
   input ProductFilter {

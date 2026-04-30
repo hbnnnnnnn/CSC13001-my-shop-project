@@ -46,22 +46,32 @@ const getCategorySalesReport = async ({ period = 'day', startDate = null, endDat
                 date: normalizeReportDate(row.date),
                 categories: [],
                 totalQuantity: 0,
-                totalRevenue: 0
+                totalRevenue: 0,
+                totalCost: 0
             };
         }
+
+        const catRevenue = Number(row.total_revenue ?? 0);
+        const catCost = Number(row.total_cost ?? 0);
 
         groupedData[row.period].categories.push({
             category_id: row.category_id,
             category_name: row.category_name,
             quantity: Number(row.total_quantity ?? 0),
-            revenue: Number(row.total_revenue ?? 0)
+            revenue: catRevenue,
+            totalCost: catCost,
+            totalProfit: catRevenue - catCost
         });
 
         groupedData[row.period].totalQuantity += Number(row.total_quantity ?? 0);
-        groupedData[row.period].totalRevenue += Number(row.total_revenue ?? 0);
+        groupedData[row.period].totalRevenue += catRevenue;
+        groupedData[row.period].totalCost = (groupedData[row.period].totalCost ?? 0) + catCost;
     });
 
-    const result = Object.values(groupedData);
+    const result = Object.values(groupedData).map(period => ({
+        ...period,
+        totalProfit: period.totalRevenue - period.totalCost
+    }));
     await cacheService.set(cacheKey, result, REPORT_CACHE_TTL_SECONDS);
 
     return result;
@@ -85,21 +95,30 @@ const getProductSalesReport = async ({ period = 'day', startDate = null, endDate
                 date: normalizeReportDate(row.date),
                 products: [],
                 totalQuantity: 0,
-                totalRevenue: 0
+                totalRevenue: 0,
+                totalCost: 0
             };
         }
+        const prodRevenue = Number(row.total_revenue ?? 0);
+        const prodCost = Number(row.total_cost ?? 0);
         groupedData[row.period].products.push({
             product_id: row.product_id,
             sku: row.sku,
             name: row.name,
             quantity: Number(row.total_quantity ?? 0),
-            revenue: Number(row.total_revenue ?? 0)
+            revenue: prodRevenue,
+            totalCost: prodCost,
+            totalProfit: prodRevenue - prodCost
         });
         groupedData[row.period].totalQuantity += Number(row.total_quantity ?? 0);
-        groupedData[row.period].totalRevenue += Number(row.total_revenue ?? 0);
+        groupedData[row.period].totalRevenue += prodRevenue;
+        groupedData[row.period].totalCost += prodCost;
     });
 
-    const result = Object.values(groupedData);
+    const result = Object.values(groupedData).map(period => ({
+        ...period,
+        totalProfit: period.totalRevenue - period.totalCost
+    }));
     await cacheService.set(cacheKey, result, REPORT_CACHE_TTL_SECONDS);
 
     return result;
@@ -141,15 +160,22 @@ const getTopSellingProducts = async ({ limit = 10, startDate = null, endDate = n
 
     const data = await reportRepository.getTopSellingProducts(limit, startDate, endDate, categoryId);
 
-    const result = data.map(row => ({
-        product_id: row.product_id,
-        sku: row.sku,
-        name: row.name,
-        price: Number(row.price ?? 0),
-        totalQuantity: Number(row.total_quantity ?? 0),
-        totalRevenue: Number(row.total_revenue ?? 0),
-        timesSold: Number(row.times_sold ?? 0)
-    }));
+    const result = data.map(row => {
+        const totalRevenue = Number(row.total_revenue ?? 0);
+        const totalCost = Number(row.total_cost ?? 0);
+        return {
+            product_id: row.product_id,
+            sku: row.sku,
+            name: row.name,
+            price: Number(row.price ?? 0),
+            costPrice: Number(row.cost_price ?? 0),
+            totalQuantity: Number(row.total_quantity ?? 0),
+            totalRevenue,
+            totalCost,
+            totalProfit: totalRevenue - totalCost,
+            timesSold: Number(row.times_sold ?? 0)
+        };
+    });
 
     await cacheService.set(cacheKey, result, REPORT_CACHE_TTL_SECONDS);
 

@@ -2,6 +2,9 @@ const esClient = require("../config/elasticsearch");
 const cacheService = require("../utils/cache.util.js");
 const INDEX = process.env.ELASTICSEARCH_PRODUCT_INDEX || "products";
 
+// cost_price is internal-only; strip it from every document before sending to Elasticsearch
+const _stripSensitiveFields = ({ cost_price, ...rest }) => rest;
+
 const createIndex = async () => {
   if (
     await esClient.indices.exists({
@@ -54,7 +57,7 @@ const indexProduct = async (product) => {
   await esClient.index({
     index: INDEX,
     id: product.product_id,
-    document: product,
+    document: _stripSensitiveFields(product),
   });
   await cacheService.delByPrefix("search:");
 };
@@ -67,7 +70,7 @@ const bulkIndexProducts = async (products) => {
         _id: product.product_id,
       },
     },
-    product,
+    _stripSensitiveFields(product),
   ]);
 
   await esClient.bulk({
@@ -80,7 +83,7 @@ const indexUpdateProduct = async (productId, product) => {
   await esClient.update({
     index: INDEX,
     id: productId,
-    doc: product,
+    doc: _stripSensitiveFields(product),
   });
   await cacheService.delByPrefix("search:");
 };
