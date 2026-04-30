@@ -102,12 +102,17 @@ const createLoaders = () => {
         }),
 
         // Loader cho Product (Cache 1h)
+        // transform strips cost_price — it is internal-only and must never leak via GraphQL
         product: new DataLoader(async (ids) => {
             return await batchFetchWithCache(ids, {
                 repository: productRepository,
                 cacheKeyPrefix: 'product',
                 idField: 'product_id',
-                ttlSeconds: 3600
+                ttlSeconds: 3600,
+                transform: (data) => {
+                    const { cost_price, ...safeData } = data;
+                    return safeData;
+                }
             });
         }),
 

@@ -599,6 +599,8 @@ query ProductSalesReport {
     date
     totalQuantity
     totalRevenue
+    totalCost
+    totalProfit
     products {
       product_id
       sku

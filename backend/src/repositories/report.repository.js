@@ -54,7 +54,8 @@ class ReportRepository {
                 c.category_id,
                 COALESCE(c.name, 'Uncategorized') AS category_name,
                 SUM(oi.quantity) AS total_quantity,
-                SUM(oi.total_price) AS total_revenue
+                SUM(oi.total_price) AS total_revenue,
+                SUM(oi.quantity * p.cost_price) AS total_cost
             FROM orders o
             JOIN order_item oi ON o.order_id = oi.order_id
             JOIN product p ON oi.product_id = p.product_id
@@ -116,14 +117,15 @@ class ReportRepository {
         }
 
         const query = `
-            SELECT 
+            SELECT
                 TO_CHAR(o.created_time, '${dateFormat}') AS period,
                 ${dateExpr} AS date,
                 p.product_id,
                 p.sku,
                 p.name,
                 SUM(oi.quantity) AS total_quantity,
-                SUM(oi.total_price) AS total_revenue
+                SUM(oi.total_price) AS total_revenue,
+                SUM(oi.quantity * p.cost_price) AS total_cost
             FROM orders o
             JOIN order_item oi ON o.order_id = oi.order_id
             JOIN product p ON oi.product_id = p.product_id
@@ -235,19 +237,21 @@ class ReportRepository {
         }
 
         const query = `
-            SELECT 
+            SELECT
                 p.product_id,
                 p.sku,
                 p.name,
                 p.price,
+                p.cost_price,
                 SUM(oi.quantity) AS total_quantity,
                 SUM(oi.total_price) AS total_revenue,
+                SUM(oi.quantity * p.cost_price) AS total_cost,
                 COUNT(DISTINCT o.order_id) AS times_sold
             FROM product p
             JOIN order_item oi ON p.product_id = oi.product_id
             JOIN orders o ON oi.order_id = o.order_id
             ${whereClause}
-            GROUP BY p.product_id, p.sku, p.name, p.price
+            GROUP BY p.product_id, p.sku, p.name, p.price, p.cost_price
             ORDER BY total_quantity DESC
             LIMIT $1
         `;
