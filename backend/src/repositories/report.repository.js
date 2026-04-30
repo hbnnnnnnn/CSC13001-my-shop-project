@@ -5,7 +5,7 @@ class ReportRepository {
         this.db = db;
     }
 
-    async getProductSalesReport(period = 'day', startDate = null, endDate = null) {
+    async getCategorySalesReport(period = 'day', startDate = null, endDate = null) {
         let dateFormat;
         let dateExpr;
         let groupByClause;
@@ -45,6 +45,74 @@ class ReportRepository {
         if (endDate) {
             whereClause += ` AND o.created_time::DATE <= $${params.length + 1}`;
             params.push(endDate);
+        }
+
+        const query = `
+            SELECT
+                TO_CHAR(o.created_time, '${dateFormat}') AS period,
+                ${dateExpr} AS date,
+                c.category_id,
+                COALESCE(c.name, 'Uncategorized') AS category_name,
+                SUM(oi.quantity) AS total_quantity,
+                SUM(oi.total_price) AS total_revenue
+            FROM orders o
+            JOIN order_item oi ON o.order_id = oi.order_id
+            JOIN product p ON oi.product_id = p.product_id
+            LEFT JOIN category c ON p.category_id = c.category_id
+            ${whereClause}
+            GROUP BY ${groupByClause}, c.category_id, c.name
+            ORDER BY ${dateExpr} DESC, total_revenue DESC
+        `;
+
+        const result = await this.db.query(query, params);
+        return result.rows;
+    }
+
+    async getProductSalesReport(period = 'day', startDate = null, endDate = null, categoryId = null) {
+        let dateFormat;
+        let dateExpr;
+        let groupByClause;
+
+        switch (period) {
+            case 'week':
+                dateFormat = 'YYYY-IW';
+                dateExpr = `DATE_TRUNC('week', o.created_time)::DATE`;
+                groupByClause = `TO_CHAR(o.created_time, 'YYYY-IW'), DATE_TRUNC('week', o.created_time)::DATE`;
+                break;
+            case 'month':
+                dateFormat = 'YYYY-MM';
+                dateExpr = `DATE_TRUNC('month', o.created_time)::DATE`;
+                groupByClause = `TO_CHAR(o.created_time, 'YYYY-MM'), DATE_TRUNC('month', o.created_time)::DATE`;
+                break;
+            case 'year':
+                dateFormat = 'YYYY';
+                dateExpr = `DATE_TRUNC('year', o.created_time)::DATE`;
+                groupByClause = `TO_CHAR(o.created_time, 'YYYY'), DATE_TRUNC('year', o.created_time)::DATE`;
+                break;
+            case 'day':
+            default:
+                dateFormat = 'YYYY-MM-DD';
+                dateExpr = `o.created_time::DATE`;
+                groupByClause = `TO_CHAR(o.created_time, 'YYYY-MM-DD'), o.created_time::DATE`;
+                break;
+        }
+
+        let whereClause = `WHERE o.status = 'Delivered' AND o.is_deleted = false`;
+        const params = [];
+
+        if (startDate) {
+            whereClause += ` AND o.created_time::DATE >= $${params.length + 1}`;
+            params.push(startDate);
+        }
+
+        if (endDate) {
+            whereClause += ` AND o.created_time::DATE <= $${params.length + 1}`;
+            params.push(endDate);
+        }
+
+        if (categoryId) {
+            whereClause += ` AND p.category_id = $${params.length + 1}`;
+            params.push(categoryId);
         }
 
         const query = `
@@ -147,7 +215,7 @@ class ReportRepository {
         return result.rows;
     }
 
-    async getTopSellingProducts(limit = 10, startDate = null, endDate = null) {
+    async getTopSellingProducts(limit = 10, startDate = null, endDate = null, categoryId = null) {
         let whereClause = `WHERE o.status = 'Delivered' AND o.is_deleted = false`;
         const params = [limit];
 
@@ -159,6 +227,11 @@ class ReportRepository {
         if (endDate) {
             whereClause += ` AND o.created_time::DATE <= $${params.length + 1}`;
             params.push(endDate);
+        }
+
+        if (categoryId) {
+            whereClause += ` AND p.category_id = $${params.length + 1}`;
+            params.push(categoryId);
         }
 
         const query = `
