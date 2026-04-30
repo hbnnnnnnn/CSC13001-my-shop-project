@@ -187,6 +187,7 @@ async function importProductsFromExcel(fileBuffer) {
   await cacheService.delByPrefix("products:p:");
   await cacheService.delByPrefix("products:low_stock:");
   await cacheService.delByPrefix("products:top_selling:");
+  await cacheService.delByPrefix("report:");
 
   return {
     summary: {

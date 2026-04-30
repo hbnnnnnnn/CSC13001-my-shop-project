@@ -78,6 +78,7 @@ const createProduct = async (product, client) => {
     // Invalidate product lists and dashboard stats
     await cacheService.delByPrefix("products:p:");
     await cacheService.delByPrefix("products:low_stock:");
+    await cacheService.delByPrefix("report:");
 
     return newProduct;
   } catch (error) {
@@ -99,6 +100,7 @@ const updateProduct = async (id, product, client) => {
     await cacheService.delByPrefix("products:p:");
     if (product.stock !== undefined) await cacheService.delByPrefix("products:low_stock:");
     if (product.price !== undefined) await cacheService.delByPrefix("products:top_selling:");
+    await cacheService.delByPrefix("report:");
 
     return updatedProduct;
   } catch (error) {
@@ -116,6 +118,7 @@ const deleteProduct = async (id, client) => {
     await cacheService.delByPrefix("products:p:");
     await cacheService.delByPrefix("products:low_stock:");
     await cacheService.delByPrefix("products:top_selling:");
+    await cacheService.delByPrefix("report:");
 
     return deletedProduct;
   } catch (error) {
