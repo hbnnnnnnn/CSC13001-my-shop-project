@@ -229,6 +229,11 @@ class ReportRepository {
             params.push(endDate);
         }
 
+        if (categoryId) {
+            whereClause += ` AND p.category_id = $${params.length + 1}`;
+            params.push(categoryId);
+        }
+
         const query = `
             SELECT 
                 p.product_id,
