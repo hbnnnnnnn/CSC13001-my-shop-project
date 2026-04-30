@@ -135,11 +135,11 @@ class ReportRepository {
                 om.date,
                 COUNT(om.order_id) AS total_orders,
                 COALESCE(SUM(om.final_price), 0) AS total_revenue,
-                COALESCE(im.total_items_sold, 0) AS total_items_sold,
+                COALESCE(MAX(im.total_items_sold), 0) AS total_items_sold,
                 ROUND(AVG(om.final_price)::numeric, 2) AS avg_order_value
             FROM order_metrics om
             LEFT JOIN item_metrics im ON im.period = om.period AND im.date = om.date
-            GROUP BY om.period, om.date, im.total_items_sold
+            GROUP BY om.period, om.date
             ORDER BY om.date DESC
         `;
 
