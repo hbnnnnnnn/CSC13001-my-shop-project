@@ -37,6 +37,21 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty]
     private string _lowStockBadgeText = "0 items";
 
+    // ── Revenue chart data ─────────────────────────────────────────────
+    [ObservableProperty]
+    private ObservableCollection<RevenueChartPoint> _revenueChartPoints = new();
+
+    [ObservableProperty]
+    private string _chartSubtitle = "Loading chart data…";
+
+    [ObservableProperty]
+    private string _chartPeriodLabel = "Daily";
+
+    /// <summary>
+    /// Raised after chart data has been loaded and is ready to be drawn.
+    /// </summary>
+    public event Action? ChartDataReady;
+
     /// <summary>
     /// Parameterless constructor for design-time / fallback.
     /// </summary>
@@ -64,14 +79,127 @@ public partial class DashboardViewModel : ObservableObject
     /// <summary>
     /// Loads all dashboard data in parallel.
     /// </summary>
-    private async Task LoadAllDashboardDataAsync()
+    public async Task LoadAllDashboardDataAsync()
     {
         await Task.WhenAll(
             LoadRecentOrdersAsync(),
             LoadTopLowStockProductsAsync(),
             LoadTopSellingProductsAsync(),
-            LoadTotalProductsAsync()
+            LoadTotalProductsAsync(),
+            LoadSalesOverviewAsync(),
+            LoadRevenueChartAsync()
         );
+    }
+
+    /// <summary>
+    /// Fetches sales overview from backend Report API → populates TotalOrders and TotalRevenue stat cards.
+    /// </summary>
+    private async Task LoadSalesOverviewAsync()
+    {
+        if (_graphql is null) return;
+
+        try
+        {
+            var data = await _graphql.QueryAsync(
+                @"query SalesOverview {
+                    salesOverview {
+                        totalOrders
+                        totalRevenue
+                        totalItemsSold
+                        uniqueCustomers
+                        avgOrderValue
+                    }
+                }"
+            );
+
+            var overview = data.GetProperty("salesOverview");
+
+            var orders = overview.GetProperty("totalOrders").GetInt32();
+            var revenue = overview.GetProperty("totalRevenue").GetInt64();
+
+            TotalOrders = orders.ToString("N0");
+            TotalRevenue = $"{revenue:N0} ₫";
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Dashboard] Failed to load sales overview: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Fetches daily revenue report from backend → populates chart data points.
+    /// Uses the last 30 days as the default date range.
+    /// </summary>
+    private async Task LoadRevenueChartAsync()
+    {
+        if (_graphql is null) return;
+
+        try
+        {
+            var endDate = DateTime.Today.ToString("yyyy-MM-dd");
+            var startDate = DateTime.Today.AddDays(-29).ToString("yyyy-MM-dd");
+
+            var data = await _graphql.QueryAsync(
+                @"query RevenueReport($period: String, $startDate: String, $endDate: String) {
+                    revenueReport(period: $period, startDate: $startDate, endDate: $endDate) {
+                        period
+                        date
+                        totalOrders
+                        totalRevenue
+                        totalItemsSold
+                        avgOrderValue
+                    }
+                }",
+                new { period = "day", startDate, endDate }
+            );
+
+            var periods = data.GetProperty("revenueReport").EnumerateArray();
+
+            RevenueChartPoints.Clear();
+            foreach (var p in periods)
+            {
+                var dateStr = p.GetProperty("date").GetString() ?? "";
+                var revenue = p.GetProperty("totalRevenue").GetInt64();
+                var ordersCount = p.GetProperty("totalOrders").GetInt32();
+
+                // Parse date for display label
+                var label = dateStr;
+                if (DateTime.TryParse(dateStr, out var dt))
+                {
+                    label = dt.ToString("dd/MM");
+                }
+
+                RevenueChartPoints.Add(new RevenueChartPoint(label, revenue, ordersCount, dateStr));
+            }
+
+            // Sort by date ascending for chart rendering
+            var sorted = RevenueChartPoints.OrderBy(p => p.RawDate).ToList();
+            RevenueChartPoints.Clear();
+            foreach (var p in sorted)
+            {
+                RevenueChartPoints.Add(p);
+            }
+
+            // Update chart subtitle
+            if (RevenueChartPoints.Count > 0)
+            {
+                var from = DateTime.TryParse(startDate, out var s) ? s.ToString("dd/MM/yyyy") : startDate;
+                var to = DateTime.TryParse(endDate, out var e) ? e.ToString("dd/MM/yyyy") : endDate;
+                ChartSubtitle = $"Doanh thu theo ngày — {from} → {to}";
+            }
+            else
+            {
+                ChartSubtitle = "Không có dữ liệu doanh thu trong khoảng thời gian này";
+            }
+
+            // Notify code-behind to redraw the chart
+            ChartDataReady?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Dashboard] Failed to load revenue chart: {ex.Message}");
+            ChartSubtitle = "Không thể tải dữ liệu biểu đồ";
+        }
     }
 
     /// <summary>
@@ -90,9 +218,6 @@ public partial class DashboardViewModel : ObservableObject
                 sortField: "CREATED_TIME",
                 sortOrder: "DESC"
             );
-
-            // Update total orders stat card with real count
-            TotalOrders = total.ToString("N0");
 
             // Map to dashboard-specific model
             RecentOrders.Clear();
@@ -304,4 +429,9 @@ public record BestSellingItem(string Name, int Sold, string Price, string ImageP
     public BitmapImage? Thumbnail =>
         string.IsNullOrEmpty(ImagePath) ? null : new BitmapImage(new Uri(ImagePath));
 }
+
+/// <summary>
+/// A single data point on the revenue chart.
+/// </summary>
+public record RevenueChartPoint(string Label, long Revenue, int Orders, string RawDate);
 
