@@ -5,6 +5,7 @@ using CSC13001_my_shop_project.Presentation.Dashboard;
 using CSC13001_my_shop_project.Presentation.Login;
 using CSC13001_my_shop_project.Presentation.OrderList;
 using CSC13001_my_shop_project.Presentation.Products;
+using CSC13001_my_shop_project.Presentation.Reports;
 using CSC13001_my_shop_project.Presentation.ServerConfiguration;
 using CSC13001_my_shop_project.Services;
 using Microsoft.Extensions.Options;
@@ -134,6 +135,7 @@ public partial class App : Application
                         {
                             services.AddSingleton<NavigationStateStore>();
                             services.AddSingleton<GraphqlService>();
+                            services.AddSingleton<IReportService, ReportService>();
                             services.AddSingleton<AuthService>();
                             services.AddSingleton<ITokenService, TokenService>();
                         services.AddHttpClient<GraphQlClient>((sp, http) =>
@@ -152,6 +154,7 @@ public partial class App : Application
                         });
                         services.AddTransient<ProductsViewModel>();
                             services.AddTransient<ProductDetailViewModel>();
+                            services.AddTransient<ReportViewModel>();
                             services.AddSingleton<AppStateService>();
                         }
                     )
@@ -182,6 +185,7 @@ public partial class App : Application
             new ViewMap<ProductsPage, ProductsViewModel>(),
             new DataViewMap<ProductDetailPage, ProductDetailViewModel, ProductDetailArgs>(),
             new ViewMap<LoginPage, LoginViewModel>(),
+            new ViewMap<ReportPage, ReportViewModel>(),
             new ViewMap<ServerConfigurationPage, ServerConfigurationViewModel>()
         );
 
@@ -198,6 +202,7 @@ public partial class App : Application
                     ),
                     new RouteMap("Dashboard", View: views.FindByViewModel<DashboardViewModel>()),
                     new RouteMap("Orders", View: views.FindByViewModel<OrderListViewModel>()),
+                    new RouteMap("Reports", View: views.FindByViewModel<ReportViewModel>()),
                     new RouteMap(
                         "ServerConfiguration",
                         View: views.FindByViewModel<ServerConfigurationViewModel>()
