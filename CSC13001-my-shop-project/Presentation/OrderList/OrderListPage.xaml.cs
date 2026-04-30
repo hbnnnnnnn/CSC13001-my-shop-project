@@ -24,6 +24,9 @@ public sealed partial class OrderListPage : Page
             {
                 SetDateLabel(FromDateText, vm.FromDate, FromDatePlaceholder);
                 SetDateLabel(ToDateText, vm.ToDate, ToDatePlaceholder);
+
+                // Reload orders every time user navigates to this tab
+                _ = vm.LoadOrdersAsync();
             }
         };
     }

@@ -78,8 +78,11 @@ public partial class OrderListViewModel : ObservableObject
         if (_isLoadingInProgress) return;
         _isLoadingInProgress = true;
 
-        IsLoading = true;
-        ErrorMessage = null;
+        App.RunOnUIThread(() =>
+        {
+            IsLoading = true;
+            ErrorMessage = null;
+        });
 
         try
         {
@@ -106,12 +109,19 @@ public partial class OrderListViewModel : ObservableObject
             Console.Error.WriteLine($"[OrderListVM] Got {orders.Count} orders (total: {total})");
 
             _allOrders = orders;
-            TotalPages = Math.Max(1, totalPages);
 
-            // Rebuild page options for ComboBox
-            PageOptions.Clear();
-            for (int i = 1; i <= TotalPages; i++)
-                PageOptions.Add(i);
+            // Build new page options list
+            var newPageOptions = new ObservableCollection<int>();
+            var newTotalPages = Math.Max(1, totalPages);
+            for (int i = 1; i <= newTotalPages; i++)
+                newPageOptions.Add(i);
+
+            // Assign on UI thread
+            App.RunOnUIThread(() =>
+            {
+                TotalPages = newTotalPages;
+                PageOptions = newPageOptions;
+            });
 
             // Client-side search only (backend has no full-text search for orders)
             ApplyClientSearch();
@@ -119,21 +129,21 @@ public partial class OrderListViewModel : ObservableObject
         catch (GraphqlException ex)
         {
             Console.Error.WriteLine($"[OrderListVM] GraphQL error: {ex.Message}");
-            ErrorMessage = ex.Message;
+            App.RunOnUIThread(() => ErrorMessage = ex.Message);
         }
         catch (HttpRequestException ex)
         {
             Console.Error.WriteLine($"[OrderListVM] HTTP error: {ex.Message}");
-            ErrorMessage = "Cannot connect to server. Check your connection.";
+            App.RunOnUIThread(() => ErrorMessage = "Cannot connect to server. Check your connection.");
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"[OrderListVM] Error: {ex.GetType().Name}: {ex.Message}");
-            ErrorMessage = $"Failed to load orders: {ex.Message}";
+            App.RunOnUIThread(() => ErrorMessage = $"Failed to load orders: {ex.Message}");
         }
         finally
         {
-            IsLoading = false;
+            App.RunOnUIThread(() => IsLoading = false);
             _isLoadingInProgress = false;
         }
     }
@@ -218,11 +228,8 @@ public partial class OrderListViewModel : ObservableObject
                 o.Amount.ToLowerInvariant().Contains(search));
         }
 
-        FilteredOrders.Clear();
-        foreach (var item in query)
-        {
-            FilteredOrders.Add(item);
-        }
+        var items = new ObservableCollection<OrderItem>(query);
+        App.RunOnUIThread(() => FilteredOrders = items);
     }
 }
 
