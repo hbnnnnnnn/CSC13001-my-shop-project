@@ -57,13 +57,6 @@ public partial class DashboardViewModel : ObservableObject
     /// </summary>
     public DashboardViewModel()
     {
-        // Load fallback hardcoded data
-        RecentOrders = new ObservableCollection<DashboardOrderItem>(new[]
-        {
-            new DashboardOrderItem("#ORD-7829", "Eleanor Pena", "Shipped", "$1,248.00"),
-            new DashboardOrderItem("#ORD-7828", "Wade Warren", "Processing", "$854.00"),
-            new DashboardOrderItem("#ORD-7827", "Esther Howard", "Delivered", "$2,450.00"),
-        });
     }
 
     /// <summary>
@@ -117,8 +110,11 @@ public partial class DashboardViewModel : ObservableObject
             var orders = overview.GetProperty("totalOrders").GetInt32();
             var revenue = overview.GetProperty("totalRevenue").GetInt64();
 
-            TotalOrders = orders.ToString("N0");
-            TotalRevenue = $"{revenue:N0} ₫";
+            App.RunOnUIThread(() =>
+            {
+                TotalOrders = orders.ToString("N0");
+                TotalRevenue = $"{revenue:N0} ₫";
+            });
         }
         catch (Exception ex)
         {
@@ -155,7 +151,8 @@ public partial class DashboardViewModel : ObservableObject
 
             var periods = data.GetProperty("revenueReport").EnumerateArray();
 
-            RevenueChartPoints.Clear();
+            // Build chart points on background thread
+            var chartPoints = new List<RevenueChartPoint>();
             foreach (var p in periods)
             {
                 var dateStr = p.GetProperty("date").GetString() ?? "";
@@ -169,28 +166,31 @@ public partial class DashboardViewModel : ObservableObject
                     label = dt.ToString("dd/MM");
                 }
 
-                RevenueChartPoints.Add(new RevenueChartPoint(label, revenue, ordersCount, dateStr));
+                chartPoints.Add(new RevenueChartPoint(label, revenue, ordersCount, dateStr));
             }
 
             // Sort by date ascending for chart rendering
-            var sorted = RevenueChartPoints.OrderBy(p => p.RawDate).ToList();
-            RevenueChartPoints.Clear();
-            foreach (var p in sorted)
-            {
-                RevenueChartPoints.Add(p);
-            }
+            chartPoints.Sort((a, b) => string.Compare(a.RawDate, b.RawDate, StringComparison.Ordinal));
 
-            // Update chart subtitle
-            if (RevenueChartPoints.Count > 0)
+            // Compute subtitle
+            string subtitle;
+            if (chartPoints.Count > 0)
             {
                 var from = DateTime.TryParse(startDate, out var s) ? s.ToString("dd/MM/yyyy") : startDate;
                 var to = DateTime.TryParse(endDate, out var e) ? e.ToString("dd/MM/yyyy") : endDate;
-                ChartSubtitle = $"Doanh thu theo ngày — {from} → {to}";
+                subtitle = $"Doanh thu theo ngày — {from} → {to}";
             }
             else
             {
-                ChartSubtitle = "Không có dữ liệu doanh thu trong khoảng thời gian này";
+                subtitle = "Không có dữ liệu doanh thu trong khoảng thời gian này";
             }
+
+            // Assign on UI thread
+            App.RunOnUIThread(() =>
+            {
+                RevenueChartPoints = new ObservableCollection<RevenueChartPoint>(chartPoints);
+                ChartSubtitle = subtitle;
+            });
 
             // Notify code-behind to redraw the chart
             ChartDataReady?.Invoke();
@@ -198,7 +198,7 @@ public partial class DashboardViewModel : ObservableObject
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[Dashboard] Failed to load revenue chart: {ex.Message}");
-            ChartSubtitle = "Không thể tải dữ liệu biểu đồ";
+            App.RunOnUIThread(() => ChartSubtitle = "Không thể tải dữ liệu biểu đồ");
         }
     }
 
@@ -219,30 +219,35 @@ public partial class DashboardViewModel : ObservableObject
                 sortOrder: "DESC"
             );
 
-            // Map to dashboard-specific model
-            RecentOrders.Clear();
+            // Build list on background thread
+            var items = new ObservableCollection<DashboardOrderItem>();
             foreach (var order in orders)
             {
-                RecentOrders.Add(new DashboardOrderItem(
+                items.Add(new DashboardOrderItem(
                     order.Id,
                     order.CustomerName,
                     order.Status,
                     order.Amount
                 ));
             }
+
+            // Assign on UI thread so PropertyChanged is raised correctly
+            App.RunOnUIThread(() =>
+            {
+                RecentOrders = items;
+                IsLoadingOrders = false;
+            });
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[Dashboard] Failed to load recent orders: {ex.Message}");
-        }
-        finally
-        {
-            IsLoadingOrders = false;
+            App.RunOnUIThread(() => IsLoadingOrders = false);
         }
     }
 
     /// <summary>
-    /// Fetches top 5 low stock products from the backend.
+    /// Fetches low stock products from the backend.
+    /// Only shows products with stock &lt; 5.
     /// </summary>
     private async Task LoadTopLowStockProductsAsync()
     {
@@ -250,28 +255,40 @@ public partial class DashboardViewModel : ObservableObject
 
         try
         {
+            // Fetch more than 5 to filter client-side
             var data = await _graphql.QueryAsync(
                 @"query TopLowStock($limit: Int) {
                     topLowStockProducts(limit: $limit) {
                         product_id name stock images
                     }
                 }",
-                new { limit = 5 }
+                new { limit = 10 }
             );
 
             var products = data.GetProperty("topLowStockProducts").EnumerateArray();
 
-            LowStockItems.Clear();
+            var items = new ObservableCollection<LowStockItem>();
             foreach (var p in products)
             {
                 var name = p.GetProperty("name").GetString() ?? "";
                 var stock = p.GetProperty("stock").GetInt32();
                 var imageUrl = GetFirstImage(p);
 
-                LowStockItems.Add(new LowStockItem(name, stock, imageUrl));
+                // Only show products with stock < 5
+                if (stock < 5)
+                {
+                    items.Add(new LowStockItem(name, stock, imageUrl));
+                }
+
+                // Cap at 5 items for display
+                if (items.Count >= 5) break;
             }
 
-            LowStockBadgeText = $"{LowStockItems.Count} items";
+            App.RunOnUIThread(() =>
+            {
+                LowStockItems = items;
+                LowStockBadgeText = $"{items.Count} items";
+            });
         }
         catch (Exception ex)
         {
@@ -299,7 +316,7 @@ public partial class DashboardViewModel : ObservableObject
 
             var products = data.GetProperty("topSellingProducts").EnumerateArray();
 
-            BestSellingItems.Clear();
+            var items = new ObservableCollection<BestSellingItem>();
             foreach (var p in products)
             {
                 var name = p.GetProperty("name").GetString() ?? "";
@@ -308,8 +325,10 @@ public partial class DashboardViewModel : ObservableObject
                 var priceText = $"{price:N0} ₫";
                 var imageUrl = GetFirstImage(p);
 
-                BestSellingItems.Add(new BestSellingItem(name, sold, priceText, imageUrl));
+                items.Add(new BestSellingItem(name, sold, priceText, imageUrl));
             }
+
+            App.RunOnUIThread(() => BestSellingItems = items);
         }
         catch (Exception ex)
         {
@@ -331,7 +350,7 @@ public partial class DashboardViewModel : ObservableObject
             );
 
             var total = data.GetProperty("products").GetProperty("total").GetInt32();
-            TotalProducts = total.ToString("N0");
+            App.RunOnUIThread(() => TotalProducts = total.ToString("N0"));
         }
         catch (Exception ex)
         {

@@ -365,14 +365,38 @@ public class OrderService
             }
         }
 
-        // Parse date
+        // Parse date — handle multiple formats from backend
         var dateStr = "";
         if (!string.IsNullOrEmpty(createdTime))
         {
+            // Try 1: Standard ISO / human-readable formats
             if (DateTimeOffset.TryParse(createdTime, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dto))
+            {
                 dateStr = dto.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
+            }
+            // Try 2: Unix timestamp in milliseconds (e.g. "1714444800000")
+            else if (long.TryParse(createdTime, out var unixMs) && unixMs > 1_000_000_000_000)
+            {
+                var dt = DateTimeOffset.FromUnixTimeMilliseconds(unixMs);
+                dateStr = dt.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
+            }
+            // Try 3: Unix timestamp in seconds (e.g. "1714444800")
+            else if (long.TryParse(createdTime, out var unixSec) && unixSec > 1_000_000_000)
+            {
+                var dt = DateTimeOffset.FromUnixTimeSeconds(unixSec);
+                dateStr = dt.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
+            }
+            // Fallback: try DateTime.TryParse with relaxed settings (handles "Wed Apr 30 2026 ..." etc.)
+            else if (DateTime.TryParse(createdTime, CultureInfo.InvariantCulture,
+                         DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeUniversal, out var dtFallback))
+            {
+                dateStr = dtFallback.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
+            }
             else
-                dateStr = createdTime;
+            {
+                // Last resort: show something meaningful
+                dateStr = createdTime.Length > 10 ? createdTime[..10] : createdTime;
+            }
         }
 
         // Parse items with nested product names
