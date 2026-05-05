@@ -84,6 +84,7 @@ const indexUpdateProduct = async (productId, product) => {
     index: INDEX,
     id: productId,
     doc: _stripSensitiveFields(product),
+    doc_as_upsert: true,
   });
   await cacheService.delByPrefix("search:");
 };

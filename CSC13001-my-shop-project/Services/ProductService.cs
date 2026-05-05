@@ -67,6 +67,19 @@ public sealed class ProductService(GraphQlClient gql) : IProductService
         return root?.Categories?.Data ?? [];
     }
 
+    public async Task<CategoryDto> CreateCategoryAsync(
+        string name,
+        string? description,
+        CancellationToken ct = default)
+    {
+        var root = await gql.ExecuteAsync<CreateCategoryDataRoot>(
+            ProductDocuments.CreateCategory,
+            new { name, description },
+            ct).ConfigureAwait(false);
+        return root?.CreateCategory
+            ?? throw new InvalidOperationException("createCategory returned no data.");
+    }
+
     public async Task<AIProductSuggestionDto?> GenerateProductDetailsFromImageAsync(
         string imageUrl,
         CancellationToken ct = default)

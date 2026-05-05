@@ -60,6 +60,16 @@ public static class ProductDocuments
         }
         """;
 
+    public const string CreateCategory = """
+        mutation CreateCategory($name: String!, $description: String) {
+          createCategory(name: $name, description: $description) {
+            category_id
+            name
+            description
+          }
+        }
+        """;
+
     public const string CreateProduct = """
         mutation CreateProduct($input: CreateProductInput!) {
           createProduct(input: $input) {

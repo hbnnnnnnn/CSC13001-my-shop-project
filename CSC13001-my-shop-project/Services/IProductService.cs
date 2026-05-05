@@ -21,6 +21,8 @@ public interface IProductService
 
     Task<List<CategoryDto>> GetCategoriesAsync(CancellationToken ct = default);
 
+    Task<CategoryDto> CreateCategoryAsync(string name, string? description, CancellationToken ct = default);
+
     /// <summary>GraphQL <c>generateProductDetailsFromImage</c> (Admin/Sale + Gemini).</summary>
     Task<AIProductSuggestionDto?> GenerateProductDetailsFromImageAsync(
         string imageUrl,

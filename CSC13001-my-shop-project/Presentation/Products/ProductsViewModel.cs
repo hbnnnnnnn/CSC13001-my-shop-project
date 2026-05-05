@@ -44,6 +44,7 @@ public partial class ProductsViewModel : ObservableObject
 
         UpdateStats();
         ApplyFilters();
+        _ = LoadCategoryOptionsFromApiAsync();
         _ = ReloadCatalogFromApiAsync();
     }
 
@@ -192,6 +193,51 @@ public partial class ProductsViewModel : ObservableObject
             SelectedCategory = CategoryOptions[0];
     }
 
+    private void MergeCategoryOptionsFromCatalog()
+    {
+        var existing = new HashSet<string>(CategoryOptions, StringComparer.OrdinalIgnoreCase);
+        foreach (var name in BuildCategoryOptionNames(_catalog))
+        {
+            if (!existing.Contains(name))
+                CategoryOptions.Add(name);
+        }
+
+        if (!CategoryOptions.Contains(SelectedCategory))
+            SelectedCategory = CategoryOptions[0];
+    }
+
+    private async Task LoadCategoryOptionsFromApiAsync()
+    {
+        try
+        {
+            var list = await _productService.GetCategoriesAsync().ConfigureAwait(false);
+            App.RunOnUIThread(() => ApplyCategoryOptionsFromApi(list));
+        }
+        catch
+        {
+            // Fallback to categories derived from catalog.
+        }
+    }
+
+    public Task RefreshCategoriesAsync() => LoadCategoryOptionsFromApiAsync();
+
+    private void ApplyCategoryOptionsFromApi(List<CategoryDto> categories)
+    {
+        CategoryOptions.Clear();
+        CategoryOptions.Add("All categories");
+        foreach (var name in categories
+            .Select(c => c.Name)
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(n => n, StringComparer.OrdinalIgnoreCase))
+        {
+            CategoryOptions.Add(name.Trim());
+        }
+
+        if (!CategoryOptions.Contains(SelectedCategory))
+            SelectedCategory = CategoryOptions[0];
+    }
+
     private async Task ReloadCatalogFromApiAsync()
     {
         App.RunOnUIThread(() =>
@@ -238,7 +284,10 @@ public partial class ProductsViewModel : ObservableObject
     private void ApplyCatalogFromApi(List<ProductListItem> list)
     {
         _catalog = list;
-        RebuildCategoryOptions();
+        if (CategoryOptions.Count <= 1)
+            RebuildCategoryOptions();
+        else
+            MergeCategoryOptionsFromCatalog();
         UpdateStats();
         ApplyFilters();
     }
