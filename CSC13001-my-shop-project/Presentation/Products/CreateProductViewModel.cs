@@ -19,17 +19,31 @@ public partial class CreateProductViewModel : ObservableObject
     private readonly IImageUploadService _imageUpload;
     private readonly Action _onClose;
     private readonly Func<Task>? _onCreated;
+    private readonly ProductDto? _editProduct;
+    private readonly string? _editProductId;
+    private readonly string? _initialCategoryId;
+    private readonly string? _initialCategoryName;
+    private readonly bool _isEditMode;
 
     public CreateProductViewModel(
         IProductService productService,
         IImageUploadService imageUpload,
         Action onClose,
-        Func<Task>? onCreated)
+        Func<Task>? onCreated,
+        ProductDto? editProduct = null)
     {
         _productService = productService;
         _imageUpload = imageUpload;
         _onClose = onClose;
         _onCreated = onCreated;
+        _editProduct = editProduct;
+        _editProductId = string.IsNullOrWhiteSpace(editProduct?.ProductId) ? null : editProduct!.ProductId;
+        _initialCategoryId = editProduct?.Category?.CategoryId;
+        _initialCategoryName = editProduct?.Category?.Name;
+        _isEditMode = editProduct is not null;
+
+        if (_editProduct is not null)
+            ApplyProductDefaults(_editProduct);
     }
 
     /// <summary>Invalidate in-flight AI suggestion when resetting or starting a new request.</summary>
@@ -111,6 +125,12 @@ public partial class CreateProductViewModel : ObservableObject
 
     public ObservableCollection<string> WeightUnits { get; } = new(["kg", "lb", "g", "oz"]);
 
+    public bool IsEditMode => _isEditMode;
+
+    public string DialogTitle => _isEditMode ? "EDIT PRODUCT" : "CREATE PRODUCT";
+
+    public string SubmitLabel => _isEditMode ? "Save Changes" : "Add Product";
+
     public string FormattedPrice =>
         string.IsNullOrWhiteSpace(Price) ? "—" : $"{PriceCurrency} {Price}";
 
@@ -132,6 +152,19 @@ public partial class CreateProductViewModel : ObservableObject
         {
             var list = await _productService.GetCategoriesAsync().ConfigureAwait(false);
             Categories = new ObservableCollection<CategoryDto>(list);
+            if (!string.IsNullOrWhiteSpace(_initialCategoryId))
+            {
+                var picked = Categories.FirstOrDefault(c => c.CategoryId == _initialCategoryId);
+                if (picked is not null)
+                    SelectedCategoryItem = picked;
+            }
+            if (SelectedCategoryItem is null && !string.IsNullOrWhiteSpace(_initialCategoryName))
+            {
+                var picked = Categories.FirstOrDefault(c =>
+                    string.Equals(c.Name, _initialCategoryName, StringComparison.OrdinalIgnoreCase));
+                if (picked is not null)
+                    SelectedCategoryItem = picked;
+            }
         }
         catch
         {
@@ -205,7 +238,9 @@ public partial class CreateProductViewModel : ObservableObject
 
     private bool ComputeIsValid()
     {
-        if (string.IsNullOrWhiteSpace(ProductName) || string.IsNullOrWhiteSpace(Sku) || SelectedCategoryItem is null)
+        if (string.IsNullOrWhiteSpace(ProductName) || string.IsNullOrWhiteSpace(Sku))
+            return false;
+        if (!_isEditMode && SelectedCategoryItem is null)
             return false;
         if (!TryParsePrice(Price, out var pr) || pr <= 0)
             return false;
@@ -215,6 +250,43 @@ public partial class CreateProductViewModel : ObservableObject
                 return false;
         }
         return true;
+    }
+
+    private void ApplyProductDefaults(ProductDto dto)
+    {
+        ProductName = dto.Name ?? "";
+        Description = dto.Description ?? "";
+        Sku = dto.Sku ?? "";
+        Supplier = dto.Supplier ?? "";
+        Price = dto.Price.ToString(CultureInfo.InvariantCulture);
+        TrackQuantity = true;
+        Quantity = dto.Stock.ToString(CultureInfo.InvariantCulture);
+
+        Tags.Clear();
+        if (!string.IsNullOrWhiteSpace(dto.Category?.Name))
+            Tags.Add(dto.Category!.Name.Trim());
+        if (!string.IsNullOrWhiteSpace(dto.Supplier) && !Tags.Contains(dto.Supplier.Trim()))
+            Tags.Add(dto.Supplier.Trim());
+
+        UploadedImages.Clear();
+        if (dto.Images is { Count: > 0 })
+        {
+            var isCover = true;
+            foreach (var url in dto.Images)
+            {
+                if (string.IsNullOrWhiteSpace(url))
+                    continue;
+                UploadedImages.Add(new ImageItem
+                {
+                    RemoteUrl = url,
+                    FileName = Path.GetFileName(url),
+                    IsCover = isCover,
+                });
+                isCover = false;
+            }
+        }
+
+        NotifySummary();
     }
 
     private static bool TryParsePrice(string? s, out int value)
@@ -435,19 +507,41 @@ public partial class CreateProductViewModel : ObservableObject
             if (TrackQuantity)
                 int.TryParse(Quantity.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out stock);
 
-            var input = new CreateProductInput
+            if (_isEditMode)
             {
-                Sku = Sku.Trim(),
-                Name = ProductName.Trim(),
-                Price = priceInt,
-                Stock = stock,
-                Description = string.IsNullOrWhiteSpace(Description) ? null : Description.Trim(),
-                Images = imageUrls.Count > 0 ? imageUrls : null,
-                Supplier = string.IsNullOrWhiteSpace(Supplier) ? null : Supplier.Trim(),
-                CategoryId = SelectedCategoryItem!.CategoryId,
-            };
+                if (string.IsNullOrWhiteSpace(_editProductId))
+                    throw new InvalidOperationException("Missing product id for update.");
 
-            await _productService.CreateAsync(input).ConfigureAwait(false);
+                var input = new UpdateProductInput
+                {
+                    Sku = Sku.Trim(),
+                    Name = ProductName.Trim(),
+                    Price = priceInt,
+                    Stock = stock,
+                    Description = string.IsNullOrWhiteSpace(Description) ? null : Description.Trim(),
+                    Images = imageUrls,
+                    Supplier = string.IsNullOrWhiteSpace(Supplier) ? null : Supplier.Trim(),
+                    CategoryId = SelectedCategoryItem?.CategoryId,
+                };
+
+                await _productService.UpdateAsync(_editProductId, input).ConfigureAwait(false);
+            }
+            else
+            {
+                var input = new CreateProductInput
+                {
+                    Sku = Sku.Trim(),
+                    Name = ProductName.Trim(),
+                    Price = priceInt,
+                    Stock = stock,
+                    Description = string.IsNullOrWhiteSpace(Description) ? null : Description.Trim(),
+                    Images = imageUrls.Count > 0 ? imageUrls : null,
+                    Supplier = string.IsNullOrWhiteSpace(Supplier) ? null : Supplier.Trim(),
+                    CategoryId = SelectedCategoryItem!.CategoryId,
+                };
+
+                await _productService.CreateAsync(input).ConfigureAwait(false);
+            }
 
             if (_onCreated is not null)
                 await _onCreated().ConfigureAwait(false);
@@ -460,11 +554,16 @@ public partial class CreateProductViewModel : ObservableObject
         }
         catch (GraphQlException ex)
         {
-            var msg = ex.Errors.FirstOrDefault()?.Message ?? "Could not create product.";
+            var msg = ex.Errors.FirstOrDefault()?.Message
+                ?? (_isEditMode ? "Could not update product." : "Could not create product.");
             var display = msg.StartsWith("Unauthenticated:", StringComparison.OrdinalIgnoreCase)
-                ? "Sign in first. createProduct requires a JWT (Authorization: Bearer) — see backend testGraphQL.md §1 and §5.1."
+                ? (_isEditMode
+                    ? "Sign in first. updateProduct requires a JWT (Authorization: Bearer) — see backend testGraphQL.md §1 and §5.1."
+                    : "Sign in first. createProduct requires a JWT (Authorization: Bearer) — see backend testGraphQL.md §1 and §5.1.")
                 : msg.StartsWith("Unauthorized:", StringComparison.OrdinalIgnoreCase)
-                    ? "Your role cannot create products. Use an Admin or Sale account."
+                    ? (_isEditMode
+                        ? "Your role cannot update products. Use an Admin or Sale account."
+                        : "Your role cannot create products. Use an Admin or Sale account.")
                     : msg;
             App.RunOnUIThread(() => ErrorMessage = display);
         }

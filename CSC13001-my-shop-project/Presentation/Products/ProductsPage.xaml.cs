@@ -22,6 +22,7 @@ public sealed partial class ProductsPage : Page
 
     private NavigationStateStore? _stateStore;
     private double _pendingScrollOffset = -1;
+    private ProductsViewModel? _boundVm;
 
     public static readonly DependencyProperty ProductGridTileWidthProperty =
         DependencyProperty.Register(
@@ -167,12 +168,26 @@ public sealed partial class ProductsPage : Page
 
     private void OnDataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
     {
+        if (_boundVm is not null)
+            _boundVm.CategoryOptions.CollectionChanged -= CategoryOptions_CollectionChanged;
+
         if (args.NewValue is ProductsViewModel vm)
         {
+            _boundVm = vm;
+            vm.CategoryOptions.CollectionChanged += CategoryOptions_CollectionChanged;
             RestoreState(vm);
             BuildMenuFlyouts(vm);
             ArmCreateDialogAfterLayout(vm);
+            return;
         }
+
+        _boundVm = null;
+    }
+
+    private void CategoryOptions_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        if (_boundVm is not null)
+            BuildMenuFlyouts(_boundVm);
     }
 
     private void BuildMenuFlyouts(ProductsViewModel vm)
@@ -301,5 +316,28 @@ public sealed partial class ProductsPage : Page
     {
         if (VM?.CreateDialogViewModel is { } dlg)
             dlg.CancelCommand.Execute(null);
+    }
+
+    private async void CreateCategory_Click(object sender, RoutedEventArgs e)
+    {
+        if (VM is null)
+            return;
+
+        var productService = App.AppHost?.Services.GetService(typeof(IProductService)) as IProductService;
+        if (productService is null)
+            return;
+
+        var vm = new CreateCategoryViewModel(
+            productService,
+            () => { },
+            VM.RefreshCategoriesAsync);
+
+        var dialog = new CreateCategoryDialog
+        {
+            XamlRoot = this.XamlRoot,
+            DataContext = vm,
+        };
+
+        await dialog.ShowAsync();
     }
 }

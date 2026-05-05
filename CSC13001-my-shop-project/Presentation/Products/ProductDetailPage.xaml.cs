@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Uno.Extensions.Navigation;
 using Uno.Extensions.Navigation.UI;
 
@@ -28,4 +29,12 @@ public sealed partial class ProductDetailPage : Page
         if (nav is not null)
             await nav.NavigateRouteAsync(this, "Products");
     }
+
+    private void EditBackdrop_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+        if (DataContext is ProductDetailViewModel vm && vm.EditDialogViewModel is { } dlg)
+            dlg.CancelCommand.Execute(null);
+    }
+
+    
 }
