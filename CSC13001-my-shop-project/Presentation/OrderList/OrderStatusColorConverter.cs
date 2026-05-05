@@ -6,6 +6,7 @@ using System;
 
 public class OrderStatusColorConverter : IValueConverter
 {
+    public Brush? CreatedColor { get; set; }
     public Brush? ProcessingColor { get; set; }
     public Brush? ShippedColor { get; set; }
     public Brush? DeliveredColor { get; set; }
@@ -19,6 +20,7 @@ public class OrderStatusColorConverter : IValueConverter
         {
             return status switch
             {
+                "Created" => CreatedColor,
                 "Processing" => ProcessingColor,
                 "Shipped" => ShippedColor,
                 "Delivered" => DeliveredColor,

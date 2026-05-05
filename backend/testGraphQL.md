@@ -16,6 +16,7 @@ Sau khi login/register lay token, them header sau trong tab Headers:
 ```
 
 Luu y phan quyen theo resolver:
+
 - Admin: duoc tao/sua/xoa category, customer
 - Admin hoac Sale: orders + reports
 - Me, Logout: can dang nhap
@@ -128,7 +129,11 @@ query CategoryById {
 
 ```graphql
 mutation UpdateCategory {
-  updateCategory(id: "1", name: "Laptop Gaming", description: "Cap nhat mo ta") {
+  updateCategory(
+    id: "1"
+    name: "Laptop Gaming"
+    description: "Cap nhat mo ta"
+  ) {
     category_id
     name
     description
@@ -150,7 +155,12 @@ mutation DeleteCategory {
 
 ```graphql
 mutation CreateCustomer {
-  createCustomer(name: "Nguyen Van A", email: "a@gmail.com", phone: "0900000001", address: "HCM") {
+  createCustomer(
+    name: "Nguyen Van A"
+    email: "a@gmail.com"
+    phone: "0900000001"
+    address: "HCM"
+  ) {
     customer_id
     name
     email
@@ -212,7 +222,13 @@ query CustomerByPhone {
 
 ```graphql
 mutation UpdateCustomer {
-  updateCustomer(id: "1", name: "Nguyen Van B", email: "b@gmail.com", phone: "0900000002", address: "Ha Noi") {
+  updateCustomer(
+    id: "1"
+    name: "Nguyen Van B"
+    email: "b@gmail.com"
+    phone: "0900000002"
+    address: "Ha Noi"
+  ) {
     customer_id
     name
     email
@@ -422,10 +438,7 @@ mutation CreateOrder {
     recipient_name: "Nguyen Van A"
     recipient_phone: "0900000001"
     recipient_email: "a@gmail.com"
-    items: [
-      { product_id: "1", quantity: 2 }
-      { product_id: "2", quantity: 1 }
-    ]
+    items: [{ product_id: "1", quantity: 2 }, { product_id: "2", quantity: 1 }]
   ) {
     order_id
     created_time
@@ -478,17 +491,14 @@ query Orders {
 ```graphql
 query OrdersFiltered {
   orders(
-    page: 1,
-    limit: 10,
+    page: 1
+    limit: 10
     filter: {
-      status: "Processing",
-      startDate: "2026-04-01",
+      status: "Processing"
+      startDate: "2026-04-01"
       endDate: "2026-04-30"
-    },
-    sort: {
-      field: CREATED_TIME,
-      order: DESC
     }
+    sort: { field: CREATED_TIME, order: DESC }
   ) {
     data {
       order_id
@@ -529,12 +539,13 @@ query OrderById {
 ```
 
 ### 6.4 Update đơn hàng FULL (Admin/Sale) - KHUYÊN DÙNG
+
 Dùng để sửa địa chỉ, người nhận, status HOẶC thay đổi danh sách món đồ (Replace all items).
 
 ```graphql
 mutation UpdateOrderFull {
   updateOrderFull(
-    id: "1",
+    id: "1"
     input: {
       status: "Processing"
       shipping_address: "456 New Street, Ward 5"
@@ -572,6 +583,7 @@ mutation UpdateOrderStatus {
 ```
 
 ### 6.5 Soft Delete đơn hàng (Admin)
+
 Lưu ý: Chỉ xóa được đơn ở trạng thái Created/Processing. Đơn đã đi giao (Shipped/Delivered) sẽ bị chặn.
 
 ```graphql
@@ -582,7 +594,8 @@ mutation DeleteOrder {
 
 ## 7) Report (Thống kê & Báo cáo)
 
-***Lưu ý về tham số (Arguments) có thể truyền vào để query:***
+**_Lưu ý về tham số (Arguments) có thể truyền vào để query:_**
+
 - `period` (String): Khoảng thời gian gom nhóm dữ liệu. Các giá trị hợp lệ: `"day"`, `"week"`, `"month"`, `"year"`. (Mặc định: `"day"`).
 - `startDate` (String): Ngày bắt đầu lọc dữ liệu (Định dạng: `"YYYY-MM-DD"`, ví dụ `"2026-01-01"`).
 - `endDate` (String): Ngày kết thúc lọc dữ liệu (Định dạng: `"YYYY-MM-DD"`).
@@ -595,7 +608,11 @@ Tất cả các query Report đều yêu cầu quyền `Admin` hoặc `Sale` (c�
 
 ```graphql
 query CategorySalesReport {
-  categorySalesReport(period: "month", startDate: "2026-01-01", endDate: "2026-12-31") {
+  categorySalesReport(
+    period: "month"
+    startDate: "2026-01-01"
+    endDate: "2026-12-31"
+  ) {
     period
     date
     totalQuantity
@@ -614,7 +631,12 @@ query CategorySalesReport {
 
 ```graphql
 query ProductSalesReport {
-  productSalesReport(period: "month", startDate: "2026-01-01", endDate: "2026-12-31", categoryId: "1") {
+  productSalesReport(
+    period: "month"
+    startDate: "2026-01-01"
+    endDate: "2026-12-31"
+    categoryId: "1"
+  ) {
     period
     date
     totalQuantity
@@ -636,7 +658,11 @@ query ProductSalesReport {
 
 ```graphql
 query RevenueReport {
-  revenueReport(period: "month", startDate: "2026-01-01", endDate: "2026-12-31") {
+  revenueReport(
+    period: "month"
+    startDate: "2026-01-01"
+    endDate: "2026-12-31"
+  ) {
     period
     date
     totalOrders
@@ -648,11 +674,17 @@ query RevenueReport {
 ```
 
 ### 7.4 Top selling products (phiên bản Report)
-*Lưu ý: Query đã được đổi tên thành `topSellingProductsReport` để tránh trùng lặp với query cùng tên của module Product.*
+
+_Lưu ý: Query đã được đổi tên thành `topSellingProductsReport` để tránh trùng lặp với query cùng tên của module Product._
 
 ```graphql
 query TopSellingProductsReportModule {
-  topSellingProductsReport(limit: 10, startDate: "2026-01-01", endDate: "2026-12-31", categoryId: "1") {
+  topSellingProductsReport(
+    limit: 10
+    startDate: "2026-01-01"
+    endDate: "2026-12-31"
+    categoryId: "1"
+  ) {
     product_id
     sku
     name
@@ -690,6 +722,27 @@ query SalesOverview {
 ## 8) Batch demo gợi ý (để trình bày nhanh)
 
 1. Register Admin -> copy token.
+2. Login -> copy token moi.
+3. Them header Authorization Bearer token.
+4. Tao category.
+5. Tao customer.
+6. Tao 2-3 product.
+7. Tao order (status ban dau), sau do updateOrderStatus -> Paid.
+8. Chay cac query report de show dashboard so lieu.
+9. Chay me va logout de ket thuc demo auth.
+
+## 9) Luu y quan trong ve topSellingProducts
+
+Trong code hien tai co 2 field cung ten topSellingProducts:
+
+- Product module: topSellingProducts(limit: Int): [Product!]!
+- Report module: topSellingProducts(limit: Int, startDate: String, endDate: String): [TopProduct!]!
+
+Neu server bao loi schema conflict hoac field/type khong khop, ban can:
+
+- Doi ten 1 trong 2 field (vi du topSellingProductsReport) de tranh trung ten.
+- Hoac tam thoi chi demo theo field dang hoat dong trong schema runtime cua ban.
+
 2. Login -> copy token mới.
 3. Thêm header `Authorization: Bearer <token>`.
 4. Tạo category.

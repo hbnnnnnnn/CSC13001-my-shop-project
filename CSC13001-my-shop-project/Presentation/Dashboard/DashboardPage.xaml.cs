@@ -1,16 +1,204 @@
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Shapes;
 
 namespace CSC13001_my_shop_project.Presentation.Dashboard;
 
 public sealed partial class DashboardPage : Page
 {
+    // ── Chart coordinate system ────────────────────────────────────────
+    //  Canvas size: 880×270  |  Plot area: x=52..876, y=12..220
+    private const double CanvasW = 880, CanvasH = 270;
+    private const double PlotLeft = 52, PlotRight = 876;
+    private const double PlotTop = 12, PlotBottom = 220;
+    private const double PlotWidth = PlotRight - PlotLeft;   // 824
+    private const double PlotHeight = PlotBottom - PlotTop;  // 208
+
+    /// <summary>Computed chart points used for hover interaction.</summary>
+    private (double X, double Y, string Date, string Value)[] _chartPoints = [];
+
     public DashboardPage()
     {
         this.InitializeComponent();
-        Loaded += (_, _) => WeakReferenceMessenger.Default.Send(new ChromeVisibilityMessage(true));
+        Loaded += OnPageLoaded;
+    }
+
+    private bool _chartEventSubscribed;
+
+    private void OnPageLoaded(object sender, RoutedEventArgs e)
+    {
+        WeakReferenceMessenger.Default.Send(new ChromeVisibilityMessage(true));
+
+        // Subscribe to chart data ready event (once only)
+        if (!_chartEventSubscribed && DataContext is DashboardViewModel vm)
+        {
+            vm.ChartDataReady += () => DispatcherQueue.TryEnqueue(RedrawChart);
+            _chartEventSubscribed = true;
+        }
+
+        // Reload all data every time user navigates to Dashboard
+        if (DataContext is DashboardViewModel viewModel)
+        {
+            _ = viewModel.LoadAllDashboardDataAsync();
+        }
+    }
+
+    // ── Dynamic chart rendering ────────────────────────────────────────
+
+    /// <summary>
+    /// Clears the hardcoded chart elements and redraws from ViewModel data.
+    /// </summary>
+    private void RedrawChart()
+    {
+        if (DataContext is not DashboardViewModel vm) return;
+        var points = vm.RevenueChartPoints;
+        if (points.Count == 0) return;
+
+        // ── Remove old dynamic elements (keep only named elements + grid lines) ──
+        // We'll clear and rebuild the entire canvas content programmatically
+        // But first, save references to interactive elements
+        var hoverDotOuter = ChartHoverDotOuter;
+        var hoverDotInner = ChartHoverDotInner;
+        var tooltip = ChartTooltip;
+        var tooltipText = ChartTooltipText;
+
+        ChartCanvas.Children.Clear();
+
+        // ── Compute Y range ──
+        var maxRevenue = points.Max(p => p.Revenue);
+        var minRevenue = points.Min(p => p.Revenue);
+
+        // Nice Y-axis: round up to a "nice" ceiling
+        var yMax = maxRevenue == 0 ? 1_000_000L : NiceCeiling(maxRevenue);
+        const long yMin = 0;
+        var yRange = yMax - yMin;
+
+        // ── Draw horizontal grid lines + Y labels (5 lines) ──
+        var gridLineCount = 5;
+        for (int i = 0; i < gridLineCount; i++)
+        {
+            double ratio = (double)i / (gridLineCount - 1);  // 0 → 1
+            double y = PlotTop + ratio * PlotHeight;
+            long val = yMax - (long)(ratio * yRange);
+
+            // Grid line
+            var line = new Line
+            {
+                X1 = PlotLeft, Y1 = y,
+                X2 = PlotRight, Y2 = y,
+                Stroke = new SolidColorBrush(Windows.UI.Color.FromArgb(
+                    (byte)(i == gridLineCount - 1 ? 0x22 : 0x10), 0, 0, 0)),
+                StrokeThickness = 1
+            };
+            ChartCanvas.Children.Add(line);
+
+            // Y-axis label
+            var label = new TextBlock
+            {
+                Text = FormatShortCurrency(val),
+                FontSize = 11,
+                Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(0xFF, 0x9C, 0xA3, 0xAF))
+            };
+            Canvas.SetLeft(label, 4);
+            Canvas.SetTop(label, y - 8);
+            ChartCanvas.Children.Add(label);
+        }
+
+        // ── Compute data point positions ──
+        int n = points.Count;
+        var computedPoints = new (double X, double Y, string Date, string Value)[n];
+        var polyPoints = new PointCollection();
+        var areaPoints = new PointCollection();
+
+        for (int i = 0; i < n; i++)
+        {
+            var pt = points[i];
+            double x = n == 1 ? (PlotLeft + PlotRight) / 2 : PlotLeft + (double)i / (n - 1) * PlotWidth;
+            double y = yRange == 0 ? (PlotTop + PlotBottom) / 2 : PlotBottom - (double)(pt.Revenue - yMin) / yRange * PlotHeight;
+
+            computedPoints[i] = (x, y, pt.Label, $"{pt.Revenue:N0} ₫");
+            polyPoints.Add(new Windows.Foundation.Point(x, y));
+
+            if (i == 0)
+                areaPoints.Add(new Windows.Foundation.Point(x, y));
+            else
+                areaPoints.Add(new Windows.Foundation.Point(x, y));
+        }
+
+        // Close the area polygon at baseline
+        if (n > 0)
+        {
+            areaPoints.Add(new Windows.Foundation.Point(computedPoints[n - 1].X, PlotBottom));
+            areaPoints.Add(new Windows.Foundation.Point(computedPoints[0].X, PlotBottom));
+        }
+
+        // ── Draw area fill ──
+        var areaPolygon = new Polygon
+        {
+            Points = areaPoints,
+            Fill = (Brush)Resources["ChartAreaFillBrush"]
+        };
+        ChartCanvas.Children.Add(areaPolygon);
+
+        // ── Draw chart line ──
+        var chartLine = new Polyline
+        {
+            Points = polyPoints,
+            Stroke = (Brush)Application.Current.Resources["ShellAccentBrush"],
+            StrokeThickness = 2.5,
+            StrokeLineJoin = PenLineJoin.Round
+        };
+        ChartCanvas.Children.Add(chartLine);
+
+        // ── Draw X-axis labels (show ~8 evenly spaced) ──
+        int maxLabels = Math.Min(8, n);
+        for (int i = 0; i < maxLabels; i++)
+        {
+            int idx = n == 1 ? 0 : (int)Math.Round((double)i / (maxLabels - 1) * (n - 1));
+            var label = new TextBlock
+            {
+                Text = computedPoints[idx].Date,
+                FontSize = 11,
+                Foreground = new SolidColorBrush(Windows.UI.Color.FromArgb(0xFF, 0x9C, 0xA3, 0xAF))
+            };
+            Canvas.SetLeft(label, computedPoints[idx].X - 16);
+            Canvas.SetTop(label, PlotBottom + 8);
+            ChartCanvas.Children.Add(label);
+        }
+
+        // ── Re-add interactive hover elements ──
+        hoverDotOuter.Visibility = Visibility.Collapsed;
+        hoverDotInner.Visibility = Visibility.Collapsed;
+        tooltip.Visibility = Visibility.Collapsed;
+
+        ChartCanvas.Children.Add(hoverDotOuter);
+        ChartCanvas.Children.Add(hoverDotInner);
+        ChartCanvas.Children.Add(tooltip);
+
+        // Store computed points for hover interaction
+        _chartPoints = computedPoints;
+    }
+
+    /// <summary>Rounds up to a "nice" number for Y-axis ceiling.</summary>
+    private static long NiceCeiling(long value)
+    {
+        if (value <= 0) return 1_000_000;
+        double mag = Math.Pow(10, Math.Floor(Math.Log10(value)));
+        double normalized = value / mag;
+        double nice = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10;
+        return (long)(nice * mag * 1.2); // Add 20% headroom
+    }
+
+    /// <summary>Formats a large number as short currency: 1000000 → "1M ₫", 500000 → "500K ₫"</summary>
+    private static string FormatShortCurrency(long value)
+    {
+        if (value >= 1_000_000_000) return $"{value / 1_000_000_000.0:F1}B ₫";
+        if (value >= 1_000_000) return $"{value / 1_000_000.0:F1}M ₫";
+        if (value >= 1_000) return $"{value / 1_000.0:F0}K ₫";
+        return $"{value:N0} ₫";
     }
 
     // ── Stat-card float animation ─────────────────────────────────────────
@@ -62,48 +250,12 @@ public sealed partial class DashboardPage : Page
             vm.NavigateTo("Orders");
     }
 
-    // ── Interactive chart ─────────────────────────────────────────────────
-    //  Canvas size: 880×270  |  Plot area: x=52..876, y=12..220
-    //  Y mapping: $0=220, $2k=168, $4k=116, $6k=64, $8k=12
-    //  X mapping: day D → x = (D-1)*27.6 + 52
-
-    private static readonly (double X, double Y, string Date, string Value)[] ChartPoints =
-    [
-        (52, 158, "Mar 1", "$2,385"),
-        (79, 130, "Mar 2", "$3,460"),
-        (106, 108, "Mar 3", "$4,310"),
-        (133, 80, "Mar 4", "$5,385"),
-        (160, 46, "Mar 5", "$6,690"),
-        (187, 64, "Mar 6", "$6,000"),
-        (214, 96, "Mar 7", "$4,770"),
-        (241, 116, "Mar 8", "$4,000"),
-        (268, 136, "Mar 9", "$3,230"),
-        (295, 86, "Mar 10", "$5,150"),
-        (322, 56, "Mar 11", "$6,310"),
-        (349, 86, "Mar 12", "$5,150"),
-        (376, 124, "Mar 13", "$3,690"),
-        (403, 104, "Mar 14", "$4,460"),
-        (430, 124, "Mar 15", "$3,690"),
-        (457, 148, "Mar 16", "$2,770"),
-        (484, 112, "Mar 17", "$4,150"),
-        (511, 78, "Mar 18", "$5,460"),
-        (538, 96, "Mar 19", "$4,770"),
-        (565, 68, "Mar 20", "$5,850"),
-        (592, 44, "Mar 21", "$7,480"),
-        (619, 72, "Mar 22", "$5,690"),
-        (646, 108, "Mar 23", "$4,310"),
-        (673, 88, "Mar 24", "$5,080"),
-        (700, 116, "Mar 25", "$4,000"),
-        (727, 104, "Mar 26", "$4,460"),
-        (754, 128, "Mar 27", "$3,540"),
-        (781, 148, "Mar 28", "$2,770"),
-        (808, 136, "Mar 29", "$3,230"),
-        (835, 158, "Mar 30", "$2,385"),
-        (862, 140, "Mar 31", "$3,080"),
-    ];
+    // ── Interactive chart hover ───────────────────────────────────────────
 
     private void Chart_PointerMoved(object sender, PointerRoutedEventArgs e)
     {
+        if (_chartPoints.Length == 0) return;
+
         var pos = e.GetCurrentPoint(ChartCanvas).Position;
 
         // Only respond within a generous hit area around the plot
@@ -111,9 +263,9 @@ public sealed partial class DashboardPage : Page
             return;
 
         // Find nearest data point by X distance
-        var nearest = ChartPoints[0];
+        var nearest = _chartPoints[0];
         var minDist = double.MaxValue;
-        foreach (var pt in ChartPoints)
+        foreach (var pt in _chartPoints)
         {
             var dist = Math.Abs(pt.X - pos.X);
             if (dist < minDist)
@@ -127,9 +279,9 @@ public sealed partial class DashboardPage : Page
         ChartTooltipText.Text = $"{nearest.Date}\n{nearest.Value}";
 
         // Keep tooltip centered above the point, clamped inside Canvas
-        const double ttW = 72,
+        const double ttW = 90,
             ttH = 40;
-        var ttLeft = Math.Clamp(nearest.X - ttW / 2.0, 52, 876 - ttW);
+        var ttLeft = Math.Clamp(nearest.X - ttW / 2.0, PlotLeft, PlotRight - ttW);
         var ttTop = Math.Max(nearest.Y - ttH - 12, 0);
         Canvas.SetLeft(ChartTooltip, ttLeft);
         Canvas.SetTop(ChartTooltip, ttTop);
@@ -163,6 +315,7 @@ public sealed partial class DashboardPage : Page
     private void RowBorder_PointerExited(object sender, PointerRoutedEventArgs e)
     {
         if (sender is Border b)
-            b.Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+            b.Background = new SolidColorBrush(Colors.Transparent);
     }
 }
+

@@ -368,58 +368,61 @@
         <!-- ═══ HEADER BAR ═══ -->
         <Border
             Grid.Row="0"
-            Background="#80FAF7F2"
+            Background="#4DFAF7F2"
             BorderBrush="#F5EDE4"
             BorderThickness="0,0,0,1"
             Padding="32,0"
             Height="86"
         >
             <Grid VerticalAlignment="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
                 <TextBlock
-                    Grid.Column="0"
                     Text="{Binding DialogTitle}"
                     FontSize="20"
                     FontWeight="Bold"
                     Foreground="#FF2C2118"
-                    CharacterSpacing="50"
                     VerticalAlignment="Center"
+                    HorizontalAlignment="Left"
+                    CharacterSpacing="50"
                 />
-
-                <Button Grid.Column="1" Content="Cancel" Click="CancelButton_Click" Style="{StaticResource CancelBtnStyle}" Margin="0,0,12,0" />
-                <Button Grid.Column="2" Content="{Binding SubmitButtonText}" Click="SubmitButton_Click" Style="{StaticResource SubmitBtnStyle}" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+                    <Button Content="Cancel" Click="CancelButton_Click" Style="{StaticResource CancelBtnStyle}" />
+                    <Button Content="{Binding SubmitButtonText}" Click="SubmitButton_Click" Style="{StaticResource SubmitBtnStyle}" />
+                </StackPanel>
             </Grid>
         </Border>
 
         <!-- ═══ BODY: TWO COLUMNS ═══ -->
-        <Grid Grid.Row="1" Padding="32">
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="32" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <!-- ─── LEFT: Customer Details + Order Details ─── -->
-            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer Grid.Column="0" Padding="32,32,24,24" VerticalScrollBarVisibility="Auto">
                 <StackPanel Spacing="24">
 
                     <!-- Customer Details -->
-                    <StackPanel Spacing="16">
+                    <StackPanel Spacing="16" x:Name="CustomerDetailsPanel">
                         <Border BorderBrush="#F5EDE4" BorderThickness="0,0,0,1" Padding="0,0,0,8">
                             <TextBlock Text="Customer Details" FontSize="18" FontWeight="Bold" Foreground="#FF2C2118" />
                         </Border>
 
                         <StackPanel Spacing="4">
-                            <TextBlock Text="CUSTOMER NAME" Style="{StaticResource FieldLabelStyle}" />
-                            <TextBox
-                                Text="{Binding CustomerName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                PlaceholderText="Enter customer name"
-                                Style="{StaticResource FormInputStyle}"
+                            <TextBlock Text="CUSTOMER" Style="{StaticResource FieldLabelStyle}" />
+                            <ComboBox
+                                x:Name="CustomerPicker"
+                                ItemsSource="{Binding AvailableCustomers}"
+                                SelectedItem="{Binding SelectedCustomer, Mode=TwoWay}"
+                                PlaceholderText="Select a customer..."
+                                DisplayMemberPath="DisplayText"
+                                FontSize="14"
+                                Background="#FAF7F2"
+                                BorderBrush="#F5EDE4"
+                                BorderThickness="1"
+                                CornerRadius="14"
+                                Height="50"
+                                HorizontalAlignment="Stretch"
                             />
                         </StackPanel>
 
@@ -430,7 +433,7 @@
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0" Spacing="4">
                                 <TextBlock Text="PHONE" Style="{StaticResource FieldLabelStyle}" />
-                                <TextBox
+                                <TextBox x:Name="PhoneTextBox"
                                     Text="{Binding Phone, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     PlaceholderText="+1 (555) 000-0000"
                                     Style="{StaticResource FormInputStyle}"
@@ -438,7 +441,7 @@
                             </StackPanel>
                             <StackPanel Grid.Column="1" Spacing="4">
                                 <TextBlock Text="EMAIL" Style="{StaticResource FieldLabelStyle}" />
-                                <TextBox
+                                <TextBox x:Name="EmailTextBox"
                                     Text="{Binding Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     PlaceholderText="email@example.com"
                                     Style="{StaticResource FormInputStyle}"
@@ -448,7 +451,7 @@
 
                         <StackPanel Spacing="4">
                             <TextBlock Text="DELIVERY ADDRESS" Style="{StaticResource FieldLabelStyle}" />
-                            <TextBox
+                            <TextBox x:Name="AddressTextBox"
                                 Text="{Binding Address, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 PlaceholderText="Enter full address"
                                 FontSize="14"
@@ -520,12 +523,12 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <!-- STATUS: Button + Flyout (OrderListPage style, auto width) -->
-                            <StackPanel Grid.Column="0" Spacing="4">
+                            <!-- STATUS: Button + Flyout with colored items (only in Edit mode) -->
+                            <StackPanel Grid.Column="0" Spacing="4" x:Name="StatusPickerPanel" Visibility="Collapsed">
                                 <TextBlock Text="STATUS" Style="{StaticResource FieldLabelStyle}" />
                                 <Border Background="#FAF7F2" BorderBrush="#F5EDE4" BorderThickness="1" CornerRadius="14" Height="50">
                                     <Button
-                                        x:Name="StatusFilterButton"
+                                        x:Name="StatusPickerButton"
                                         Style="{StaticResource StatusBtnStyle}"
                                         HorizontalAlignment="Stretch"
                                         VerticalAlignment="Stretch"
@@ -541,20 +544,17 @@
                                                         <Setter Property="BorderThickness" Value="1" />
                                                         <Setter Property="CornerRadius" Value="12" />
                                                         <Setter Property="Padding" Value="6" />
-                                                        <Setter Property="MinWidth" Value="160" />
-                                                        <Setter Property="MaxWidth" Value="160" />
+                                                        <Setter Property="MinWidth" Value="180" />
                                                     </Style>
                                                 </Flyout.FlyoutPresenterStyle>
                                                 <ListView
-                                                    x:Name="StatusFilterList"
+                                                    x:Name="StatusOptionsList"
                                                     ItemsSource="{Binding StatusOptions}"
-                                                    SelectedItem="{Binding SelectedStatus, Mode=TwoWay}"
-                                                    SelectionChanged="StatusFilterList_SelectionChanged"
-                                                    ContainerContentChanging="StatusFilterList_ContainerContentChanging"
+                                                    SelectionMode="Single"
+                                                    SelectionChanged="StatusOptionsList_SelectionChanged"
                                                     Background="Transparent"
                                                     BorderThickness="0"
                                                     Padding="0"
-                                                    SelectionMode="Single"
                                                 >
                                                     <ListView.ItemContainerStyle>
                                                         <Style TargetType="ListViewItem">
@@ -566,9 +566,9 @@
                                                         </Style>
                                                     </ListView.ItemContainerStyle>
                                                     <ListView.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                                                <Ellipse x:Name="StatusDot" Width="8" Height="8" VerticalAlignment="Center" />
+                                                        <DataTemplate x:DataType="x:String">
+                                                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                                                <Ellipse Width="8" Height="8" VerticalAlignment="Center" />
                                                                 <TextBlock Text="{Binding}" FontSize="14" FontWeight="Medium" VerticalAlignment="Center" />
                                                             </StackPanel>
                                                         </DataTemplate>
@@ -576,31 +576,17 @@
                                                 </ListView>
                                             </Flyout>
                                         </Button.Flyout>
-                                        <Grid HorizontalAlignment="Stretch">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="Auto" />
-                                                <ColumnDefinition Width="12" />
-                                                <ColumnDefinition Width="Auto" />
-                                            </Grid.ColumnDefinitions>
-                                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                                                <Ellipse x:Name="StatusDotBtn" Width="8" Height="8" Fill="#F3B55C" VerticalAlignment="Center" />
-                                                <TextBlock
-                                                    x:Name="StatusFilterText"
-                                                    Text="{Binding SelectedStatus}"
-                                                    FontSize="16"
-                                                    FontWeight="Medium"
-                                                    Foreground="#F3B55C"
-                                                    VerticalAlignment="Center"
-                                                />
-                                            </StackPanel>
-                                            <FontIcon Grid.Column="2" Glyph="&#xE70D;" FontSize="12" Foreground="#992C2118" VerticalAlignment="Center" />
-                                        </Grid>
+                                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                            <Ellipse x:Name="SelectedStatusDot" Width="8" Height="8" VerticalAlignment="Center" />
+                                            <TextBlock x:Name="SelectedStatusText" Text="{Binding SelectedStatus}" FontSize="14" FontWeight="Medium" VerticalAlignment="Center" />
+                                            <FontIcon Glyph="&#xE70D;" FontSize="10" Foreground="#992C2118" VerticalAlignment="Center" />
+                                        </StackPanel>
                                     </Button>
                                 </Border>
                             </StackPanel>
 
-                            <!-- DATE: Button + DatePickerFlyout -->
-                            <StackPanel Grid.Column="1" Spacing="4">
+                            <!-- DATE: Button + DatePickerFlyout (aligned with title in Create mode) -->
+                            <StackPanel Grid.Column="0" Spacing="4" x:Name="DatePickerPanel">
                                 <TextBlock Text="DATE" Style="{StaticResource FieldLabelStyle}" />
                                 <Button x:Name="DatePickerButton" Style="{StaticResource DateInputButtonStyle}">
                                     <TextBlock x:Name="DateDisplayText" FontSize="16" Foreground="#FF2C2118" VerticalAlignment="Center" />
@@ -617,11 +603,11 @@
 
             <!-- ─── RIGHT: Products Panel ─── -->
             <Border
-                Grid.Column="2"
+                Grid.Column="1"
                 Background="#4DFAF7F2"
                 BorderBrush="#F5EDE4"
                 BorderThickness="1"
-                CornerRadius="14"
+                CornerRadius="0"
             >
                 <Grid>
                     <Grid.RowDefinitions>
@@ -641,7 +627,7 @@
                         Height="77"
                     >
                         <Grid VerticalAlignment="Center">
-                            <TextBlock Text="Products" FontSize="18" FontWeight="Bold" Foreground="#FF2C2118" VerticalAlignment="Center" />
+                            <TextBlock Text="Product List" FontSize="18" FontWeight="Bold" Foreground="#FF2C2118" VerticalAlignment="Center" />
 
                             <!-- "+ ADD PRODUCT" link: underline bar on hover -->
                             <Button
@@ -659,13 +645,13 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="50" />
-                            <ColumnDefinition Width="80" />
-                            <ColumnDefinition Width="80" />
+                            <ColumnDefinition Width="140" />
+                            <ColumnDefinition Width="140" />
                             <ColumnDefinition Width="36" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="PRODUCT NAME" FontSize="12" FontWeight="Bold" Foreground="#B32C2118" CharacterSpacing="50" VerticalAlignment="Center" />
                         <TextBlock Grid.Column="1" Text="QTY" FontSize="12" FontWeight="Bold" Foreground="#B32C2118" CharacterSpacing="50" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                        <TextBlock Grid.Column="2" Text="PRICE" FontSize="12" FontWeight="Bold" Foreground="#B32C2118" CharacterSpacing="50" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="2" Text="UNIT PRICE" FontSize="12" FontWeight="Bold" Foreground="#B32C2118" CharacterSpacing="50" HorizontalAlignment="Right" VerticalAlignment="Center" />
                         <TextBlock Grid.Column="3" Text="TOTAL" FontSize="12" FontWeight="Bold" Foreground="#B32C2118" CharacterSpacing="50" HorizontalAlignment="Right" VerticalAlignment="Center" />
                     </Grid>
 
@@ -679,16 +665,78 @@
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="50" />
-                                                <ColumnDefinition Width="80" />
-                                                <ColumnDefinition Width="80" />
+                                                <ColumnDefinition Width="140" />
+                                                <ColumnDefinition Width="140" />
                                                 <ColumnDefinition Width="36" />
                                             </Grid.ColumnDefinitions>
                                             <TextBlock Grid.Column="0" Text="{Binding ProductName}" FontSize="14" FontWeight="Medium" Foreground="#FF2C2118" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                                             <TextBlock Grid.Column="1" Text="{Binding Quantity}" FontSize="14" Foreground="#CC2C2118" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                            <TextBlock Grid.Column="2" Text="{Binding UnitPriceFormatted}" FontSize="14" Foreground="#CC2C2118" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                            <TextBlock Grid.Column="3" Text="{Binding TotalFormatted}" FontSize="14" FontWeight="Bold" Foreground="#FF2C2118" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                                            <Button Grid.Column="4" Background="Transparent" BorderThickness="0" Padding="4" Tag="{Binding}" Click="RemoveProduct_Click" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                <FontIcon Glyph="&#xE711;" FontSize="12" Foreground="#992C2118" />
+                                            <TextBlock Grid.Column="2" Text="{Binding UnitPriceFormatted}" FontSize="13" Foreground="#CC2C2118" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                            <TextBlock Grid.Column="3" Text="{Binding TotalFormatted}" FontSize="13" FontWeight="Bold" Foreground="#FF2C2118" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                            <Button
+                                                Grid.Column="4"
+                                                Tag="{Binding}"
+                                                Click="RemoveProduct_Click"
+                                                HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                                Visibility="{Binding DataContext.RemoveButtonVisibility, ElementName=ProductList}"
+                                                ToolTipService.ToolTip="Remove product"
+                                                Width="28" Height="28"
+                                                Padding="0"
+                                            >
+                                                <Button.Template>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Grid
+                                                            x:Name="RootGrid"
+                                                            Background="Transparent"
+                                                            CornerRadius="6"
+                                                            Width="28" Height="28"
+                                                        >
+                                                            <VisualStateManager.VisualStateGroups>
+                                                                <VisualStateGroup x:Name="CommonStates">
+                                                                    <VisualState x:Name="Normal" />
+                                                                    <VisualState x:Name="PointerOver">
+                                                                        <Storyboard>
+                                                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="Background">
+                                                                                <DiscreteObjectKeyFrame KeyTime="0">
+                                                                                    <DiscreteObjectKeyFrame.Value>
+                                                                                        <SolidColorBrush Color="#1AE74C3C" />
+                                                                                    </DiscreteObjectKeyFrame.Value>
+                                                                                </DiscreteObjectKeyFrame>
+                                                                            </ObjectAnimationUsingKeyFrames>
+                                                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RemoveIcon" Storyboard.TargetProperty="Foreground">
+                                                                                <DiscreteObjectKeyFrame KeyTime="0">
+                                                                                    <DiscreteObjectKeyFrame.Value>
+                                                                                        <SolidColorBrush Color="#E74C3C" />
+                                                                                    </DiscreteObjectKeyFrame.Value>
+                                                                                </DiscreteObjectKeyFrame>
+                                                                            </ObjectAnimationUsingKeyFrames>
+                                                                        </Storyboard>
+                                                                    </VisualState>
+                                                                    <VisualState x:Name="Pressed">
+                                                                        <Storyboard>
+                                                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RootGrid" Storyboard.TargetProperty="Background">
+                                                                                <DiscreteObjectKeyFrame KeyTime="0">
+                                                                                    <DiscreteObjectKeyFrame.Value>
+                                                                                        <SolidColorBrush Color="#33E74C3C" />
+                                                                                    </DiscreteObjectKeyFrame.Value>
+                                                                                </DiscreteObjectKeyFrame>
+                                                                            </ObjectAnimationUsingKeyFrames>
+                                                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="RemoveIcon" Storyboard.TargetProperty="Foreground">
+                                                                                <DiscreteObjectKeyFrame KeyTime="0">
+                                                                                    <DiscreteObjectKeyFrame.Value>
+                                                                                        <SolidColorBrush Color="#C0392B" />
+                                                                                    </DiscreteObjectKeyFrame.Value>
+                                                                                </DiscreteObjectKeyFrame>
+                                                                            </ObjectAnimationUsingKeyFrames>
+                                                                        </Storyboard>
+                                                                    </VisualState>
+                                                                </VisualStateGroup>
+                                                            </VisualStateManager.VisualStateGroups>
+                                                            <FontIcon x:Name="RemoveIcon" Glyph="&#xE711;" FontSize="12" Foreground="#992C2118" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                        </Grid>
+                                                    </ControlTemplate>
+                                                </Button.Template>
                                             </Button>
                                         </Grid>
                                     </DataTemplate>
@@ -720,19 +768,30 @@
                         </StackPanel>
                     </Grid>
 
-                    <!-- Total Amount Footer -->
+                    <!-- Totals Footer (matching Detail Dialog layout) -->
                     <Border
                         Grid.Row="3"
                         Background="White"
                         BorderBrush="#F5EDE4"
                         BorderThickness="0,1,0,0"
-                        Padding="24,0"
-                        Height="77"
+                        Padding="24,16"
                     >
-                        <Grid VerticalAlignment="Center">
-                            <TextBlock Text="Total Amount" FontSize="20" FontWeight="Bold" Foreground="#FF2C2118" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                            <TextBlock x:Name="TotalAmountText" Text="{Binding TotalAmountFormatted}" FontSize="20" FontWeight="Bold" Foreground="#F3B55C" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                        </Grid>
+                        <StackPanel Spacing="8">
+                            <Grid>
+                                <TextBlock Text="Subtotal" FontSize="14" Foreground="#992C2118" HorizontalAlignment="Left" />
+                                <TextBlock Text="{Binding TotalAmountFormatted}" FontSize="14" Foreground="#FF2C2118" HorizontalAlignment="Right" />
+                            </Grid>
+                            <Grid>
+                                <TextBlock Text="Shipping Fees" FontSize="14" Foreground="#992C2118" HorizontalAlignment="Left" />
+                                <TextBlock Text="0 ₫" FontSize="14" Foreground="#FF2C2118" HorizontalAlignment="Right" />
+                            </Grid>
+                            <Border BorderBrush="#F5EDE4" BorderThickness="0,1,0,0" Padding="0,10,0,0" Margin="0,4,0,0">
+                                <Grid>
+                                    <TextBlock Text="Total" FontSize="18" FontWeight="Bold" Foreground="#FF2C2118" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                                    <TextBlock x:Name="TotalAmountText" Text="{Binding TotalAmountFormatted}" FontSize="18" FontWeight="Bold" Foreground="#F3B55C" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+                        </StackPanel>
                     </Border>
                 </Grid>
             </Border>

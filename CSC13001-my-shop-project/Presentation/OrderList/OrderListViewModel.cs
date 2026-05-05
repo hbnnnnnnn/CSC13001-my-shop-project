@@ -4,13 +4,16 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CSC13001_my_shop_project.Services;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI;
 using Windows.UI;
 
 public partial class OrderListViewModel : ObservableObject
 {
-    private readonly List<OrderItem> _allOrders;
+    private readonly OrderService _orderService;
+    private List<OrderItem> _allOrders = [];
+    private bool _isLoadingInProgress;
 
     [ObservableProperty]
     private ObservableCollection<OrderItem> _filteredOrders = new();
@@ -39,144 +42,123 @@ public partial class OrderListViewModel : ObservableObject
     [ObservableProperty]
     private DateTimeOffset? _toDate;
 
+    [ObservableProperty]
+    private bool _isLoading;
+
+    [ObservableProperty]
+    private string? _errorMessage;
+
     public List<string> StatusFilterOptions { get; } = new()
     {
         "All Status",
+        "Created",
         "Processing",
         "Shipped",
         "Delivered",
-        "Pending",
         "Cancelled"
     };
 
-    public OrderListViewModel()
+    public OrderService OrderServiceInstance => _orderService;
+
+    public OrderListViewModel(OrderService orderService)
     {
+        _orderService = orderService;
         SelectedStatusFilter = StatusFilterOptions[0];
 
-        _allOrders = new List<OrderItem>
-        {
-            new()
-            {
-                Id = "#00123", Date = "03/02/2026", CustomerName = "Eleanor Pena", Status = "Processing", Amount = "$450.00",
-                Phone = "+1 (555) 012-3456", Email = "eleanor@example.com", Address = "789 Oak Lane\nChicago, IL 60601, USA",
-                Products = new ObservableCollection<OrderProductItem>
-                {
-                    new() { ProductName = "Nordic Lounge Chair", Quantity = 2, UnitPrice = 124.50m },
-                    new() { ProductName = "Minimalist Wooden Lamp", Quantity = 1, UnitPrice = 89.00m },
-                    new() { ProductName = "Ceramic Artisan Vase", Quantity = 3, UnitPrice = 37.00m }
-                },
-                ShippingFee = 25.00m
-            },
-            new()
-            {
-                Id = "#00124", Date = "03/02/2026", CustomerName = "Wade Warren", Status = "Shipped", Amount = "$1,248.00",
-                Phone = "+1 (555) 234-5678", Email = "wade@example.com", Address = "456 Elm Street\nLos Angeles, CA 90001, USA",
-                Products = new ObservableCollection<OrderProductItem>
-                {
-                    new() { ProductName = "Designer Coffee Table", Quantity = 1, UnitPrice = 899.00m },
-                    new() { ProductName = "Artisan Throw Pillow", Quantity = 4, UnitPrice = 62.25m }
-                },
-                ShippingFee = 30.00m
-            },
-            new()
-            {
-                Id = "#00125", Date = "03/01/2026", CustomerName = "Esther Howard", Status = "Delivered", Amount = "$2,450.00",
-                Phone = "+1 (555) 345-6789", Email = "esther@example.com", Address = "321 Pine Avenue\nNew York, NY 10001, USA",
-                Products = new ObservableCollection<OrderProductItem>
-                {
-                    new() { ProductName = "Premium Leather Sofa", Quantity = 1, UnitPrice = 2400.00m }
-                },
-                ShippingFee = 50.00m
-            },
-            new()
-            {
-                Id = "#00126", Date = "02/28/2026", CustomerName = "Cameron Williamson", Status = "Pending", Amount = "$854.00",
-                Phone = "+1 (555) 456-7890", Email = "cameron@example.com", Address = "654 Maple Drive\nSan Francisco, CA 94102, USA",
-                Products = new ObservableCollection<OrderProductItem>
-                {
-                    new() { ProductName = "Scandinavian Dining Chair", Quantity = 4, UnitPrice = 199.00m },
-                    new() { ProductName = "Linen Table Runner", Quantity = 2, UnitPrice = 29.00m }
-                },
-                ShippingFee = 0m
-            },
-            new()
-            {
-                Id = "#00127", Date = "02/28/2026", CustomerName = "Brooklyn Simmons", Status = "Processing", Amount = "$320.00",
-                Phone = "+1 (555) 567-8901", Email = "brooklyn@example.com", Address = "987 Cedar Blvd\nSeattle, WA 98101, USA",
-                Products = new ObservableCollection<OrderProductItem>
-                {
-                    new() { ProductName = "Woven Basket Set", Quantity = 2, UnitPrice = 85.00m },
-                    new() { ProductName = "Concrete Planter", Quantity = 3, UnitPrice = 45.00m }
-                },
-                ShippingFee = 15.00m
-            },
-            new()
-            {
-                Id = "#00128", Date = "02/27/2026", CustomerName = "Leslie Alexander", Status = "Cancelled", Amount = "$120.00",
-                Phone = "+1 (555) 678-9012", Email = "leslie@example.com", Address = "147 Birch Court\nAustin, TX 73301, USA",
-                Products = new ObservableCollection<OrderProductItem>
-                {
-                    new() { ProductName = "Ceramic Artisan Vase", Quantity = 2, UnitPrice = 37.00m },
-                    new() { ProductName = "Scented Soy Candle", Quantity = 3, UnitPrice = 15.33m }
-                },
-                ShippingFee = 0m
-            },
-            new()
-            {
-                Id = "#00129", Date = "02/26/2026", CustomerName = "Jenny Wilson", Status = "Delivered", Amount = "$2,890.00",
-                Phone = "+1 (555) 789-0123", Email = "jenny@example.com", Address = "258 Walnut Way\nDenver, CO 80202, USA",
-                Products = new ObservableCollection<OrderProductItem>
-                {
-                    new() { ProductName = "Minimalist Bookshelf", Quantity = 2, UnitPrice = 650.00m },
-                    new() { ProductName = "Brass Table Lamp", Quantity = 1, UnitPrice = 320.00m },
-                    new() { ProductName = "Handwoven Rug", Quantity = 1, UnitPrice = 1200.00m }
-                },
-                ShippingFee = 70.00m
-            },
-            new()
-            {
-                Id = "#00130", Date = "02/25/2026", CustomerName = "Guy Hawkins", Status = "Shipped", Amount = "$560.00",
-                Phone = "+1 (555) 890-1234", Email = "guy@example.com", Address = "369 Spruce Street\nPortland, OR 97201, USA",
-                Products = new ObservableCollection<OrderProductItem>
-                {
-                    new() { ProductName = "Nordic Lounge Chair", Quantity = 1, UnitPrice = 510.00m }
-                },
-                ShippingFee = 50.00m
-            },
-            new()
-            {
-                Id = "#00131", Date = "02/24/2026", CustomerName = "Robert Fox", Status = "Processing", Amount = "$1,100.00",
-                Phone = "+1 (555) 901-2345", Email = "robert@example.com", Address = "741 Ash Lane\nMiami, FL 33101, USA",
-                Products = new ObservableCollection<OrderProductItem>
-                {
-                    new() { ProductName = "Designer Coffee Table", Quantity = 1, UnitPrice = 899.00m },
-                    new() { ProductName = "Minimalist Wooden Lamp", Quantity = 2, UnitPrice = 89.00m }
-                },
-                ShippingFee = 23.00m
-            },
-            new()
-            {
-                Id = "#00132", Date = "02/23/2026", CustomerName = "Jacob Jones", Status = "Delivered", Amount = "$3,200.00",
-                Phone = "+1 (555) 012-3456", Email = "customer@example.com", Address = "1234 Design Avenue, Suite 500\nNew York, NY 10001, USA",
-                Products = new ObservableCollection<OrderProductItem>
-                {
-                    new() { ProductName = "Nordic Lounge Chair", Quantity = 2, UnitPrice = 124.50m },
-                    new() { ProductName = "Minimalist Wooden Lamp", Quantity = 1, UnitPrice = 89.00m },
-                    new() { ProductName = "Ceramic Artisan Vase", Quantity = 3, UnitPrice = 37.00m }
-                },
-                ShippingFee = 25.00m
-            }
-        };
-
-        ApplyFilters();
+        // Fire-and-forget load on construction
+        _ = LoadOrdersAsync();
     }
 
-    partial void OnSearchTextChanged(string value) => ApplyFilters();
-    partial void OnSelectedStatusFilterChanged(string value) => ApplyFilters();
-    partial void OnCurrentPageChanged(int value) => ApplyFilters();
-    partial void OnPageSizeChanged(int value) { CurrentPage = 1; ApplyFilters(); }
-    partial void OnFromDateChanged(DateTimeOffset? value) => ApplyFilters();
-    partial void OnToDateChanged(DateTimeOffset? value) => ApplyFilters();
+    /// <summary>
+    /// Fetches orders from backend with server-side filters and pagination.
+    /// </summary>
+    public async Task LoadOrdersAsync()
+    {
+        // Prevent re-entrant calls (filter changes can cascade)
+        if (_isLoadingInProgress) return;
+        _isLoadingInProgress = true;
+
+        App.RunOnUIThread(() =>
+        {
+            IsLoading = true;
+            ErrorMessage = null;
+        });
+
+        try
+        {
+            Console.Error.WriteLine("[OrderListVM] Loading orders...");
+
+            // Build server-side filter params
+            string? statusFilter = (SelectedStatusFilter != "All Status")
+                ? SelectedStatusFilter
+                : null;
+
+            string? startDate = FromDate?.UtcDateTime.ToString("o");
+            string? endDate = ToDate?.UtcDateTime.Date.AddDays(1).AddTicks(-1).ToString("o");
+
+            var (orders, total, totalPages) = await _orderService.GetOrdersAsync(
+                page: CurrentPage,
+                limit: PageSize,
+                statusFilter: statusFilter,
+                startDate: startDate,
+                endDate: endDate,
+                sortField: "CREATED_TIME",
+                sortOrder: "DESC"
+            );
+
+            Console.Error.WriteLine($"[OrderListVM] Got {orders.Count} orders (total: {total})");
+
+            _allOrders = orders;
+
+            // Build new page options list
+            var newPageOptions = new ObservableCollection<int>();
+            var newTotalPages = Math.Max(1, totalPages);
+            for (int i = 1; i <= newTotalPages; i++)
+                newPageOptions.Add(i);
+
+            // Assign on UI thread
+            App.RunOnUIThread(() =>
+            {
+                TotalPages = newTotalPages;
+                PageOptions = newPageOptions;
+            });
+
+            // Client-side search only (backend has no full-text search for orders)
+            ApplyClientSearch();
+        }
+        catch (GraphqlException ex)
+        {
+            Console.Error.WriteLine($"[OrderListVM] GraphQL error: {ex.Message}");
+            App.RunOnUIThread(() => ErrorMessage = ex.Message);
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.Error.WriteLine($"[OrderListVM] HTTP error: {ex.Message}");
+            App.RunOnUIThread(() => ErrorMessage = "Cannot connect to server. Check your connection.");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[OrderListVM] Error: {ex.GetType().Name}: {ex.Message}");
+            App.RunOnUIThread(() => ErrorMessage = $"Failed to load orders: {ex.Message}");
+        }
+        finally
+        {
+            App.RunOnUIThread(() => IsLoading = false);
+            _isLoadingInProgress = false;
+        }
+    }
+
+    // Status/date filter changes → reload from backend (reset to page 1)
+    partial void OnSelectedStatusFilterChanged(string value) { CurrentPage = 1; _ = LoadOrdersAsync(); }
+    partial void OnFromDateChanged(DateTimeOffset? value) { CurrentPage = 1; _ = LoadOrdersAsync(); }
+    partial void OnToDateChanged(DateTimeOffset? value) { CurrentPage = 1; _ = LoadOrdersAsync(); }
+
+    // Pagination changes → reload from backend
+    partial void OnCurrentPageChanged(int value) => _ = LoadOrdersAsync();
+    partial void OnPageSizeChanged(int value) { CurrentPage = 1; _ = LoadOrdersAsync(); }
+
+    // Search text → client-side only (no backend full-text search for orders)
+    partial void OnSearchTextChanged(string value) => ApplyClientSearch();
 
     [RelayCommand]
     private void GoToPage(int page)
@@ -201,17 +183,42 @@ public partial class OrderListViewModel : ObservableObject
             CurrentPage++;
     }
 
-    public void DeleteOrder(OrderItem order)
+    /// <summary>
+    /// Deletes an order via the backend (soft delete) and refreshes the list.
+    /// </summary>
+    public async Task<bool> DeleteOrderAsync(OrderItem order)
     {
-        _allOrders.Remove(order);
-        ApplyFilters();
+        try
+        {
+            var rawId = order.Id.TrimStart('#');
+            await _orderService.DeleteOrderAsync(rawId);
+            await LoadOrdersAsync(); // Refresh from server
+            return true;
+        }
+        catch (GraphqlException ex)
+        {
+            ErrorMessage = ex.Message;
+            return false;
+        }
+        catch (HttpRequestException)
+        {
+            ErrorMessage = "Cannot connect to server.";
+            return false;
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Failed to delete order: {ex.Message}";
+            return false;
+        }
     }
 
-    private void ApplyFilters()
+    /// <summary>
+    /// Client-side search within the already-fetched page of orders.
+    /// </summary>
+    private void ApplyClientSearch()
     {
         var query = _allOrders.AsEnumerable();
 
-        // Search filter
         if (!string.IsNullOrWhiteSpace(SearchText))
         {
             var search = SearchText.Trim().ToLowerInvariant();
@@ -221,38 +228,16 @@ public partial class OrderListViewModel : ObservableObject
                 o.Amount.ToLowerInvariant().Contains(search));
         }
 
-        // Status filter
-        if (!string.IsNullOrEmpty(SelectedStatusFilter) && SelectedStatusFilter != "All Status")
-        {
-            query = query.Where(o => o.Status == SelectedStatusFilter);
-        }
-
-        var filtered = query.ToList();
-        TotalPages = Math.Max(1, (int)Math.Ceiling(filtered.Count / (double)PageSize));
-
-        // Rebuild page options for ComboBox
-        PageOptions.Clear();
-        for (int i = 1; i <= TotalPages; i++)
-            PageOptions.Add(i);
-
-        if (CurrentPage > TotalPages)
-            CurrentPage = TotalPages;
-
-        var paged = filtered
-            .Skip((CurrentPage - 1) * PageSize)
-            .Take(PageSize)
-            .ToList();
-
-        FilteredOrders.Clear();
-        foreach (var item in paged)
-        {
-            FilteredOrders.Add(item);
-        }
+        var items = new ObservableCollection<OrderItem>(query);
+        App.RunOnUIThread(() => FilteredOrders = items);
     }
 }
 
 public partial class OrderProductItem : ObservableObject
 {
+    [ObservableProperty]
+    private string _productId = "";
+
     [ObservableProperty]
     private string _productName = "";
 
@@ -264,17 +249,29 @@ public partial class OrderProductItem : ObservableObject
 
     public decimal Total => Quantity * UnitPrice;
 
-    public string UnitPriceFormatted => $"${UnitPrice:N2}";
-    public string TotalFormatted => $"${Total:N2}";
+    public string UnitPriceFormatted => $"{UnitPrice:N0} ₫";
+    public string TotalFormatted => $"{Total:N0} ₫";
 
-    partial void OnQuantityChanged(int value) => OnPropertyChanged(nameof(Total));
-    partial void OnUnitPriceChanged(decimal value) => OnPropertyChanged(nameof(Total));
+    partial void OnQuantityChanged(int value)
+    {
+        OnPropertyChanged(nameof(Total));
+        OnPropertyChanged(nameof(TotalFormatted));
+    }
+
+    partial void OnUnitPriceChanged(decimal value)
+    {
+        OnPropertyChanged(nameof(Total));
+        OnPropertyChanged(nameof(UnitPriceFormatted));
+        OnPropertyChanged(nameof(TotalFormatted));
+    }
 }
 
 public partial class OrderItem : ObservableObject
 {
     [ObservableProperty]
     private string _id = "";
+    [ObservableProperty]
+    private string _customerId = "";
     [ObservableProperty]
     private string _date = "";
     [ObservableProperty]
@@ -297,36 +294,31 @@ public partial class OrderItem : ObservableObject
 
     public decimal Subtotal => Products?.Sum(p => p.Total) ?? 0m;
     public decimal TotalAmount => Subtotal + ShippingFee;
-    public string SubtotalFormatted => $"${Subtotal:N2}";
-    public string ShippingFeeFormatted => $"${ShippingFee:N2}";
-    public string TotalAmountFormatted => $"${TotalAmount:N2}";
+    public string SubtotalFormatted => $"{Subtotal:N0} ₫";
+    public string ShippingFeeFormatted => $"{ShippingFee:N0} ₫";
+    public string TotalAmountFormatted => $"{TotalAmount:N0} ₫";
 
     public SolidColorBrush StatusBgBrush => GetStatusBrush("Bg");
     public SolidColorBrush StatusFgBrush => GetStatusBrush("Fg");
     public SolidColorBrush StatusBorderBrush => GetStatusBrush("Border");
 
     /// <summary>
-    /// Returns the prominent accent color for dot+text display.
-    /// For filled badges (Processing, Pending) → BgBrush.
-    /// For outlined badges (Shipped, Delivered, Cancelled) → FgBrush.
+    /// Returns the prominent accent color for dot+text display in detail view.
+    /// All statuses now use outline style → FgBrush is the accent color.
     /// </summary>
-    public SolidColorBrush StatusAccentBrush => Status switch
-    {
-        "Processing" => GetStatusBrush("Bg"),
-        "Pending" => GetStatusBrush("Bg"),
-        _ => GetStatusBrush("Fg")
-    };
+    public SolidColorBrush StatusAccentBrush => GetStatusBrush("Fg");
 
     private SolidColorBrush GetStatusBrush(string part)
     {
         var key = Status switch
         {
-            "Processing" => $"StatusProcessingBrush",
-            "Shipped" => $"StatusShippedBrush",
-            "Delivered" => $"StatusDeliveredBrush",
-            "Pending" => $"StatusPendingBrush",
-            "Cancelled" => $"StatusCancelledBrush",
-            _ => $"StatusShippedBrush"
+            "Created" => "StatusCreatedBrush",
+            "Processing" => "StatusProcessingBrush",
+            "Shipped" => "StatusShippedBrush",
+            "Delivered" => "StatusDeliveredBrush",
+            "Pending" => "StatusPendingBrush",
+            "Cancelled" => "StatusCancelledBrush",
+            _ => "StatusShippedBrush"
         };
 
         // Replace "Brush" with the correct part
@@ -345,5 +337,6 @@ public partial class OrderItem : ObservableObject
         OnPropertyChanged(nameof(StatusBgBrush));
         OnPropertyChanged(nameof(StatusFgBrush));
         OnPropertyChanged(nameof(StatusBorderBrush));
+        OnPropertyChanged(nameof(StatusAccentBrush));
     }
 }

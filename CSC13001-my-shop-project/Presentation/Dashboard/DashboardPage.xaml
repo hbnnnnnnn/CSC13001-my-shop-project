@@ -412,7 +412,7 @@
                                         Foreground="{StaticResource ShellTextStrongBrush}"
                                     />
                                     <TextBlock
-                                        Text="Sales revenue by day — March 2026"
+                                        Text="{Binding ChartSubtitle}"
                                         FontSize="13"
                                         Foreground="#FF9CA3AF"
                                     />
@@ -426,7 +426,7 @@
                                     VerticalAlignment="Center"
                                 >
                                     <TextBlock
-                                        Text="Daily"
+                                        Text="{Binding ChartPeriodLabel}"
                                         FontSize="12"
                                         FontWeight="SemiBold"
                                         Foreground="White"
@@ -435,17 +435,14 @@
                             </Grid>
 
                             <!--
-                                Area Chart  (Canvas 880x270 inside Viewbox)
-                                Plot area  : x=52..876, y=12..220  (824x208 px)
-                                Y-mapping  : $0=220  $2k=168  $4k=116  $6k=64  $8k=12
-                                X-mapping  : day D -> x = (D-1)*27.6 + 52  (~27.6px/day)
-                                X-labels   : Mar 1, Mar 5, Mar 9, Mar 13, Mar 17, Mar 21, Mar 25, Mar 29
+                                Area Chart (Canvas 880x270 inside Viewbox)
+                                Chart content is drawn dynamically by code-behind (RedrawChart)
                             -->
                             <Viewbox
                                 Stretch="Fill"
                                 Height="270"
                                 HorizontalAlignment="Stretch"
-                                Margin="0,0,0,8"
+                                Margin="24,0,24,8"
                             >
                                 <Canvas
                                     x:Name="ChartCanvas"
@@ -455,100 +452,7 @@
                                     PointerMoved="Chart_PointerMoved"
                                     PointerExited="Chart_PointerExited"
                                 >
-                                    <!-- Horizontal grid lines -->
-                                    <Line
-                                        X1="52"
-                                        Y1="12"
-                                        X2="876"
-                                        Y2="12"
-                                        Stroke="#10000000"
-                                        StrokeThickness="1"
-                                    />
-                                    <Line
-                                        X1="52"
-                                        Y1="64"
-                                        X2="876"
-                                        Y2="64"
-                                        Stroke="#10000000"
-                                        StrokeThickness="1"
-                                    />
-                                    <Line
-                                        X1="52"
-                                        Y1="116"
-                                        X2="876"
-                                        Y2="116"
-                                        Stroke="#10000000"
-                                        StrokeThickness="1"
-                                    />
-                                    <Line
-                                        X1="52"
-                                        Y1="168"
-                                        X2="876"
-                                        Y2="168"
-                                        Stroke="#10000000"
-                                        StrokeThickness="1"
-                                    />
-                                    <Line
-                                        X1="52"
-                                        Y1="220"
-                                        X2="876"
-                                        Y2="220"
-                                        Stroke="#22000000"
-                                        StrokeThickness="1"
-                                    />
-
-                                    <!-- Y-axis labels -->
-                                    <TextBlock
-                                        Canvas.Left="4"
-                                        Canvas.Top="4"
-                                        Text="$8k"
-                                        FontSize="11"
-                                        Foreground="#FF9CA3AF"
-                                    />
-                                    <TextBlock
-                                        Canvas.Left="4"
-                                        Canvas.Top="56"
-                                        Text="$6k"
-                                        FontSize="11"
-                                        Foreground="#FF9CA3AF"
-                                    />
-                                    <TextBlock
-                                        Canvas.Left="4"
-                                        Canvas.Top="108"
-                                        Text="$4k"
-                                        FontSize="11"
-                                        Foreground="#FF9CA3AF"
-                                    />
-                                    <TextBlock
-                                        Canvas.Left="4"
-                                        Canvas.Top="160"
-                                        Text="$2k"
-                                        FontSize="11"
-                                        Foreground="#FF9CA3AF"
-                                    />
-                                    <TextBlock
-                                        Canvas.Left="4"
-                                        Canvas.Top="212"
-                                        Text="$0"
-                                        FontSize="11"
-                                        Foreground="#FF9CA3AF"
-                                    />
-
-                                    <!-- Area fill (closes at baseline y=220) -->
-                                    <Polygon
-                                        Points="52,158 79,130 106,108 133,80 160,46 187,64 214,96 241,116 268,136 295,86 322,56 349,86 376,124 403,104 430,124 457,148 484,112 511,78 538,96 565,68 592,44 619,72 646,108 673,88 700,116 727,104 754,128 781,148 808,136 835,158 862,140 876,152 876,220 52,220"
-                                        Fill="{StaticResource ChartAreaFillBrush}"
-                                    />
-
-                                    <!-- Chart line -->
-                                    <Polyline
-                                        Points="52,158 79,130 106,108 133,80 160,46 187,64 214,96 241,116 268,136 295,86 322,56 349,86 376,124 403,104 430,124 457,148 484,112 511,78 538,96 565,68 592,44 619,72 646,108 673,88 700,116 727,104 754,128 781,148 808,136 835,158 862,140"
-                                        Stroke="{StaticResource ShellAccentBrush}"
-                                        StrokeThickness="2.5"
-                                        StrokeLineJoin="Round"
-                                    />
-
-                                    <!-- ── Interactive hover elements (controlled from code-behind) ── -->
+                                    <!-- Interactive hover elements (managed by code-behind) -->
                                     <Ellipse
                                         x:Name="ChartHoverDotOuter"
                                         Canvas.Left="0"
@@ -584,69 +488,12 @@
                                             TextAlignment="Center"
                                         />
                                     </Border>
-
-                                    <!-- X-axis labels (every 4 days) -->
-                                    <TextBlock
-                                        Canvas.Left="38"
-                                        Canvas.Top="228"
-                                        Text="Mar 1"
-                                        FontSize="11"
-                                        Foreground="#FF9CA3AF"
-                                    />
-                                    <TextBlock
-                                        Canvas.Left="148"
-                                        Canvas.Top="228"
-                                        Text="Mar 5"
-                                        FontSize="11"
-                                        Foreground="#FF9CA3AF"
-                                    />
-                                    <TextBlock
-                                        Canvas.Left="258"
-                                        Canvas.Top="228"
-                                        Text="Mar 9"
-                                        FontSize="11"
-                                        Foreground="#FF9CA3AF"
-                                    />
-                                    <TextBlock
-                                        Canvas.Left="365"
-                                        Canvas.Top="228"
-                                        Text="Mar 13"
-                                        FontSize="11"
-                                        Foreground="#FF9CA3AF"
-                                    />
-                                    <TextBlock
-                                        Canvas.Left="475"
-                                        Canvas.Top="228"
-                                        Text="Mar 17"
-                                        FontSize="11"
-                                        Foreground="#FF9CA3AF"
-                                    />
-                                    <TextBlock
-                                        Canvas.Left="582"
-                                        Canvas.Top="228"
-                                        Text="Mar 21"
-                                        FontSize="11"
-                                        Foreground="#FF9CA3AF"
-                                    />
-                                    <TextBlock
-                                        Canvas.Left="692"
-                                        Canvas.Top="228"
-                                        Text="Mar 25"
-                                        FontSize="11"
-                                        Foreground="#FF9CA3AF"
-                                    />
-                                    <TextBlock
-                                        Canvas.Left="800"
-                                        Canvas.Top="228"
-                                        Text="Mar 29"
-                                        FontSize="11"
-                                        Foreground="#FF9CA3AF"
-                                    />
                                 </Canvas>
                             </Viewbox>
                         </StackPanel>
                     </Border>
                     <!-- end Daily Sales Chart -->
+
 
                     <!-- Recent Orders Card -->
                     <Border
@@ -728,7 +575,8 @@
                                         <Border
                                             BorderBrush="{StaticResource ShellBorderBrush}"
                                             BorderThickness="0,0,0,1"
-                                            Padding="0,12"
+                                            CornerRadius="8"
+                                            Padding="8,12"
                                             PointerEntered="RowBorder_PointerEntered"
                                             PointerExited="RowBorder_PointerExited"
                                         >
@@ -840,7 +688,8 @@
                                         <Border
                                             BorderBrush="{StaticResource ShellBorderBrush}"
                                             BorderThickness="0,0,0,1"
-                                            Padding="0,14"
+                                            CornerRadius="8"
+                                            Padding="8,14"
                                             PointerEntered="RowBorder_PointerEntered"
                                             PointerExited="RowBorder_PointerExited"
                                         >
@@ -947,7 +796,8 @@
                                     <Border
                                         BorderBrush="{StaticResource ShellBorderBrush}"
                                         BorderThickness="0,0,0,1"
-                                        Padding="0,10"
+                                        CornerRadius="8"
+                                        Padding="8,10"
                                         PointerEntered="RowBorder_PointerEntered"
                                         PointerExited="RowBorder_PointerExited"
                                     >

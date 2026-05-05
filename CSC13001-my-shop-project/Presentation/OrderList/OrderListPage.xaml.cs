@@ -1,3 +1,4 @@
+using CSC13001_my_shop_project.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -23,29 +24,84 @@ public sealed partial class OrderListPage : Page
             {
                 SetDateLabel(FromDateText, vm.FromDate, FromDatePlaceholder);
                 SetDateLabel(ToDateText, vm.ToDate, ToDatePlaceholder);
+
+                // Reload orders every time user navigates to this tab
+                _ = vm.LoadOrdersAsync();
             }
         };
     }
 
+    /// <summary>
+    /// Resolves a service from the DI container.
+    /// </summary>
+    private T? GetService<T>() where T : class
+        => App.AppHost?.Services.GetService<T>();
+
     private async void NewOrderButton_Click(object sender, RoutedEventArgs e)
     {
+        var orderService = GetService<OrderService>();
+        var authService = GetService<AuthService>();
+        if (orderService is null || authService is null) return;
+
         var dialog = new CreateOrderDialog
         {
             XamlRoot = this.XamlRoot,
-            DataContext = new CreateOrderViewModel()
+            DataContext = new CreateOrderViewModel(orderService, authService)
         };
 
-        await dialog.ShowAsync();
+        // Show dialog (fire-and-forget internally)
+        _ = dialog.ShowAsync();
+
+        // Wait for the dialog to signal completion
+        var success = await dialog.WaitForResultAsync();
+
+        if (success)
+        {
+            // Show success notification
+            var successDialog = new ContentDialog
+            {
+                XamlRoot = this.XamlRoot,
+                Title = "Success",
+                Content = "Order has been created successfully!",
+                CloseButtonText = "OK"
+            };
+            await successDialog.ShowAsync();
+
+            // Refresh order list immediately
+            if (DataContext is OrderListViewModel vm)
+            {
+                await vm.LoadOrdersAsync();
+            }
+        }
     }
 
     private async void ViewOrder_Click(object sender, RoutedEventArgs e)
     {
         if (sender is MenuFlyoutItem item && item.DataContext is OrderItem order)
         {
+            var orderService = GetService<OrderService>();
+
+            // Fetch full order details (with product names) from backend
+            OrderItem detailedOrder = order;
+            if (orderService is not null)
+            {
+                try
+                {
+                    // Extract numeric ID from "#123" format
+                    var rawId = order.Id.TrimStart('#');
+                    detailedOrder = await orderService.GetOrderByIdAsync(rawId);
+                }
+                catch
+                {
+                    // Fallback to the list data if detail fetch fails
+                    detailedOrder = order;
+                }
+            }
+
             var dialog = new OrderDetailDialog
             {
                 XamlRoot = this.XamlRoot,
-                DataContext = new OrderDetailViewModel(order)
+                DataContext = new OrderDetailViewModel(detailedOrder)
             };
 
             await dialog.ShowAsync();
@@ -56,13 +112,49 @@ public sealed partial class OrderListPage : Page
     {
         if (sender is MenuFlyoutItem item && item.DataContext is OrderItem order)
         {
+            var orderService = GetService<OrderService>();
+            var authService = GetService<AuthService>();
+            if (orderService is null || authService is null) return;
+
+            // Fetch full details for edit
+            OrderItem detailedOrder = order;
+            try
+            {
+                var rawId = order.Id.TrimStart('#');
+                detailedOrder = await orderService.GetOrderByIdAsync(rawId);
+            }
+            catch
+            {
+                detailedOrder = order;
+            }
+
             var dialog = new CreateOrderDialog
             {
                 XamlRoot = this.XamlRoot,
-                DataContext = new CreateOrderViewModel(order)
+                DataContext = new CreateOrderViewModel(detailedOrder, orderService, authService)
             };
 
-            await dialog.ShowAsync();
+            // Show dialog and wait for result
+            _ = dialog.ShowAsync();
+            var success = await dialog.WaitForResultAsync();
+
+            if (success)
+            {
+                var successDialog = new ContentDialog
+                {
+                    XamlRoot = this.XamlRoot,
+                    Title = "Success",
+                    Content = "Order has been updated successfully!",
+                    CloseButtonText = "OK"
+                };
+                await successDialog.ShowAsync();
+
+                // Refresh order list
+                if (DataContext is OrderListViewModel vm)
+                {
+                    await vm.LoadOrdersAsync();
+                }
+            }
         }
     }
 
@@ -91,20 +183,35 @@ public sealed partial class OrderListPage : Page
 
             if (confirmDialog.IsConfirmed)
             {
-                // Delete the order from ViewModel
                 if (DataContext is OrderListViewModel vm)
                 {
-                    vm.DeleteOrder(order);
+                    // Call backend soft-delete
+                    var deleted = await vm.DeleteOrderAsync(order);
+
+                    if (deleted)
+                    {
+                        // Show success dialog
+                        var successDialog = new DeleteSuccessDialog
+                        {
+                            XamlRoot = this.XamlRoot
+                        };
+                        successDialog.SetOrderId(order.Id);
+                        await successDialog.ShowAsync();
+                    }
+                    else if (!string.IsNullOrEmpty(vm.ErrorMessage))
+                    {
+                        // Show error dialog (e.g., cannot delete shipped/delivered order)
+                        var errorDialog = new ContentDialog
+                        {
+                            XamlRoot = this.XamlRoot,
+                            Title = "Cannot Delete Order",
+                            Content = vm.ErrorMessage,
+                            CloseButtonText = "OK"
+                        };
+                        await errorDialog.ShowAsync();
+                        vm.ErrorMessage = null;
+                    }
                 }
-
-                // Show success dialog
-                var successDialog = new DeleteSuccessDialog
-                {
-                    XamlRoot = this.XamlRoot
-                };
-                successDialog.SetOrderId(order.Id);
-
-                await successDialog.ShowAsync();
             }
         }
         catch (System.Exception ex)

@@ -56,8 +56,7 @@
                 x:Key="SystemColorControlAccentBrush"
                 Color="{StaticResource BrandColor}"
             />
-            <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="Red" />
-            <SolidColorBrush x:Key="SystemColorControlAccentBrush" Color="Red" />
+
 
             <SolidColorBrush
                 x:Key="ShellBackgroundBrush"
@@ -98,26 +97,30 @@
             <SolidColorBrush x:Key="ShellSearchBackgroundBrush" Color="#80F5EDE4" />
 
             <!-- Order Status Badge Brushes -->
-            <!-- Processing: amber filled -->
-            <SolidColorBrush x:Key="StatusProcessingBgBrush" Color="#F3B55C" />
-            <SolidColorBrush x:Key="StatusProcessingFgBrush" Color="White" />
-            <SolidColorBrush x:Key="StatusProcessingBorderBrush" Color="#F3B55C" />
-            <!-- Shipped: neutral outline -->
-            <SolidColorBrush x:Key="StatusShippedBgBrush" Color="#FAF7F2" />
-            <SolidColorBrush x:Key="StatusShippedFgBrush" Color="#2C2118" />
-            <SolidColorBrush x:Key="StatusShippedBorderBrush" Color="#F5EDE4" />
-            <!-- Delivered: green -->
+            <!-- Created: smoky grey -->
+            <SolidColorBrush x:Key="StatusCreatedBgBrush" Color="#F3F4F6" />
+            <SolidColorBrush x:Key="StatusCreatedFgBrush" Color="#6B7280" />
+            <SolidColorBrush x:Key="StatusCreatedBorderBrush" Color="#E5E7EB" />
+            <!-- Processing: blue outline (matches dashboard) -->
+            <SolidColorBrush x:Key="StatusProcessingBgBrush" Color="#EFF6FF" />
+            <SolidColorBrush x:Key="StatusProcessingFgBrush" Color="#155DFC" />
+            <SolidColorBrush x:Key="StatusProcessingBorderBrush" Color="#DBEAFE" />
+            <!-- Shipped: amber/gold outline (matches dashboard) -->
+            <SolidColorBrush x:Key="StatusShippedBgBrush" Color="#1AF3B55C" />
+            <SolidColorBrush x:Key="StatusShippedFgBrush" Color="#F3B55C" />
+            <SolidColorBrush x:Key="StatusShippedBorderBrush" Color="#33F3B55C" />
+            <!-- Delivered: green outline (matches dashboard) -->
             <SolidColorBrush x:Key="StatusDeliveredBgBrush" Color="#ECFDF5" />
             <SolidColorBrush x:Key="StatusDeliveredFgBrush" Color="#009966" />
             <SolidColorBrush x:Key="StatusDeliveredBorderBrush" Color="#D0FAE5" />
-            <!-- Pending: red-orange filled -->
-            <SolidColorBrush x:Key="StatusPendingBgBrush" Color="#E07A5F" />
-            <SolidColorBrush x:Key="StatusPendingFgBrush" Color="White" />
-            <SolidColorBrush x:Key="StatusPendingBorderBrush" Color="#E07A5F" />
-            <!-- Cancelled: grey -->
-            <SolidColorBrush x:Key="StatusCancelledBgBrush" Color="#F9FAFB" />
-            <SolidColorBrush x:Key="StatusCancelledFgBrush" Color="#99A1AF" />
-            <SolidColorBrush x:Key="StatusCancelledBorderBrush" Color="#F3F4F6" />
+            <!-- Pending: orange (brand color) -->
+            <SolidColorBrush x:Key="StatusPendingBgBrush" Color="#FFF7ED" />
+            <SolidColorBrush x:Key="StatusPendingFgBrush" Color="#E8893C" />
+            <SolidColorBrush x:Key="StatusPendingBorderBrush" Color="#FFEDD5" />
+            <!-- Cancelled: red -->
+            <SolidColorBrush x:Key="StatusCancelledBgBrush" Color="#FEF2F2" />
+            <SolidColorBrush x:Key="StatusCancelledFgBrush" Color="#DC2626" />
+            <SolidColorBrush x:Key="StatusCancelledBorderBrush" Color="#FEE2E2" />
             <Style x:Key="ShellSearchTextBoxStyle" TargetType="TextBox">
                 <Setter Property="Background" Value="{StaticResource ShellSearchBackgroundBrush}" />
                 <Setter Property="BorderBrush" Value="Transparent" />

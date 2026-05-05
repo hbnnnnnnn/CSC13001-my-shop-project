@@ -156,6 +156,11 @@ public partial class App : Application
                             services.AddTransient<ProductDetailViewModel>();
                             services.AddTransient<ReportViewModel>();
                             services.AddSingleton<AppStateService>();
+
+                            // API services
+                            services.AddSingleton<GraphqlService>();
+                            services.AddSingleton<AuthService>();
+                            services.AddSingleton<OrderService>();
                         }
                     )
                     .UseNavigation(RegisterRoutes)
