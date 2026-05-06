@@ -98,18 +98,10 @@ public partial class ReportViewModel : ObservableObject
     [
         new Axis
         {
-            Name = "Revenue ($)",
+            Name = "Amount ($)",
             TextSize = AxisLabelTextSize,
             NameTextSize = AxisNameTextSize,
             Labeler = v => FormatCompactUsd((double)v),
-        },
-        new Axis
-        {
-            Name = "Units",
-            TextSize = AxisLabelTextSize,
-            NameTextSize = AxisNameTextSize,
-            Position = LiveChartsCore.Measure.AxisPosition.End,
-            Labeler = v => ((double)v).ToString("N0", CultureInfo.InvariantCulture),
         },
     ];
 
@@ -641,18 +633,10 @@ public partial class ReportViewModel : ObservableObject
             [
                 new Axis
                 {
-                    Name = "Revenue ($)",
+                    Name = "Amount ($)",
                     TextSize = AxisLabelTextSize,
                     NameTextSize = AxisNameTextSize,
                     Labeler = v => FormatCompactUsd((double)v),
-                },
-                new Axis
-                {
-                    Name = "Units",
-                    TextSize = AxisLabelTextSize,
-                    NameTextSize = AxisNameTextSize,
-                    Position = LiveChartsCore.Measure.AxisPosition.End,
-                    Labeler = v => ((double)v).ToString("N0", CultureInfo.InvariantCulture),
                 },
             ];
             OnPropertyChanged(nameof(RevenueXAxes));
@@ -662,7 +646,7 @@ public partial class ReportViewModel : ObservableObject
 
         var labels = ordered.Select(p => FormatBucketLabel(SelectedPeriodKey, p.Date, p.Period)).ToList();
         var rev = new ObservableCollection<double>(ordered.Select(p => (double)p.TotalRevenue));
-        var items = new ObservableCollection<double>(ordered.Select(p => (double)p.TotalItemsSold));
+        var profits = new ObservableCollection<double>(ordered.Select(p => (double)p.TotalProfit));
 
         RevenueColumnSeries = new ObservableCollection<ISeries>(
         [
@@ -677,9 +661,9 @@ public partial class ReportViewModel : ObservableObject
             },
             new ColumnSeries<double>
             {
-                Name = "Units",
-                Values = items,
-                ScalesYAt = 1,
+                Name = "Profit",
+                Values = profits,
+                ScalesYAt = 0,
                 Fill = new SolidColorPaint(SKColor.Parse("3B82F6")),
                 Stroke = new SolidColorPaint(SKColor.Parse("1D4ED8"), 1),
                 MaxBarWidth = 24,
@@ -703,19 +687,10 @@ public partial class ReportViewModel : ObservableObject
         [
             new Axis
             {
-                Name = "Revenue ($)",
+                Name = "Amount ($)",
                 TextSize = AxisLabelTextSize,
                 NameTextSize = AxisNameTextSize,
                 Labeler = v => FormatCompactUsd((double)v),
-                SeparatorsPaint = new SolidColorPaint(SKColor.Parse("334155")) { StrokeThickness = 0.5f },
-            },
-            new Axis
-            {
-                Name = "Units",
-                TextSize = AxisLabelTextSize,
-                NameTextSize = AxisNameTextSize,
-                Position = LiveChartsCore.Measure.AxisPosition.End,
-                Labeler = v => ((double)v).ToString("N0", CultureInfo.InvariantCulture),
                 SeparatorsPaint = new SolidColorPaint(SKColor.Parse("334155")) { StrokeThickness = 0.5f },
             },
         ];

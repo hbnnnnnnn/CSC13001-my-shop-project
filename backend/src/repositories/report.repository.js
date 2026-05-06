@@ -194,9 +194,11 @@ class ReportRepository {
                 SELECT
                     TO_CHAR(o.created_time, '${dateFormat}') AS period,
                     ${dateExpr} AS date,
-                    COALESCE(SUM(oi.quantity), 0) AS total_items_sold
+                    COALESCE(SUM(oi.quantity), 0) AS total_items_sold,
+                    COALESCE(SUM(oi.quantity * p.cost_price), 0) AS total_cost
                 FROM orders o
                 LEFT JOIN order_item oi ON o.order_id = oi.order_id
+                LEFT JOIN product p ON oi.product_id = p.product_id
                 ${whereClause}
                 GROUP BY ${groupByClause}
             )
@@ -205,6 +207,8 @@ class ReportRepository {
                 om.date,
                 COUNT(om.order_id) AS total_orders,
                 COALESCE(SUM(om.final_price), 0) AS total_revenue,
+                COALESCE(MAX(im.total_cost), 0) AS total_cost,
+                (COALESCE(SUM(om.final_price), 0) - COALESCE(MAX(im.total_cost), 0)) AS total_profit,
                 COALESCE(MAX(im.total_items_sold), 0) AS total_items_sold,
                 ROUND(AVG(om.final_price)::numeric, 2) AS avg_order_value
             FROM order_metrics om

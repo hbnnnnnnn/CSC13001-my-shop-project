@@ -669,6 +669,8 @@ query RevenueReport {
     totalRevenue
     totalItemsSold
     avgOrderValue
+    totalCost
+    totalProfit
   }
 }
 ```
@@ -751,3 +753,73 @@ Neu server bao loi schema conflict hoac field/type khong khop, ban can:
 7. Tạo order (status ban đầu là Created), sau đó updateOrderFull -> Status: `Delivered` (Vì báo cáo chỉ tính đơn hàng Delivered).
 8. Chạy các query report (Category Sales -> Product Breakdown -> Revenue -> Top Selling -> Overview) để show dashboard số liệu.
 9. Chạy query `me` và `logout` để kết thúc demo auth.
+
+## 10) Batch Test Orders (Để test Report và Biểu đồ)
+
+Dưới đây là danh sách các mutation để tạo nhanh nhiều đơn hàng khác nhau. Hãy chạy lần lượt từng block, sau đó chạy các lệnh Update Status để đơn hàng được tính vào Report (chỉ tính đơn `Delivered`).
+
+### 10.1 Tạo 3 đơn hàng mới
+```graphql
+mutation BatchCreateOrders {
+  order2: createOrder(
+    customer_id: "1"
+    account_id: "1"
+    shipping_address: "Address 2"
+    recipient_name: "Test User 2"
+    recipient_phone: "0900000002"
+    recipient_email: "test2@gmail.com"
+    items: [{ product_id: "2", quantity: 2 }]
+  ) { order_id status final_price }
+  
+  order3: createOrder(
+    customer_id: "1"
+    account_id: "1"
+    shipping_address: "Address 3"
+    recipient_name: "Test User 3"
+    recipient_phone: "0900000003"
+    recipient_email: "test3@gmail.com"
+    items: [{ product_id: "3", quantity: 1 }, { product_id: "4", quantity: 2 }]
+  ) { order_id status final_price }
+  
+  order4: createOrder(
+    customer_id: "1"
+    account_id: "1"
+    shipping_address: "Address 4"
+    recipient_name: "Test User 4"
+    recipient_phone: "0900000004"
+    recipient_email: "test4@gmail.com"
+    items: [{ product_id: "1", quantity: 1 }, { product_id: "4", quantity: 5 }]
+  ) { order_id status final_price }
+}
+```
+
+### 10.2 Chuyển tất cả sang Delivered (Thay ID tương ứng từ kết quả trên)
+*Lưu ý: Thay `id: "2"`, `"3"`, `"4"` bằng các ID thực tế bạn nhận được.*
+
+// update từ Created sang Processing, Shipped, Delivered (không update thẳng lên Delivered được)
+```graphql
+mutation SetOrdersToDelivered {
+  s1: updateOrderFull(id: "2", input: { status: "Processing" }) { order_id status }
+  s2: updateOrderFull(id: "2", input: { status: "Shipped" }) { order_id status }
+  s3: updateOrderFull(id: "2", input: { status: "Delivered" }) { order_id status }
+
+  s4: updateOrderFull(id: "3", input: { status: "Processing" }) { order_id status }
+  s5: updateOrderFull(id: "3", input: { status: "Shipped" }) { order_id status }
+  s6: updateOrderFull(id: "3", input: { status: "Delivered" }) { order_id status }
+
+  s7: updateOrderFull(id: "4", input: { status: "Processing" }) { order_id status }
+  s8: updateOrderFull(id: "4", input: { status: "Shipped" }) { order_id status }
+  s9: updateOrderFull(id: "4", input: { status: "Delivered" }) { order_id status }
+}
+```
+
+### 10.3 (Optional) SQL để "lùi ngày" đơn hàng (Để thấy biểu đồ cột đẹp hơn)
+Nếu bạn muốn thấy dữ liệu ở các tháng khác (Tháng 3, Tháng 4), hãy chạy lệnh này trong terminal (Powershell):
+
+```powershell
+# Chuyển đơn ID 2 về tháng 3, ID 3 về tháng 4
+docker exec myshop_db psql -U postgres -d myshop -c "UPDATE orders SET created_time = '2026-03-15 10:00:00' WHERE order_id = 2;"
+docker exec myshop_db psql -U postgres -d myshop -c "UPDATE orders SET created_time = '2026-04-20 15:30:00' WHERE order_id = 3;"
+```
+
+Sau khi chạy xong các bước trên, hãy bấm **Apply** trên UI của Report để thấy sự thay đổi.

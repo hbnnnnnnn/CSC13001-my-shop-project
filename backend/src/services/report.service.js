@@ -140,6 +140,8 @@ const getRevenueReport = async ({ period = 'day', startDate = null, endDate = nu
         date: normalizeReportDate(row.date),
         totalOrders: Number(row.total_orders ?? 0),
         totalRevenue: Number(row.total_revenue ?? 0),
+        totalCost: Number(row.total_cost ?? 0),
+        totalProfit: Number(row.total_profit ?? 0),
         totalItemsSold: Number(row.total_items_sold ?? 0),
         avgOrderValue: Number(row.avg_order_value ?? 0)
     }));

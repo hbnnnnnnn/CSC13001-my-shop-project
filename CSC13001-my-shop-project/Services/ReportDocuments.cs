@@ -52,6 +52,8 @@ internal static class ReportDocuments
             date
             totalOrders
             totalRevenue
+            totalCost
+            totalProfit
             totalItemsSold
             avgOrderValue
           }
