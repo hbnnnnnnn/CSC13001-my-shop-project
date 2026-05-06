@@ -56,8 +56,24 @@ const requireRole = (allowedRoles, resolverFunc) => {
     };
 };
 
+// Middleware dùng cho các route REST Express
+const restRoleMiddleware = (allowedRoles) => {
+    return async (req, res, next) => {
+        const { user } = await getUserFromToken(req);
+        if (!user) {
+            return res.status(401).json({ error: 'Unauthenticated: You are not logged in' });
+        }
+        if (!allowedRoles.includes(user.account_role)) {
+            return res.status(403).json({ error: 'Unauthorized: You do not have permission to access' });
+        }
+        req.user = user;
+        next();
+    };
+};
+
 module.exports = {
     getUserFromToken,
     requireAuth,
-    requireRole
+    requireRole,
+    restRoleMiddleware
 };
