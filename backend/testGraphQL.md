@@ -841,8 +841,8 @@ Dùng để thay đổi thông tin kết nối PostgreSQL từ Frontend.
   "host": "db",
   "port": 5432,
   "user": "postgres",
-  "password": "postgres",
-  "database": "myshop"
+  "password": "yourpassword", // đổi khi gọi config
+  "database": "test" // đổi khi gọi config
 }
 ```
 
