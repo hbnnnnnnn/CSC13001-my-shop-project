@@ -24,6 +24,7 @@ public partial class ReportViewModel : ObservableObject
     private const float AxisNameTextSize = 11f;
 
     private readonly IReportService _reportService;
+    private IReadOnlyList<CategorySalesPeriodDto> _cachedCategoryPeriods = [];
 
     public ReportViewModel(IReportService reportService)
     {
@@ -49,6 +50,11 @@ public partial class ReportViewModel : ObservableObject
     private string _selectedPeriodKey = "day";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsProductMode))]
+    [NotifyPropertyChangedFor(nameof(LineChartTitle))]
+    private string _selectedLineModeKey = "category";
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(StartDateDisplay))]
     private DateTimeOffset _startDate;
 
@@ -64,13 +70,16 @@ public partial class ReportViewModel : ObservableObject
     private bool _isBusy;
 
     [ObservableProperty]
+    private bool _isDrilldownBusy;
+
+    [ObservableProperty]
     private string? _errorMessage;
 
     [ObservableProperty]
-    private Axis[] _productQtyXAxes = [new Axis { LabelsRotation = -35, TextSize = AxisLabelTextSize }];
+    private Axis[] _salesLineXAxes = [new Axis { LabelsRotation = -35, TextSize = AxisLabelTextSize }];
 
     [ObservableProperty]
-    private Axis[] _productQtyYAxes =
+    private Axis[] _salesLineYAxes =
     [
         new Axis
         {
@@ -105,7 +114,7 @@ public partial class ReportViewModel : ObservableObject
     ];
 
     [ObservableProperty]
-    private ObservableCollection<ISeries> _productQuantitySeries = new();
+    private ObservableCollection<ISeries> _salesLineSeries = new();
 
     [ObservableProperty]
     private ObservableCollection<ISeries> _revenueColumnSeries = new();
@@ -117,7 +126,7 @@ public partial class ReportViewModel : ObservableObject
     private ObservableCollection<ISeries> _pieBucketRevenueSeries = new();
 
     [ObservableProperty]
-    private ObservableCollection<ChartLegendItemVm> _productQtyLegendItems = new();
+    private ObservableCollection<ChartLegendItemVm> _salesLineLegendItems = new();
 
     [ObservableProperty]
     private ObservableCollection<ChartLegendItemVm> _revenueLegendItems = new();
@@ -127,6 +136,13 @@ public partial class ReportViewModel : ObservableObject
 
     [ObservableProperty]
     private ObservableCollection<ChartLegendItemVm> _pieBucketLegendItems = new();
+
+    [ObservableProperty]
+    private ObservableCollection<CategoryOption> _categoryOptions = new();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(LineChartTitle))]
+    private string? _selectedCategoryId;
 
     [ObservableProperty]
     private string _overviewTotalOrders = "—";
@@ -146,12 +162,35 @@ public partial class ReportViewModel : ObservableObject
     [ObservableProperty]
     private string _overviewMinOrderValue = "—";
 
+    public string SelectedCategoryName =>
+        CategoryOptions.FirstOrDefault(c => c.Id == SelectedCategoryId)?.Name ?? "";
+
+    public bool IsProductMode => SelectedLineModeKey == "product";
+
+    public string LineChartTitle
+    {
+        get
+        {
+            if (SelectedLineModeKey == "category")
+                return "Units sold by category";
+            return string.IsNullOrWhiteSpace(SelectedCategoryName)
+                ? "Units sold by product"
+                : $"Units sold: {SelectedCategoryName}";
+        }
+    }
+
     public IReadOnlyList<ReportPeriodOption> PeriodOptions { get; } =
     [
         new() { Key = "day", Label = "Daily" },
         new() { Key = "week", Label = "Weekly" },
         new() { Key = "month", Label = "Monthly" },
         new() { Key = "year", Label = "Yearly" },
+    ];
+
+    public IReadOnlyList<ReportLineModeOption> LineModeOptions { get; } =
+    [
+        new() { Key = "category", Label = "Category" },
+        new() { Key = "product", Label = "Products" },
     ];
 
     [RelayCommand]
@@ -167,8 +206,9 @@ public partial class ReportViewModel : ObservableObject
                 .LoadReportsAsync(SelectedPeriodKey, start, end, TopSellingPieLimit)
                 .ConfigureAwait(true);
 
+            _cachedCategoryPeriods = bundle.CategorySales;
             ApplySalesOverview(bundle.SalesOverview);
-            BuildProductLineChart(bundle.ProductSales);
+            RenderLineChart();
             BuildRevenueColumns(bundle.Revenue);
             BuildPieTop(bundle.TopSelling);
             BuildPieBuckets(bundle.Revenue);
@@ -207,14 +247,17 @@ public partial class ReportViewModel : ObservableObject
 
     private void ClearCharts()
     {
-        ProductQuantitySeries = new ObservableCollection<ISeries>();
+        _cachedCategoryPeriods = [];
+        SalesLineSeries = new ObservableCollection<ISeries>();
         RevenueColumnSeries = new ObservableCollection<ISeries>();
         PieTopProductsSeries = new ObservableCollection<ISeries>();
         PieBucketRevenueSeries = new ObservableCollection<ISeries>();
-        ProductQtyLegendItems = new ObservableCollection<ChartLegendItemVm>();
+        SalesLineLegendItems = new ObservableCollection<ChartLegendItemVm>();
         RevenueLegendItems = new ObservableCollection<ChartLegendItemVm>();
         PieTopLegendItems = new ObservableCollection<ChartLegendItemVm>();
         PieBucketLegendItems = new ObservableCollection<ChartLegendItemVm>();
+        CategoryOptions = new ObservableCollection<CategoryOption>();
+        SelectedCategoryId = null;
         ClearOverviewKpis();
     }
 
@@ -247,15 +290,16 @@ public partial class ReportViewModel : ObservableObject
     private static ObservableCollection<ChartLegendItemVm> CreateLegendItems(IEnumerable<ISeries> series) =>
         new(series.Select(s => new ChartLegendItemVm(s)));
 
-    private void BuildProductLineChart(IReadOnlyList<ProductSalesPeriodDto> periods)
+    private void BuildCategoryLineChart(IReadOnlyList<CategorySalesPeriodDto> periods)
     {
         var ordered = periods.OrderBy(p => NormalizeSortKey(p.Date)).ToList();
         if (ordered.Count == 0)
         {
-            ProductQuantitySeries = new ObservableCollection<ISeries>();
-            ProductQtyLegendItems = new ObservableCollection<ChartLegendItemVm>();
-            ProductQtyXAxes = [new Axis { LabelsRotation = -35, TextSize = AxisLabelTextSize }];
-            ProductQtyYAxes =
+            SalesLineSeries = new ObservableCollection<ISeries>();
+            SalesLineLegendItems = new ObservableCollection<ChartLegendItemVm>();
+            CategoryOptions = new ObservableCollection<CategoryOption>();
+            SalesLineXAxes = [new Axis { LabelsRotation = -35, TextSize = AxisLabelTextSize }];
+            SalesLineYAxes =
             [
                 new Axis
                 {
@@ -265,8 +309,168 @@ public partial class ReportViewModel : ObservableObject
                     Labeler = v => ((double)v).ToString("N0", CultureInfo.InvariantCulture),
                 },
             ];
-            OnPropertyChanged(nameof(ProductQtyXAxes));
-            OnPropertyChanged(nameof(ProductQtyYAxes));
+            SelectedCategoryId = null;
+            OnPropertyChanged(nameof(SalesLineXAxes));
+            OnPropertyChanged(nameof(SalesLineYAxes));
+            OnPropertyChanged(nameof(SelectedCategoryName));
+            OnPropertyChanged(nameof(LineChartTitle));
+            return;
+        }
+
+        var labels = ordered.Select(p => FormatBucketLabel(SelectedPeriodKey, p.Date, p.Period)).ToList();
+        var dateKeys = ordered.Select(p => NormalizeDateKey(p.Date)).ToList();
+
+        var categoryTotals = new Dictionary<string, (string Name, int Qty)>(StringComparer.Ordinal);
+        foreach (var row in ordered)
+        {
+            foreach (var line in row.Categories)
+            {
+                if (string.IsNullOrWhiteSpace(line.CategoryId))
+                    continue;
+                if (!categoryTotals.TryGetValue(line.CategoryId, out var t))
+                    categoryTotals[line.CategoryId] = (ShortName(line.CategoryName, 20), line.Quantity);
+                else
+                    categoryTotals[line.CategoryId] = (t.Name, t.Qty + line.Quantity);
+            }
+        }
+
+        var orderedCategories = categoryTotals
+            .OrderByDescending(kv => kv.Value.Qty)
+            .Select(kv => (Id: kv.Key, Name: kv.Value.Name))
+            .ToList();
+
+        var indexByKey = dateKeys.Select((k, i) => (k, i)).ToDictionary(t => t.k, t => t.i);
+
+        var seriesList = new List<ISeries>();
+        var seriesIndex = 0;
+        foreach (var cat in orderedCategories)
+        {
+            var values = new ObservableCollection<double>();
+            for (var i = 0; i < dateKeys.Count; i++)
+                values.Add(0);
+
+            foreach (var row in ordered)
+            {
+                var key = NormalizeDateKey(row.Date);
+                if (!indexByKey.TryGetValue(key, out var idx))
+                    continue;
+                var line = row.Categories.FirstOrDefault(c => c.CategoryId == cat.Id);
+                if (line is not null)
+                    values[idx] += line.Quantity;
+            }
+
+            var color = Palette[seriesIndex % Palette.Length];
+            seriesIndex++;
+            seriesList.Add(
+                new LineSeries<double>
+                {
+                    Name = cat.Name,
+                    Values = values,
+                    GeometrySize = 6,
+                    LineSmoothness = 0.2,
+                    Stroke = new SolidColorPaint(color, 2),
+                    Fill = null,
+                    GeometryStroke = new SolidColorPaint(color, 2),
+                    GeometryFill = new SolidColorPaint(color),
+                }
+            );
+        }
+
+        SalesLineSeries = new ObservableCollection<ISeries>(seriesList);
+        SalesLineLegendItems = CreateLegendItems(seriesList);
+        CategoryOptions = new ObservableCollection<CategoryOption>(
+            orderedCategories.Select(c => new CategoryOption { Id = c.Id, Name = c.Name }));
+
+        if (!string.IsNullOrWhiteSpace(SelectedCategoryId) &&
+            CategoryOptions.Any(c => c.Id == SelectedCategoryId))
+        {
+            OnPropertyChanged(nameof(SelectedCategoryName));
+            OnPropertyChanged(nameof(LineChartTitle));
+        }
+        else
+        {
+            SelectedCategoryId = CategoryOptions.FirstOrDefault()?.Id;
+        }
+
+        SalesLineXAxes =
+        [
+            new Axis
+            {
+                Labels = labels,
+                LabelsRotation = -35,
+                TextSize = AxisLabelTextSize,
+                SeparatorsPaint = new SolidColorPaint(SKColor.Parse("334155")) { StrokeThickness = 0.5f },
+            },
+        ];
+        SalesLineYAxes =
+        [
+            new Axis
+            {
+                Name = "Unit",
+                TextSize = AxisLabelTextSize,
+                NameTextSize = AxisNameTextSize,
+                Labeler = v => ((double)v).ToString("N0", CultureInfo.InvariantCulture),
+                SeparatorsPaint = new SolidColorPaint(SKColor.Parse("334155")) { StrokeThickness = 0.5f },
+            },
+        ];
+        OnPropertyChanged(nameof(SalesLineXAxes));
+        OnPropertyChanged(nameof(SalesLineYAxes));
+    }
+
+    private async Task LoadCategoryBreakdownAsync()
+    {
+        if (string.IsNullOrWhiteSpace(SelectedCategoryId))
+        {
+            BuildProductLineChart([]);
+            return;
+        }
+
+        IsDrilldownBusy = true;
+        try
+        {
+            var start = StartDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var end = EndDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            var periods = await _reportService
+                .LoadProductSalesAsync(SelectedPeriodKey, start, end, SelectedCategoryId)
+                .ConfigureAwait(true);
+            BuildProductLineChart(periods);
+        }
+        catch (GraphQlException ex)
+        {
+            ErrorMessage = ex.Message;
+            BuildProductLineChart([]);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = ex.Message;
+            BuildProductLineChart([]);
+        }
+        finally
+        {
+            IsDrilldownBusy = false;
+        }
+    }
+
+    private void BuildProductLineChart(IReadOnlyList<ProductSalesPeriodDto> periods)
+    {
+        var ordered = periods.OrderBy(p => NormalizeSortKey(p.Date)).ToList();
+        if (ordered.Count == 0)
+        {
+            SalesLineSeries = new ObservableCollection<ISeries>();
+            SalesLineLegendItems = new ObservableCollection<ChartLegendItemVm>();
+            SalesLineXAxes = [new Axis { LabelsRotation = -35, TextSize = AxisLabelTextSize }];
+            SalesLineYAxes =
+            [
+                new Axis
+                {
+                    Name = "Unit",
+                    TextSize = AxisLabelTextSize,
+                    NameTextSize = AxisNameTextSize,
+                    Labeler = v => ((double)v).ToString("N0", CultureInfo.InvariantCulture),
+                },
+            ];
+            OnPropertyChanged(nameof(SalesLineXAxes));
+            OnPropertyChanged(nameof(SalesLineYAxes));
             return;
         }
 
@@ -360,10 +564,10 @@ public partial class ReportViewModel : ObservableObject
             );
         }
 
-        ProductQuantitySeries = new ObservableCollection<ISeries>(seriesList);
-        ProductQtyLegendItems = CreateLegendItems(seriesList);
+        SalesLineSeries = new ObservableCollection<ISeries>(seriesList);
+        SalesLineLegendItems = CreateLegendItems(seriesList);
 
-        ProductQtyXAxes =
+        SalesLineXAxes =
         [
             new Axis
             {
@@ -373,7 +577,7 @@ public partial class ReportViewModel : ObservableObject
                 SeparatorsPaint = new SolidColorPaint(SKColor.Parse("334155")) { StrokeThickness = 0.5f },
             },
         ];
-        ProductQtyYAxes =
+        SalesLineYAxes =
         [
             new Axis
             {
@@ -384,8 +588,45 @@ public partial class ReportViewModel : ObservableObject
                 SeparatorsPaint = new SolidColorPaint(SKColor.Parse("334155")) { StrokeThickness = 0.5f },
             },
         ];
-        OnPropertyChanged(nameof(ProductQtyXAxes));
-        OnPropertyChanged(nameof(ProductQtyYAxes));
+        OnPropertyChanged(nameof(SalesLineXAxes));
+        OnPropertyChanged(nameof(SalesLineYAxes));
+    }
+
+    partial void OnSelectedCategoryIdChanged(string? value)
+    {
+        OnPropertyChanged(nameof(SelectedCategoryName));
+        OnPropertyChanged(nameof(LineChartTitle));
+        if (IsProductMode)
+            _ = LoadCategoryBreakdownAsync();
+    }
+
+    partial void OnSelectedLineModeKeyChanged(string? value)
+    {
+        OnPropertyChanged(nameof(IsProductMode));
+        OnPropertyChanged(nameof(LineChartTitle));
+        RenderLineChart();
+    }
+
+    private void RenderLineChart()
+    {
+        if (SelectedLineModeKey == "product")
+        {
+            EnsureCategorySelection();
+            _ = LoadCategoryBreakdownAsync();
+        }
+        else
+        {
+            BuildCategoryLineChart(_cachedCategoryPeriods);
+        }
+    }
+
+    private void EnsureCategorySelection()
+    {
+        if (!string.IsNullOrWhiteSpace(SelectedCategoryId) &&
+            CategoryOptions.Any(c => c.Id == SelectedCategoryId))
+            return;
+
+        SelectedCategoryId = CategoryOptions.FirstOrDefault()?.Id;
     }
 
     private void BuildRevenueColumns(IReadOnlyList<RevenuePeriodDto> periods)
@@ -641,4 +882,18 @@ public sealed class ReportPeriodOption
     public string Key { get; init; } = "";
 
     public string Label { get; init; } = "";
+}
+
+public sealed class ReportLineModeOption
+{
+    public string Key { get; init; } = "";
+
+    public string Label { get; init; } = "";
+}
+
+public sealed class CategoryOption
+{
+    public string Id { get; init; } = "";
+
+    public string Name { get; init; } = "";
 }
