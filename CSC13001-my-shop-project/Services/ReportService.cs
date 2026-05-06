@@ -16,8 +16,8 @@ public sealed class ReportService(GraphQlClient gql) : IReportService
         var topVars = new { limit = topSellingLimit, startDate, endDate };
         var overviewVars = new { startDate, endDate };
 
-        var productTask = gql.ExecuteAsync<ProductSalesReportRoot>(
-            ReportDocuments.ProductSalesReport,
+        var categoryTask = gql.ExecuteAsync<CategorySalesReportRoot>(
+            ReportDocuments.CategorySalesReport,
             vars,
             cancellationToken);
         var revenueTask = gql.ExecuteAsync<RevenueReportRoot>(
@@ -33,18 +33,40 @@ public sealed class ReportService(GraphQlClient gql) : IReportService
             overviewVars,
             cancellationToken);
 
-        await Task.WhenAll(productTask, revenueTask, topTask, overviewTask).ConfigureAwait(false);
+        await Task.WhenAll(categoryTask, revenueTask, topTask, overviewTask).ConfigureAwait(false);
 
-        var productRoot = await productTask.ConfigureAwait(false);
+        var categoryRoot = await categoryTask.ConfigureAwait(false);
         var revenueRoot = await revenueTask.ConfigureAwait(false);
         var topRoot = await topTask.ConfigureAwait(false);
         var overviewRoot = await overviewTask.ConfigureAwait(false);
 
         return new ReportBundleDto(
-            productRoot?.ProductSalesReport ?? [],
+            categoryRoot?.CategorySalesReport ?? [],
             revenueRoot?.RevenueReport ?? [],
             topRoot?.TopSellingProductsReport ?? [],
             overviewRoot?.SalesOverview);
+    }
+
+    public async Task<IReadOnlyList<ProductSalesPeriodDto>> LoadProductSalesAsync(
+        string period,
+        string? startDate,
+        string? endDate,
+        string? categoryId,
+        CancellationToken cancellationToken = default)
+    {
+        var vars = new { period, startDate, endDate, categoryId };
+        var root = await gql.ExecuteAsync<ProductSalesReportRoot>(
+            ReportDocuments.ProductSalesReport,
+            vars,
+            cancellationToken).ConfigureAwait(false);
+
+        return root?.ProductSalesReport ?? [];
+    }
+
+    private sealed class CategorySalesReportRoot
+    {
+        [JsonPropertyName("categorySalesReport")]
+        public List<CategorySalesPeriodDto>? CategorySalesReport { get; set; }
     }
 
     private sealed class ProductSalesReportRoot

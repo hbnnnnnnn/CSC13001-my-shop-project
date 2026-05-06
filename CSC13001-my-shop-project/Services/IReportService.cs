@@ -10,10 +10,17 @@ public interface IReportService
         string? endDate,
         int topSellingLimit = 12,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<ProductSalesPeriodDto>> LoadProductSalesAsync(
+        string period,
+        string? startDate,
+        string? endDate,
+        string? categoryId,
+        CancellationToken cancellationToken = default);
 }
 
 public sealed record ReportBundleDto(
-    IReadOnlyList<ProductSalesPeriodDto> ProductSales,
+    IReadOnlyList<CategorySalesPeriodDto> CategorySales,
     IReadOnlyList<RevenuePeriodDto> Revenue,
     IReadOnlyList<TopSellingProductDto> TopSelling,
     SalesOverviewDto? SalesOverview);

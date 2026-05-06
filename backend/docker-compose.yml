@@ -36,7 +36,7 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./database/migrations/01_init_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
       - ./database/migrations/02_add_indexes.sql:/docker-entrypoint-initdb.d/02_add_indexes.sql
-      - ./database/migrations/03_add_cost_price.sql:/docker-entrypoint-initdb.d/03_add_cost_price.sql
+      - ./database/migrations/03_add_cost_price_to_products.sql:/docker-entrypoint-initdb.d/03_add_cost_price_to_products.sql
       - ./database/seeds/01_dummy_data.sql:/docker-entrypoint-initdb.d/04_seed.sql
       - ./database/seeds/02_update_cost_price.sql:/docker-entrypoint-initdb.d/05_update_cost_price.sql
     healthcheck:

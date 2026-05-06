@@ -19,18 +19,27 @@ WHERE order_id IN (
 );
 DELETE FROM orders WHERE shipping_address = 'REPORT_CHARTS_DEMO_SEED';
 DELETE FROM product WHERE sku LIKE 'RPTDEMO-%';
+DELETE FROM category WHERE name IN ('RPTDEMO Phones', 'RPTDEMO Laptops', 'RPTDEMO Accessories');
 DELETE FROM customer WHERE email = 'reportdemo.charts@local.test';
 
 DO $$
 DECLARE
     acc_id INTEGER;
-    cat_id INTEGER;
+    cat_phone INTEGER;
+    cat_laptop INTEGER;
+    cat_accessory INTEGER;
     cust_id INTEGER;
     p_phone INTEGER;
     p_laptop INTEGER;
     p_buds INTEGER;
     p_tab INTEGER;
     p_watch INTEGER;
+    prod_ids INTEGER[];
+    prod_prices INTEGER[];
+    i INTEGER;
+    idx INTEGER;
+    qty INTEGER;
+    price INTEGER;
     oid INTEGER;
     final INTEGER;
 BEGIN
@@ -39,10 +48,15 @@ BEGIN
         RAISE EXCEPTION 'Không có account. Chạy seeds/01_dummy_data.sql hoặc tạo ít nhất một ACCOUNT trước.';
     END IF;
 
-    SELECT category_id INTO cat_id FROM category ORDER BY category_id LIMIT 1;
-    IF cat_id IS NULL THEN
-        RAISE EXCEPTION 'Không có category. Chạy seeds/01_dummy_data.sql trước.';
-    END IF;
+    INSERT INTO category (name, description)
+    VALUES
+        ('RPTDEMO Phones', 'Seed category for report charts'),
+        ('RPTDEMO Laptops', 'Seed category for report charts'),
+        ('RPTDEMO Accessories', 'Seed category for report charts');
+
+    SELECT category_id INTO cat_phone FROM category WHERE name = 'RPTDEMO Phones' ORDER BY category_id LIMIT 1;
+    SELECT category_id INTO cat_laptop FROM category WHERE name = 'RPTDEMO Laptops' ORDER BY category_id LIMIT 1;
+    SELECT category_id INTO cat_accessory FROM category WHERE name = 'RPTDEMO Accessories' ORDER BY category_id LIMIT 1;
 
     INSERT INTO customer (name, phone, email, address)
     VALUES (
@@ -55,17 +69,20 @@ BEGIN
 
     INSERT INTO product (sku, name, price, stock, description, category_id)
     VALUES
-        ('RPTDEMO-PHONE', N'Điện thoại demo R1', 8000000, 200, N'Seed cho biểu đồ', cat_id),
-        ('RPTDEMO-LAPTOP', N'Laptop demo R2', 22000000, 80, N'Seed cho biểu đồ', cat_id),
-        ('RPTDEMO-BUDS', N'Tai nghe demo R3', 2000000, 300, N'Seed cho biểu đồ', cat_id),
-        ('RPTDEMO-TAB', N'Máy tính bảng R4', 12000000, 120, N'Seed cho biểu đồ', cat_id),
-        ('RPTDEMO-WATCH', N'Đồng hồ R5', 5000000, 150, N'Seed cho biểu đồ', cat_id);
+        ('RPTDEMO-PHONE', N'Điện thoại demo R1', 8000000, 200, N'Seed cho biểu đồ', cat_phone),
+        ('RPTDEMO-LAPTOP', N'Laptop demo R2', 22000000, 80, N'Seed cho biểu đồ', cat_laptop),
+        ('RPTDEMO-BUDS', N'Tai nghe demo R3', 2000000, 300, N'Seed cho biểu đồ', cat_accessory),
+        ('RPTDEMO-TAB', N'Máy tính bảng R4', 12000000, 120, N'Seed cho biểu đồ', cat_laptop),
+        ('RPTDEMO-WATCH', N'Đồng hồ R5', 5000000, 150, N'Seed cho biểu đồ', cat_accessory);
 
     SELECT product_id INTO p_phone FROM product WHERE sku = 'RPTDEMO-PHONE';
     SELECT product_id INTO p_laptop FROM product WHERE sku = 'RPTDEMO-LAPTOP';
     SELECT product_id INTO p_buds FROM product WHERE sku = 'RPTDEMO-BUDS';
     SELECT product_id INTO p_tab FROM product WHERE sku = 'RPTDEMO-TAB';
     SELECT product_id INTO p_watch FROM product WHERE sku = 'RPTDEMO-WATCH';
+
+    prod_ids := ARRAY[p_phone, p_laptop, p_buds, p_tab, p_watch];
+    prod_prices := ARRAY[8000000, 22000000, 2000000, 12000000, 5000000];
 
     -- Helper: tạo một đơn Delivered + dòng hàng, chỉnh created_time
     -- (final_price = tổng total_price của các dòng)
@@ -207,6 +224,26 @@ BEGIN
     UPDATE orders SET final_price = final WHERE order_id = oid;
     INSERT INTO order_item (order_id, product_id, quantity, unit_sale_price, total_price)
     VALUES (oid, p_phone, 6, 8000000, final);
+
+    -- thêm dữ liệu đều theo ngày để biểu đồ mượt hơn
+    FOR i IN 1..30 LOOP
+        idx := ((i - 1) % 5) + 1;
+        qty := ((i - 1) % 4) + 1;
+        price := prod_prices[idx];
+
+        INSERT INTO orders (
+            created_time, final_price, status, customer_id, account_id,
+            shipping_address, recipient_name, recipient_phone, recipient_email, is_deleted
+        ) VALUES (
+            timezone('utc', now()) - make_interval(days => i) - interval '3 hours', 0, 'Delivered', cust_id, acc_id,
+            'REPORT_CHARTS_DEMO_SEED', N'Khách Demo Báo cáo', '0900000000', 'reportdemo.charts@local.test', false
+        ) RETURNING order_id INTO oid;
+
+        final := qty * price;
+        UPDATE orders SET final_price = final WHERE order_id = oid;
+        INSERT INTO order_item (order_id, product_id, quantity, unit_sale_price, total_price)
+        VALUES (oid, prod_ids[idx], qty, price, final);
+    END LOOP;
 
 END $$;
 

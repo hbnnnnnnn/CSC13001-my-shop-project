@@ -380,11 +380,67 @@
             />
 
             <StackPanel Spacing="8">
-                <TextBlock
-                    Text="Product Unit Sold"
-                    FontSize="18"
-                    FontWeight="SemiBold"
-                    Foreground="{StaticResource ShellTextStrongBrush}"
+                <Grid ColumnSpacing="12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        Text="{Binding LineChartTitle}"
+                        FontSize="18"
+                        FontWeight="SemiBold"
+                        Foreground="{StaticResource ShellTextStrongBrush}"
+                    />
+                    <StackPanel
+                        Grid.Column="1"
+                        Orientation="Horizontal"
+                        Spacing="8"
+                        VerticalAlignment="Center"
+                    >
+                        <TextBlock
+                            Text="View"
+                            FontSize="12"
+                            Foreground="#FF6B7280"
+                            VerticalAlignment="Center"
+                        />
+                        <ComboBox
+                            ItemsSource="{Binding LineModeOptions}"
+                            DisplayMemberPath="Label"
+                            SelectedValuePath="Key"
+                            SelectedValue="{Binding SelectedLineModeKey, Mode=TwoWay}"
+                            MinWidth="140"
+                            Height="32"
+                            FontSize="13"
+                            Padding="10,0,8,0"
+                            VerticalContentAlignment="Center"
+                        />
+                        <TextBlock
+                            Text="Category"
+                            FontSize="12"
+                            Foreground="#FF6B7280"
+                            VerticalAlignment="Center"
+                            Visibility="{Binding IsProductMode, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        />
+                        <ComboBox
+                            ItemsSource="{Binding CategoryOptions}"
+                            DisplayMemberPath="Name"
+                            SelectedValuePath="Id"
+                            SelectedValue="{Binding SelectedCategoryId, Mode=TwoWay}"
+                            MinWidth="180"
+                            Height="32"
+                            FontSize="13"
+                            Padding="10,0,8,0"
+                            VerticalContentAlignment="Center"
+                            Visibility="{Binding IsProductMode, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        />
+                    </StackPanel>
+                </Grid>
+                <ProgressRing
+                    Width="28"
+                    Height="28"
+                    IsActive="{Binding IsDrilldownBusy}"
+                    HorizontalAlignment="Left"
+                    Visibility="{Binding IsDrilldownBusy, Converter={StaticResource BooleanToVisibilityConverter}}"
                 />
                 <Grid ColumnSpacing="12">
                     <Grid.ColumnDefinitions>
@@ -393,9 +449,9 @@
                     </Grid.ColumnDefinitions>
                     <lvc:CartesianChart
                         Grid.Column="0"
-                        Series="{Binding ProductQuantitySeries}"
-                        XAxes="{Binding ProductQtyXAxes}"
-                        YAxes="{Binding ProductQtyYAxes}"
+                        Series="{Binding SalesLineSeries}"
+                        XAxes="{Binding SalesLineXAxes}"
+                        YAxes="{Binding SalesLineYAxes}"
                         Height="320"
                         LegendPosition="Hidden"
                         TooltipTextSize="11"
@@ -409,7 +465,7 @@
                         <ScrollViewer MaxHeight="320" VerticalScrollBarVisibility="Auto">
                             <ItemsControl
                                 ItemTemplate="{StaticResource ChartSeriesLegendItemTemplate}"
-                                ItemsSource="{Binding ProductQtyLegendItems}"
+                                ItemsSource="{Binding SalesLineLegendItems}"
                             />
                         </ScrollViewer>
                     </Border>
