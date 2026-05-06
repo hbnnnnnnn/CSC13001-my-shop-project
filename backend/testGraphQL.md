@@ -823,3 +823,32 @@ docker exec myshop_db psql -U postgres -d myshop -c "UPDATE orders SET created_t
 ```
 
 Sau khi chạy xong các bước trên, hãy bấm **Apply** trên UI của Report để thấy sự thay đổi.
+
+## 11) Configuration (REST API)
+
+### 11.1 Cập nhật cấu hình Database (POST)
+
+Dùng để thay đổi thông tin kết nối PostgreSQL từ Frontend.
+
+**Yêu cầu:** Quyền `Admin` (cần Header `Authorization: Bearer <Admin_Token>`).
+
+- **Endpoint:** `http://localhost:4000/api/config/db`
+- **Method:** `POST`
+- **Body (JSON):**
+
+```json
+{
+  "host": "db",
+  "port": 5432,
+  "user": "postgres",
+  "password": "yourpassword", // đổi khi gọi config
+  "database": "test" // đổi khi gọi config
+}
+```
+
+**Cách test bằng cURL:**
+```bash
+curl -X POST http://localhost:4000/api/config/db \
+     -H "Content-Type: application/json" \
+     -d "{\"host\":\"db\",\"port\":5432,\"user\":\"postgres\",\"password\":\"postgres\",\"database\":\"myshop\"}"
+```

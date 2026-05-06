@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const uploadRoute = require("./routes/upload.route.js");
 const importRoute = require("./routes/import.route.js");
+const configRoute = require("./routes/config.route.js");
 
 const app = express();
 
@@ -10,6 +11,7 @@ app.use(cors());                 // Will be narrowed to /graphql only later if n
 app.use(express.json());         // Parse JSON bodies for any REST routes
 app.use("/api/upload", uploadRoute);
 app.use("/api/import", importRoute);
+app.use("/api/config", configRoute);
 
 // REST routes (lightweight, non-GraphQL)
 app.get('/health', (req, res) => {

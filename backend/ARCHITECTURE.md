@@ -53,7 +53,9 @@ backend/
 
 Hệ thống được thiết kế chạy qua **Docker** giúp nhóm không phải cài từng phần mềm rườm rà.
 - `docker-compose.yml` định nghĩa 2 services: **`db`** (chạy PostgreSQL) và **`backend`** (chạy code Node.js của chúng ta).
-- Backend (Node.js) kết nối với Database (Postgres) thông qua **`src/config/db.js`**. File này sử dụng thư viện `pg` tạo ra một `Pool`. Lợi ích của Pool là giữ cho nhiều truy vấn chạy song song cùng lúc mà không làm sập Database.
+- Backend (Node.js) kết nối với Database (Postgres) thông qua **`src/config/db.js`**. 
+- **Cơ chế nạp cấu hình:** Hệ thống ưu tiên đọc file `src/config/db.config.json` (thường được tạo ra từ màn hình cấu hình trên Frontend). Nếu không thấy file này, nó sẽ nạp thông tin từ biến môi trường (Environment Variables) trong file `.env`.
+- **Cập nhật động:** Thông qua API REST `POST /api/config/db`, người dùng có thể thay đổi thông số kết nối. Backend sẽ tự động kiểm tra, lưu lại và khởi tạo lại `Pool` kết nối mới mà không cần khởi động lại toàn bộ server.
 - Khi khởi tạo môi trường lần đầu, bất kì ai trong nhóm chỉ cần gõ `npm run db:init` -> Chức năng này sẽ gọi `initDb.js` để đẩy các lệnh SQL ở thư mục `migrations` và `seeds` xuống thẳng PostgreSQL để tạo bảng và dữ liệu mẫu.
 
 ---

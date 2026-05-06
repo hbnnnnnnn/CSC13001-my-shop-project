@@ -100,6 +100,15 @@ Useful things to do in Kibana:
 | `docker-compose logs -f backend`              | Stream backend logs                                   |
 | `docker-compose logs -f db`                   | Stream database logs                                  |
 | `docker-compose logs -f elasticsearch`        | Stream Elasticsearch logs                             |
+| `POST /api/config/db`                        | REST API để cập nhật cấu hình kết nối DB từ Frontend  |
+
+## Dynamic Database Configuration
+
+Hệ thống cho phép thay đổi thông tin kết nối CSDL PostgreSQL động thông qua REST API (để phục vụ yêu cầu cấu hình từ giao diện Desktop).
+
+- **Cấu hình ưu tiên:** Hệ thống ưu tiên đọc file `src/config/db.config.json`. Nếu không có, sẽ sử dụng biến môi trường trong `.env`.
+- **API Endpoint:** `POST http://localhost:4000/api/config/db`
+- **Tác vụ:** Khi gọi API này, Backend sẽ kiểm tra kết nối mới. Nếu thành công, nó sẽ lưu vào file JSON, ngắt kết nối cũ và tự động chuyển sang sử dụng kết nối mới mà không cần restart server.
 
 ## Project Structure
 
