@@ -3,10 +3,16 @@ require("dotenv").config();
 const esClient = require("../config/elasticsearch");
 const db = require("../config/db");
 const searchService = require("../services/search.service");
+const { redisClient } = require("../config/redis");
 
 const INDEX = process.env.ELASTICSEARCH_PRODUCT_INDEX || "products";
 
 const init = async () => {
+  // Connect to Redis for cache operations during sync
+  if (!redisClient.isOpen) {
+    await redisClient.connect();
+  }
+
   // Skip sync if index already exists (data was already synced before)
   if (await esClient.indices.exists({ index: INDEX })) {
     console.log(

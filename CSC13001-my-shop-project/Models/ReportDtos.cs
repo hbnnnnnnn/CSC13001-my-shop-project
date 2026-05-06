@@ -100,6 +100,12 @@ public sealed class RevenuePeriodDto
     [JsonPropertyName("totalRevenue")]
     public int TotalRevenue { get; set; }
 
+    [JsonPropertyName("totalCost")]
+    public int TotalCost { get; set; }
+
+    [JsonPropertyName("totalProfit")]
+    public int TotalProfit { get; set; }
+
     [JsonPropertyName("totalItemsSold")]
     public int TotalItemsSold { get; set; }
 

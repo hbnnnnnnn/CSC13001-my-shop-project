@@ -43,6 +43,8 @@ const reportSchema = `#graphql
     date: String!
     totalOrders: Int!
     totalRevenue: Int!
+    totalCost: Int!
+    totalProfit: Int!
     totalItemsSold: Int!
     avgOrderValue: Float!
   }
