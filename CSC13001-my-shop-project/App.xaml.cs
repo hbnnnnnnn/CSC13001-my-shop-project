@@ -156,6 +156,7 @@ public partial class App : Application
                             services.AddTransient<ProductDetailViewModel>();
                             services.AddTransient<ReportViewModel>();
                             services.AddSingleton<AppStateService>();
+                            services.AddSingleton<DbConfigService>();
 
                             // API services
                             services.AddSingleton<GraphqlService>();
