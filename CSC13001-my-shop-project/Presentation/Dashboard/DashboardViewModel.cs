@@ -93,16 +93,19 @@ public partial class DashboardViewModel : ObservableObject
 
         try
         {
+            var today = DateTime.Today.ToString("yyyy-MM-dd");
+
             var data = await _graphql.QueryAsync(
-                @"query SalesOverview {
-                    salesOverview {
+                @"query SalesOverview($startDate: String, $endDate: String) {
+                    salesOverview(startDate: $startDate, endDate: $endDate) {
                         totalOrders
                         totalRevenue
                         totalItemsSold
                         uniqueCustomers
                         avgOrderValue
                     }
-                }"
+                }",
+                new { startDate = today, endDate = today }
             );
 
             var overview = data.GetProperty("salesOverview");
