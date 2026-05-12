@@ -19,6 +19,9 @@
         <SolidColorBrush x:Key="ProductCardHoverBackgroundBrush" Color="#FFF5EDE4" />
         <SolidColorBrush x:Key="ProductCardHoverBorderBrush" Color="#99F3B55C" />
 
+        <SolidColorBrush x:Key="ShellAccentHoverBrush" Color="#FFE8A547" />
+        <SolidColorBrush x:Key="ShellAccentPressedBrush" Color="#FFD8932F" />
+
         <Style x:Key="ProductsPrimaryButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="{StaticResource ShellAccentBrush}" />
             <Setter Property="Foreground" Value="White" />
@@ -28,6 +31,58 @@
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="UseSystemFocusVisuals" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="RootBorder"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="{TemplateBinding CornerRadius}"
+                            Padding="{TemplateBinding Padding}"
+                            BorderThickness="0"
+                            RenderTransformOrigin="0.5,0.5"
+                        >
+                            <Border.RenderTransform>
+                                <TranslateTransform x:Name="RootTranslate" Y="0" />
+                            </Border.RenderTransform>
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal" />
+                                    <VisualState x:Name="PointerOver">
+                                        <VisualState.Setters>
+                                            <Setter
+                                                Target="RootBorder.Background"
+                                                Value="{StaticResource ShellAccentHoverBrush}"
+                                            />
+                                            <Setter Target="RootTranslate.Y" Value="-1" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <VisualState.Setters>
+                                            <Setter
+                                                Target="RootBorder.Background"
+                                                Value="{StaticResource ShellAccentPressedBrush}"
+                                            />
+                                            <Setter Target="RootTranslate.Y" Value="0" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <VisualState.Setters>
+                                            <Setter Target="RootBorder.Opacity" Value="0.5" />
+                                        </VisualState.Setters>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <ContentPresenter
+                                Content="{TemplateBinding Content}"
+                                ContentTemplate="{TemplateBinding ContentTemplate}"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style x:Key="ProductsIconGhostButtonStyle" TargetType="Button">
@@ -111,6 +166,53 @@
             <Setter Property="UseSystemFocusVisuals" Value="False" />
         </Style>
 
+        <!-- Ghost button used by pagination controls (matches OrderListPage) -->
+        <Style x:Key="ProductsGhostButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="UseSystemFocusVisuals" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            Padding="{TemplateBinding Padding}"
+                            CornerRadius="10"
+                        >
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12" />
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="PointerOver">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="Opacity" To="0.65" Duration="0:0:0.12" />
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="Root" Storyboard.TargetProperty="Opacity" To="0.45" Duration="0:0:0" />
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled" />
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <ContentPresenter
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center"
+                            />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- No ListViewItemPresenter / reveal border (avoids extra grey ring around cards). -->
         <Style x:Key="ProductsGridViewItemChromelessStyle" TargetType="GridViewItem">
             <Setter Property="Padding" Value="0" />
@@ -173,6 +275,26 @@
                     Spacing="10"
                     VerticalAlignment="Center"
                 >
+                    <Button
+                        Style="{StaticResource ProductsPrimaryButtonStyle}"
+                        Click="ImportProducts_Click"
+                    >
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon
+                                Glyph="&#xE8B5;"
+                                FontSize="16"
+                                Foreground="White"
+                                VerticalAlignment="Center"
+                            />
+                            <TextBlock
+                                Text="Import from Excel"
+                                FontSize="14"
+                                FontWeight="SemiBold"
+                                Foreground="White"
+                                VerticalAlignment="Center"
+                            />
+                        </StackPanel>
+                    </Button>
                     <Button
                         Style="{StaticResource ProductsPrimaryButtonStyle}"
                         Click="CreateCategory_Click"
@@ -1049,79 +1171,158 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
-            <!-- Pagination -->
-            <Grid Margin="0,8,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock
-                    Text="{Binding PageSummaryText}"
-                    FontSize="14"
-                    Foreground="#FF6B7280"
-                    VerticalAlignment="Center"
-                />
-                <StackPanel
-                    Grid.Column="1"
-                    Orientation="Horizontal"
-                    Spacing="8"
-                    VerticalAlignment="Center"
-                >
-                    <Button
-                        Style="{StaticResource ProductsPaginationChevronStyle}"
-                        Command="{Binding PreviousPageCommand}"
-                        IsEnabled="{Binding CanGoPrevious}"
-                    >
-                        <FontIcon
-                            Glyph="&#xE76B;"
-                            FontSize="12"
-                            Foreground="{StaticResource ShellTextStrongBrush}"
-                        />
-                    </Button>
-                    <ItemsControl ItemsSource="{Binding PageButtons}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="6" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Button
-                                    Width="40"
-                                    Height="40"
-                                    CornerRadius="8"
-                                    Padding="0"
-                                    Background="{Binding IsCurrent, Converter={StaticResource PagBg}}"
-                                    Foreground="{Binding IsCurrent, Converter={StaticResource PagFg}}"
-                                    BorderThickness="1"
-                                    BorderBrush="{StaticResource ShellBorderBrush}"
-                                    Command="{Binding DataContext.GoToPageCommand, ElementName=ProductsRootPage}"
-                                    CommandParameter="{Binding Page}"
-                                    UseSystemFocusVisuals="False"
-                                >
-                                    <TextBlock
-                                        Text="{Binding Page}"
-                                        FontWeight="SemiBold"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                    />
-                                </Button>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                    <Button
-                        Style="{StaticResource ProductsPaginationChevronStyle}"
-                        Command="{Binding NextPageCommand}"
-                        IsEnabled="{Binding CanGoNext}"
-                    >
-                        <FontIcon
-                            Glyph="&#xE76C;"
-                            FontSize="12"
-                            Foreground="{StaticResource ShellTextStrongBrush}"
-                        />
-                    </Button>
-                </StackPanel>
-            </Grid>
+            <!-- Pagination (unified with OrderListPage) -->
+            <Border
+                BorderBrush="{StaticResource ShellBorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="0,16,0,0"
+                Margin="0,8,0,0"
+            >
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Show N per page -->
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <TextBlock Text="Show" FontSize="14" Foreground="#992C2118" VerticalAlignment="Center" />
+                        <Border Background="#FAF7F2" BorderBrush="#F5EDE4" BorderThickness="1" CornerRadius="10" Height="34" Width="62">
+                            <Button
+                                x:Name="PageSizeButton"
+                                Style="{StaticResource ProductsGhostButtonStyle}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Padding="12,0,8,0"
+                            >
+                                <Button.Flyout>
+                                    <Flyout Placement="Top">
+                                        <Flyout.FlyoutPresenterStyle>
+                                            <Style TargetType="FlyoutPresenter">
+                                                <Setter Property="Background" Value="White" />
+                                                <Setter Property="BorderBrush" Value="#F5EDE4" />
+                                                <Setter Property="BorderThickness" Value="1" />
+                                                <Setter Property="CornerRadius" Value="10" />
+                                                <Setter Property="Padding" Value="4" />
+                                                <Setter Property="MinWidth" Value="62" />
+                                                <Setter Property="MaxWidth" Value="62" />
+                                            </Style>
+                                        </Flyout.FlyoutPresenterStyle>
+                                        <ListView
+                                            x:Name="PageSizeList"
+                                            ItemsSource="{Binding PageSizeOptions}"
+                                            SelectionChanged="PageSizeList_SelectionChanged"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Padding="0"
+                                            SelectionMode="Single"
+                                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                        >
+                                            <ListView.ItemContainerStyle>
+                                                <Style TargetType="ListViewItem">
+                                                    <Setter Property="Padding" Value="6,5" />
+                                                    <Setter Property="MinHeight" Value="0" />
+                                                    <Setter Property="MinWidth" Value="0" />
+                                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                                    <Setter Property="CornerRadius" Value="8" />
+                                                    <Setter Property="Margin" Value="0,1" />
+                                                </Style>
+                                            </ListView.ItemContainerStyle>
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" FontSize="14" FontWeight="Medium" Foreground="#FF2C2118" TextAlignment="Center" HorizontalAlignment="Stretch" />
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                        </ListView>
+                                    </Flyout>
+                                </Button.Flyout>
+                                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding PageSize}" FontSize="14" FontWeight="Medium" Foreground="#FF2C2118" VerticalAlignment="Center" />
+                                    <FontIcon Glyph="&#xE70D;" FontSize="10" Foreground="#992C2118" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </Border>
+                        <TextBlock Text="per page" FontSize="14" Foreground="#992C2118" VerticalAlignment="Center" />
+                    </StackPanel>
+
+                    <!-- Prev / Page Selector / Next -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <Button
+                            Style="{StaticResource ProductsGhostButtonStyle}"
+                            Command="{Binding PreviousPageCommand}"
+                            IsEnabled="{Binding CanGoPrevious}"
+                            Padding="8"
+                        >
+                            <TextBlock Text="Prev" FontSize="14" FontWeight="Medium" Foreground="#992C2118" />
+                        </Button>
+
+                        <Border Background="#FAF7F2" BorderBrush="#F5EDE4" BorderThickness="1" CornerRadius="10" Height="34" Width="62">
+                            <Button
+                                x:Name="PageSelectorButton"
+                                Style="{StaticResource ProductsGhostButtonStyle}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Padding="12,0,8,0"
+                            >
+                                <Button.Flyout>
+                                    <Flyout Placement="Top">
+                                        <Flyout.FlyoutPresenterStyle>
+                                            <Style TargetType="FlyoutPresenter">
+                                                <Setter Property="Background" Value="White" />
+                                                <Setter Property="BorderBrush" Value="#F5EDE4" />
+                                                <Setter Property="BorderThickness" Value="1" />
+                                                <Setter Property="CornerRadius" Value="10" />
+                                                <Setter Property="Padding" Value="4" />
+                                                <Setter Property="MinWidth" Value="62" />
+                                                <Setter Property="MaxWidth" Value="62" />
+                                            </Style>
+                                        </Flyout.FlyoutPresenterStyle>
+                                        <ListView
+                                            x:Name="PageSelectorList"
+                                            ItemsSource="{Binding PageOptions}"
+                                            SelectionChanged="PageSelectorList_SelectionChanged"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Padding="0"
+                                            SelectionMode="Single"
+                                            ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                        >
+                                            <ListView.ItemContainerStyle>
+                                                <Style TargetType="ListViewItem">
+                                                    <Setter Property="Padding" Value="6,5" />
+                                                    <Setter Property="MinHeight" Value="0" />
+                                                    <Setter Property="MinWidth" Value="0" />
+                                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                                    <Setter Property="CornerRadius" Value="8" />
+                                                    <Setter Property="Margin" Value="0,1" />
+                                                </Style>
+                                            </ListView.ItemContainerStyle>
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding}" FontSize="14" FontWeight="Medium" Foreground="#FF2C2118" TextAlignment="Center" HorizontalAlignment="Stretch" />
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                        </ListView>
+                                    </Flyout>
+                                </Button.Flyout>
+                                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding CurrentPage}" FontSize="14" FontWeight="Medium" Foreground="#FF2C2118" VerticalAlignment="Center" />
+                                    <FontIcon Glyph="&#xE70D;" FontSize="10" Foreground="#992C2118" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </Border>
+
+                        <Button
+                            Style="{StaticResource ProductsGhostButtonStyle}"
+                            Command="{Binding NextPageCommand}"
+                            IsEnabled="{Binding CanGoNext}"
+                            Padding="8"
+                        >
+                            <TextBlock Text="Next" FontSize="14" FontWeight="Medium" Foreground="#992C2118" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 

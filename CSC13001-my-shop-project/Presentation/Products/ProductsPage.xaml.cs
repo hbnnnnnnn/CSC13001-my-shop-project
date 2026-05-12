@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.IO;
+using System.Text;
 using CommunityToolkit.Mvvm.Messaging;
 using CSC13001_my_shop_project.Models;
 using CSC13001_my_shop_project.Presentation.Dashboard;
@@ -11,6 +13,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Uno.Extensions.Navigation;
 using Uno.Extensions.Navigation.UI;
+using Windows.Storage.Pickers;
 
 namespace CSC13001_my_shop_project.Presentation.Products;
 
@@ -316,6 +319,148 @@ public sealed partial class ProductsPage : Page
     {
         if (VM?.CreateDialogViewModel is { } dlg)
             dlg.CancelCommand.Execute(null);
+    }
+
+    private async void ImportProducts_Click(object sender, RoutedEventArgs e)
+    {
+        if (VM is null)
+            return;
+
+        var importService = App.AppHost?.Services.GetService(typeof(IImportService)) as IImportService;
+        if (importService is null)
+            return;
+
+        try
+        {
+            var picker = new FileOpenPicker
+            {
+                SuggestedStartLocation = PickerLocationId.DocumentsLibrary,
+            };
+            picker.FileTypeFilter.Add(".xlsx");
+
+            var file = await picker.PickSingleFileAsync();
+            if (file is null)
+                return;
+
+            await ShowImportingDialogAndRunAsync(importService, file);
+        }
+        catch (Exception ex)
+        {
+            await ShowMessageAsync("Import failed", ex.Message);
+        }
+    }
+
+    private async Task ShowImportingDialogAndRunAsync(IImportService importService, Windows.Storage.StorageFile file)
+    {
+        var progressDialog = new ContentDialog
+        {
+            XamlRoot = this.XamlRoot,
+            Title = "Importing products",
+            Content = new StackPanel
+            {
+                Spacing = 12,
+                Children =
+                {
+                    new ProgressRing { IsActive = true, Width = 28, Height = 28 },
+                    new TextBlock { Text = $"Uploading {file.Name}…" },
+                },
+            },
+        };
+
+        var importTask = Task.Run(async () =>
+        {
+            using var stream = await file.OpenStreamForReadAsync();
+            return await importService.ImportProductsAsync(stream, file.Name);
+        });
+
+        _ = progressDialog.ShowAsync();
+        ProductImportResult? result = null;
+        Exception? error = null;
+        try
+        {
+            result = await importTask;
+        }
+        catch (Exception ex)
+        {
+            error = ex;
+        }
+        finally
+        {
+            progressDialog.Hide();
+        }
+
+        if (error is not null)
+        {
+            await ShowMessageAsync("Import failed", error.Message);
+            return;
+        }
+
+        if (result is null)
+            return;
+
+        var summary = new StringBuilder();
+        if (result.Summary is { } s)
+        {
+            summary.AppendLine($"Total rows: {s.TotalRows}");
+            summary.AppendLine($"Upserted: {s.Upserted}");
+            summary.AppendLine($"Errors: {s.Errors}");
+        }
+        if (!string.IsNullOrEmpty(result.Message))
+            summary.AppendLine(result.Message);
+
+        if (result.Errors.Count > 0)
+        {
+            summary.AppendLine();
+            summary.AppendLine("Errors:");
+            foreach (var err in result.Errors.Take(20))
+            {
+                summary.AppendLine($"• Row {err.Row} ({err.Sku ?? "—"}): {err.Reason}");
+            }
+            if (result.Errors.Count > 20)
+                summary.AppendLine($"… and {result.Errors.Count - 20} more");
+        }
+
+        await ShowMessageAsync(result.Success ? "Import completed" : "Import failed", summary.ToString());
+
+        if (result.Success && VM is not null)
+        {
+            await VM.RefreshCatalogAsync();
+            await VM.RefreshCategoriesAsync();
+        }
+    }
+
+    private Task ShowMessageAsync(string title, string content)
+    {
+        var dialog = new ContentDialog
+        {
+            XamlRoot = this.XamlRoot,
+            Title = title,
+            Content = new ScrollViewer
+            {
+                Content = new TextBlock { Text = content, TextWrapping = TextWrapping.Wrap },
+                MaxHeight = 400,
+            },
+            CloseButtonText = "OK",
+        };
+        return dialog.ShowAsync().AsTask();
+    }
+
+    private void PageSizeList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is ListView lv && lv.SelectedItem is int size && VM is not null)
+        {
+            VM.PageSize = size;
+            PageSizeButton.Flyout?.Hide();
+        }
+    }
+
+    private void PageSelectorList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (sender is ListView lv && lv.SelectedItem is int page && VM is not null)
+        {
+            VM.CurrentPage = page;
+            PageSelectorButton.Flyout?.Hide();
+        }
     }
 
     private async void CreateCategory_Click(object sender, RoutedEventArgs e)

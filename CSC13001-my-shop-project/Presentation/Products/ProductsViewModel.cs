@@ -11,7 +11,7 @@ public sealed record PageButtonModel(int Page, bool IsCurrent);
 
 public partial class ProductsViewModel : ObservableObject
 {
-    private const int DefaultPageSize = 8;
+    private const int DefaultPageSize = 10;
 
     private readonly IProductService _productService;
     private readonly IImageUploadService _imageUpload;
@@ -82,6 +82,28 @@ public partial class ProductsViewModel : ObservableObject
 
     [ObservableProperty]
     private int totalPages = 1;
+
+    [ObservableProperty]
+    private int pageSize = DefaultPageSize;
+
+    public ObservableCollection<int> PageOptions { get; } = new() { 1 };
+
+    public List<int> PageSizeOptions { get; } = new() { 5, 10, 20 };
+
+    partial void OnPageSizeChanged(int value)
+    {
+        if (_suppressFilters)
+            return;
+        CurrentPage = 1;
+        ApplyFilters();
+    }
+
+    partial void OnCurrentPageChanged(int value)
+    {
+        if (_suppressFilters)
+            return;
+        RebuildCurrentPage();
+    }
 
     [ObservableProperty]
     private bool isGridView = true;
@@ -220,6 +242,8 @@ public partial class ProductsViewModel : ObservableObject
     }
 
     public Task RefreshCategoriesAsync() => LoadCategoryOptionsFromApiAsync();
+
+    public Task RefreshCatalogAsync() => ReloadCatalogFromApiAsync();
 
     private void ApplyCategoryOptionsFromApi(List<CategoryDto> categories)
     {
@@ -419,7 +443,7 @@ public partial class ProductsViewModel : ObservableObject
         };
 
         _filtered = q.ToList();
-        TotalPages = Math.Max(1, (int)Math.Ceiling(_filtered.Count / (double)DefaultPageSize));
+        TotalPages = Math.Max(1, (int)Math.Ceiling(_filtered.Count / (double)PageSize));
         if (CurrentPage > TotalPages)
             CurrentPage = TotalPages;
         if (CurrentPage < 1)
@@ -433,13 +457,17 @@ public partial class ProductsViewModel : ObservableObject
         PageButtons.Clear();
         for (var i = 1; i <= TotalPages; i++)
             PageButtons.Add(new PageButtonModel(i, i == CurrentPage));
+
+        PageOptions.Clear();
+        for (var i = 1; i <= TotalPages; i++)
+            PageOptions.Add(i);
     }
 
     private void RebuildCurrentPage()
     {
         PagedItems.Clear();
-        var skip = (CurrentPage - 1) * DefaultPageSize;
-        foreach (var item in _filtered.Skip(skip).Take(DefaultPageSize))
+        var skip = (CurrentPage - 1) * PageSize;
+        foreach (var item in _filtered.Skip(skip).Take(PageSize))
             PagedItems.Add(item);
 
         RebuildPageButtons();
