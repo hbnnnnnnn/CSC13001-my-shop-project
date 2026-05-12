@@ -17,10 +17,10 @@ public sealed partial class CurrencyInputControl : UserControl
         nameof(Currency),
         typeof(string),
         typeof(CurrencyInputControl),
-        new PropertyMetadata("USD", OnCurrencyChanged)
+        new PropertyMetadata("₫", OnCurrencyChanged)
     );
 
-    public ObservableCollection<string> CurrencyOptions { get; } = new(["USD", "EUR", "VND"]);
+    public ObservableCollection<string> CurrencyOptions { get; } = new(["₫", "VND"]);
 
     public string Amount
     {

@@ -58,6 +58,16 @@ public partial class OrderListViewModel : ObservableObject
         "Cancelled"
     };
 
+    // ── Empty state computed properties ─────────────────────────────────
+    public bool HasOrders => FilteredOrders.Count > 0;
+    public bool HasActiveFilters => !string.IsNullOrEmpty(SearchText)
+        || SelectedStatusFilter != "All Status"
+        || FromDate != null || ToDate != null;
+    public bool ShowEmptyState => !IsLoading && !HasOrders;
+    public bool ShowNoResults => ShowEmptyState && HasActiveFilters;
+    public bool ShowFirstTimeEmpty => ShowEmptyState && !HasActiveFilters;
+    public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
+
     public OrderService OrderServiceInstance => _orderService;
 
     public OrderListViewModel(OrderService orderService)
@@ -82,6 +92,7 @@ public partial class OrderListViewModel : ObservableObject
         {
             IsLoading = true;
             ErrorMessage = null;
+            OnPropertyChanged(nameof(HasError));
         });
 
         try
@@ -129,17 +140,17 @@ public partial class OrderListViewModel : ObservableObject
         catch (GraphqlException ex)
         {
             Console.Error.WriteLine($"[OrderListVM] GraphQL error: {ex.Message}");
-            App.RunOnUIThread(() => ErrorMessage = ex.Message);
+            App.RunOnUIThread(() => { ErrorMessage = ex.Message; OnPropertyChanged(nameof(HasError)); });
         }
         catch (HttpRequestException ex)
         {
             Console.Error.WriteLine($"[OrderListVM] HTTP error: {ex.Message}");
-            App.RunOnUIThread(() => ErrorMessage = "Cannot connect to server. Check your connection.");
+            App.RunOnUIThread(() => { ErrorMessage = "Cannot connect to server. Check your connection."; OnPropertyChanged(nameof(HasError)); });
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"[OrderListVM] Error: {ex.GetType().Name}: {ex.Message}");
-            App.RunOnUIThread(() => ErrorMessage = $"Failed to load orders: {ex.Message}");
+            App.RunOnUIThread(() => { ErrorMessage = $"Failed to load orders: {ex.Message}"; OnPropertyChanged(nameof(HasError)); });
         }
         finally
         {
@@ -229,7 +240,14 @@ public partial class OrderListViewModel : ObservableObject
         }
 
         var items = new ObservableCollection<OrderItem>(query);
-        App.RunOnUIThread(() => FilteredOrders = items);
+        App.RunOnUIThread(() =>
+        {
+            FilteredOrders = items;
+            OnPropertyChanged(nameof(HasOrders));
+            OnPropertyChanged(nameof(ShowEmptyState));
+            OnPropertyChanged(nameof(ShowNoResults));
+            OnPropertyChanged(nameof(ShowFirstTimeEmpty));
+        });
     }
 }
 

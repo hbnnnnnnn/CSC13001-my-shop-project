@@ -30,8 +30,8 @@ public sealed class ProductModel
     public SolidColorBrush StatusBadgeForeground { get; init; } = null!;
     public SolidColorBrush StatusDotBrush { get; init; } = null!;
 
-    public string PriceText => $"${Price:0}";
-    public string CostMarginLine => $"Cost per item: ${CostPerItem:0} · Margin: {MarginPercent}%";
+    public string PriceText => $"{Price:N0} ₫";
+    public string CostMarginLine => $"Cost per item: {CostPerItem:N0} ₫ · Margin: {MarginPercent}%";
     public string RatingReviewsText => $"{Rating:0.0} ({ReviewCount} reviews)";
     public string StockLevelText => $"{StockLeft} / {StockTotal}";
 

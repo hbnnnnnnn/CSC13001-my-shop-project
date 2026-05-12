@@ -101,7 +101,7 @@
                     CharacterSpacing="50"
                 />
                 <!-- <TextBlock
-                    Text="Delivered orders only. Default date range is 1 Jan 2026 – 31 Dec 2026 (UTC). The second column is units sold (not profit). Revenue from the API is in USD. Click a legend item next to a chart to show or hide that series. After seeding the database, click Apply; if the API uses Redis cache, restart it when numbers look stale."
+                    Text="Delivered orders only. Default date range is 1 Jan 2026 – 31 Dec 2026 (UTC). The second column is units sold (not profit). Revenue from the API is in VND (₫). Click a legend item next to a chart to show or hide that series. After seeding the database, click Apply; if the API uses Redis cache, restart it when numbers look stale."
                     FontSize="14"
                     Foreground="#FF6B7280"
                     TextWrapping="WrapWholeWords"

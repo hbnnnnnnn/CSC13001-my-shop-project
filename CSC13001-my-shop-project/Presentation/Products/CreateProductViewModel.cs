@@ -70,19 +70,19 @@ public partial class CreateProductViewModel : ObservableObject
     private string price = "";
 
     [ObservableProperty]
-    private string priceCurrency = "USD";
+    private string priceCurrency = "₫";
 
     [ObservableProperty]
     private string comparePrice = "";
 
     [ObservableProperty]
-    private string compareCurrency = "USD";
+    private string compareCurrency = "₫";
 
     [ObservableProperty]
     private string costPerItem = "";
 
     [ObservableProperty]
-    private string costCurrency = "USD";
+    private string costCurrency = "₫";
 
     [ObservableProperty]
     private bool trackQuantity = true;
@@ -132,7 +132,7 @@ public partial class CreateProductViewModel : ObservableObject
     public string SubmitLabel => _isEditMode ? "Save Changes" : "Add Product";
 
     public string FormattedPrice =>
-        string.IsNullOrWhiteSpace(Price) ? "—" : $"{PriceCurrency} {Price}";
+        string.IsNullOrWhiteSpace(Price) ? "—" : $"{Price} {PriceCurrency}";
 
     public string SummaryCategoryDisplay => SelectedCategoryItem?.Name ?? "—";
 
@@ -180,11 +180,11 @@ public partial class CreateProductViewModel : ObservableObject
         Supplier = "";
         TagInput = "";
         Price = "";
-        PriceCurrency = "USD";
+        PriceCurrency = "₫";
         ComparePrice = "";
-        CompareCurrency = "USD";
+        CompareCurrency = "₫";
         CostPerItem = "";
-        CostCurrency = "USD";
+        CostCurrency = "₫";
         TrackQuantity = true;
         Quantity = "0";
         Weight = "";

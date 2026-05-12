@@ -1,8 +1,12 @@
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using CommunityToolkit.Mvvm.Messaging;
+using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+using LiveChartsCore.SkiaSharpView.Painting;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
+using SkiaSharp;
 using Windows.UI;
 using CSC13001_my_shop_project.Services;
 
@@ -34,6 +38,19 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<BestSellingItem> _bestSellingItems = new();
 
+    // ── Empty state computed properties ─────────────────────────────────
+    public bool HasRecentOrders => RecentOrders.Count > 0;
+    public bool ShowEmptyRecentOrders => !IsLoadingOrders && !HasRecentOrders;
+
+    public bool HasLowStockItems => LowStockItems.Count > 0;
+    public bool ShowEmptyLowStock => !HasLowStockItems;
+
+    public bool HasBestSellingItems => BestSellingItems.Count > 0;
+    public bool ShowEmptyBestSelling => !HasBestSellingItems;
+
+    public bool HasChartData => RevenueChartPoints.Count > 0 && RevenueChartPoints.Any(p => p.Revenue > 0);
+    public bool ShowEmptyChart => !HasChartData;
+
     [ObservableProperty]
     private string _lowStockBadgeText = "0 items";
 
@@ -42,15 +59,26 @@ public partial class DashboardViewModel : ObservableObject
     private ObservableCollection<RevenueChartPoint> _revenueChartPoints = new();
 
     [ObservableProperty]
-    private string _chartSubtitle = "Loading chart data…";
+    private string _chartSubtitle = "";
 
     [ObservableProperty]
     private string _chartPeriodLabel = "Daily";
 
-    /// <summary>
-    /// Raised after chart data has been loaded and is ready to be drawn.
-    /// </summary>
-    public event Action? ChartDataReady;
+    // ── LiveCharts properties for XAML binding ────────────────────────
+    [ObservableProperty]
+    private ISeries[] _chartSeries = [];
+
+    [ObservableProperty]
+    private Axis[] _chartXAxes = [new Axis { LabelsRotation = -45, TextSize = 10f }];
+
+    [ObservableProperty]
+    private Axis[] _chartYAxes = [new Axis
+    {
+        Name = "Revenue (₫)",
+        TextSize = 10f,
+        NameTextSize = 11f,
+        Labeler = v => FormatShortCurrency((long)(double)v),
+    }];
 
     /// <summary>
     /// Parameterless constructor for design-time / fallback.
@@ -93,7 +121,10 @@ public partial class DashboardViewModel : ObservableObject
 
         try
         {
-            var today = DateTime.Today.ToString("yyyy-MM-dd");
+            var firstOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            var lastOfMonth = firstOfMonth.AddMonths(1).AddDays(-1);
+            var startDate = firstOfMonth.ToString("yyyy-MM-dd");
+            var endDate = lastOfMonth.ToString("yyyy-MM-dd");
 
             var data = await _graphql.QueryAsync(
                 @"query SalesOverview($startDate: String, $endDate: String) {
@@ -105,7 +136,7 @@ public partial class DashboardViewModel : ObservableObject
                         avgOrderValue
                     }
                 }",
-                new { startDate = today, endDate = today }
+                new { startDate, endDate }
             );
 
             var overview = data.GetProperty("salesOverview");
@@ -127,15 +158,17 @@ public partial class DashboardViewModel : ObservableObject
 
     /// <summary>
     /// Fetches daily revenue report from backend → populates chart data points.
-    /// Uses the last 30 days as the default date range.
+    /// Uses the current month (1st → last day) as the date range.
     /// Falls back to mock data if API returns no results.
     /// </summary>
     private async Task LoadRevenueChartAsync()
     {
         try
         {
-            var endDate = DateTime.Today.ToString("yyyy-MM-dd");
-            var startDate = DateTime.Today.AddDays(-29).ToString("yyyy-MM-dd");
+            var firstOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            var lastOfMonth = firstOfMonth.AddMonths(1).AddDays(-1);
+            var startDate = firstOfMonth.ToString("yyyy-MM-dd");
+            var endDate = lastOfMonth.ToString("yyyy-MM-dd");
 
             List<RevenueChartPoint> chartPoints = new();
 
@@ -190,19 +223,14 @@ public partial class DashboardViewModel : ObservableObject
             chartPoints.Sort((a, b) => string.Compare(a.RawDate, b.RawDate, StringComparison.Ordinal));
 
             // Compute subtitle
-            var from = DateTime.TryParse(startDate, out var s) ? s.ToString("dd/MM/yyyy") : startDate;
-            var to = DateTime.TryParse(endDate, out var e) ? e.ToString("dd/MM/yyyy") : endDate;
-            var subtitle = $"Doanh thu theo ngày — {from} → {to}";
-
             // Assign on UI thread
             App.RunOnUIThread(() =>
             {
                 RevenueChartPoints = new ObservableCollection<RevenueChartPoint>(chartPoints);
-                ChartSubtitle = subtitle;
+                BuildChartSeries(chartPoints);
+                OnPropertyChanged(nameof(HasChartData));
+                OnPropertyChanged(nameof(ShowEmptyChart));
             });
-
-            // Notify code-behind to redraw the chart
-            ChartDataReady?.Invoke();
         }
         catch (Exception ex)
         {
@@ -213,10 +241,71 @@ public partial class DashboardViewModel : ObservableObject
             App.RunOnUIThread(() =>
             {
                 RevenueChartPoints = new ObservableCollection<RevenueChartPoint>(mockData);
-                ChartSubtitle = "Dữ liệu mẫu — không kết nối được server";
+                BuildChartSeries(mockData);
+                OnPropertyChanged(nameof(HasChartData));
+                OnPropertyChanged(nameof(ShowEmptyChart));
             });
-            ChartDataReady?.Invoke();
         }
+    }
+
+    /// <summary>
+    /// Builds LiveCharts series and axes from the chart data points.
+    /// </summary>
+    private void BuildChartSeries(List<RevenueChartPoint> points)
+    {
+        if (points.Count == 0 || !points.Any(p => p.Revenue > 0))
+        {
+            ChartSeries = [];
+            return;
+        }
+
+        var accentColor = SKColor.Parse("F3B55C");
+
+        ChartSeries =
+        [
+            new LineSeries<long>
+            {
+                Name = "Doanh thu",
+                Values = new ObservableCollection<long>(points.Select(p => p.Revenue)),
+                GeometrySize = 6,
+                LineSmoothness = 0.3,
+                Stroke = new SolidColorPaint(accentColor, 2.5f),
+                Fill = new SolidColorPaint(accentColor.WithAlpha(40)),
+                GeometryStroke = new SolidColorPaint(accentColor, 2),
+                GeometryFill = new SolidColorPaint(accentColor),
+            }
+        ];
+
+        ChartXAxes =
+        [
+            new Axis
+            {
+                Labels = points.Select(p => p.Label).ToList(),
+                LabelsRotation = -45,
+                TextSize = 10f,
+                SeparatorsPaint = new SolidColorPaint(SKColor.Parse("334155")) { StrokeThickness = 0.5f },
+            }
+        ];
+
+        ChartYAxes =
+        [
+            new Axis
+            {
+                Name = "Doanh thu (₫)",
+                TextSize = 10f,
+                NameTextSize = 11f,
+                Labeler = v => FormatShortCurrency((long)(double)v),
+            }
+        ];
+    }
+
+    /// <summary>Formats a large number as short currency: 1000000 → "1M ₫"</summary>
+    private static string FormatShortCurrency(long value)
+    {
+        if (value >= 1_000_000_000) return $"{value / 1_000_000_000.0:F1}B ₫";
+        if (value >= 1_000_000) return $"{value / 1_000_000.0:F1}M ₫";
+        if (value >= 1_000) return $"{value / 1_000.0:F0}K ₫";
+        return $"{value:N0} ₫";
     }
 
     /// <summary>
@@ -282,12 +371,19 @@ public partial class DashboardViewModel : ObservableObject
             {
                 RecentOrders = items;
                 IsLoadingOrders = false;
+                OnPropertyChanged(nameof(HasRecentOrders));
+                OnPropertyChanged(nameof(ShowEmptyRecentOrders));
             });
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"[Dashboard] Failed to load recent orders: {ex.Message}");
-            App.RunOnUIThread(() => IsLoadingOrders = false);
+            App.RunOnUIThread(() =>
+            {
+                IsLoadingOrders = false;
+                OnPropertyChanged(nameof(HasRecentOrders));
+                OnPropertyChanged(nameof(ShowEmptyRecentOrders));
+            });
         }
     }
 
@@ -334,6 +430,8 @@ public partial class DashboardViewModel : ObservableObject
             {
                 LowStockItems = items;
                 LowStockBadgeText = $"{items.Count} items";
+                OnPropertyChanged(nameof(HasLowStockItems));
+                OnPropertyChanged(nameof(ShowEmptyLowStock));
             });
         }
         catch (Exception ex)
@@ -374,7 +472,12 @@ public partial class DashboardViewModel : ObservableObject
                 items.Add(new BestSellingItem(name, sold, priceText, imageUrl));
             }
 
-            App.RunOnUIThread(() => BestSellingItems = items);
+            App.RunOnUIThread(() =>
+            {
+                BestSellingItems = items;
+                OnPropertyChanged(nameof(HasBestSellingItems));
+                OnPropertyChanged(nameof(ShowEmptyBestSelling));
+            });
         }
         catch (Exception ex)
         {

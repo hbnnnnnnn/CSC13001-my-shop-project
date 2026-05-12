@@ -98,10 +98,10 @@ public partial class ReportViewModel : ObservableObject
     [
         new Axis
         {
-            Name = "Amount ($)",
+            Name = "Số tiền (₫)",
             TextSize = AxisLabelTextSize,
             NameTextSize = AxisNameTextSize,
-            Labeler = v => FormatCompactUsd((double)v),
+            Labeler = v => FormatCompactVnd((double)v),
         },
     ];
 
@@ -272,11 +272,11 @@ public partial class ReportViewModel : ObservableObject
         }
 
         OverviewTotalOrders = o.TotalOrders.ToString("N0", CultureInfo.InvariantCulture);
-        OverviewTotalRevenue = FormatCompactUsd(o.TotalRevenue);
+        OverviewTotalRevenue = FormatCompactVnd(o.TotalRevenue);
         OverviewTotalItemsSold = o.TotalItemsSold.ToString("N0", CultureInfo.InvariantCulture);
-        OverviewAvgOrderValue = FormatCompactUsd(o.AvgOrderValue);
-        OverviewMaxOrderValue = FormatCompactUsd(o.MaxOrderValue);
-        OverviewMinOrderValue = FormatCompactUsd(o.MinOrderValue);
+        OverviewAvgOrderValue = FormatCompactVnd(o.AvgOrderValue);
+        OverviewMaxOrderValue = FormatCompactVnd(o.MaxOrderValue);
+        OverviewMinOrderValue = FormatCompactVnd(o.MinOrderValue);
     }
 
     private static ObservableCollection<ChartLegendItemVm> CreateLegendItems(IEnumerable<ISeries> series) =>
@@ -633,10 +633,10 @@ public partial class ReportViewModel : ObservableObject
             [
                 new Axis
                 {
-                    Name = "Amount ($)",
+                    Name = "Số tiền (₫)",
                     TextSize = AxisLabelTextSize,
                     NameTextSize = AxisNameTextSize,
-                    Labeler = v => FormatCompactUsd((double)v),
+                    Labeler = v => FormatCompactVnd((double)v),
                 },
             ];
             OnPropertyChanged(nameof(RevenueXAxes));
@@ -687,10 +687,10 @@ public partial class ReportViewModel : ObservableObject
         [
             new Axis
             {
-                Name = "Amount ($)",
+                Name = "Số tiền (₫)",
                 TextSize = AxisLabelTextSize,
                 NameTextSize = AxisNameTextSize,
-                Labeler = v => FormatCompactUsd((double)v),
+                Labeler = v => FormatCompactVnd((double)v),
                 SeparatorsPaint = new SolidColorPaint(SKColor.Parse("334155")) { StrokeThickness = 0.5f },
             },
         ];
@@ -711,7 +711,7 @@ public partial class ReportViewModel : ObservableObject
                     DataLabelsSize = 10,
                     DataLabelsMaxWidth = 72,
                     DataLabelsPaint = new SolidColorPaint(SKColors.White),
-                    DataLabelsFormatter = pt => FormatCompactUsd(pt.Coordinate.PrimaryValue),
+                    DataLabelsFormatter = pt => FormatCompactVnd(pt.Coordinate.PrimaryValue),
                 }
             );
         }
@@ -741,25 +741,25 @@ public partial class ReportViewModel : ObservableObject
         PieBucketLegendItems = CreateLegendItems(list);
     }
 
-    private static string FormatCompactUsd(double usd)
+    private static string FormatCompactVnd(double vnd)
     {
-        if (double.IsNaN(usd) || double.IsInfinity(usd))
-            return "$0";
-        var sign = usd < 0 ? "-" : "";
-        var x = Math.Abs(usd);
+        if (double.IsNaN(vnd) || double.IsInfinity(vnd))
+            return "0 ₫";
+        var sign = vnd < 0 ? "-" : "";
+        var x = Math.Abs(vnd);
         if (x >= 1_000_000d)
         {
             var m = x / 1_000_000d;
-            return sign + "$" + (Math.Abs(m - Math.Round(m)) < 0.0001 ? $"{Math.Round(m):0}M" : $"{m:0.##}M");
+            return sign + (Math.Abs(m - Math.Round(m)) < 0.0001 ? $"{Math.Round(m):0}M" : $"{m:0.##}M") + " ₫";
         }
         if (x >= 1_000d)
         {
             var k = x / 1_000d;
-            return sign + "$" + (Math.Abs(k - Math.Round(k)) < 0.0001 ? $"{Math.Round(k):0}K" : $"{k:0.##}K");
+            return sign + (Math.Abs(k - Math.Round(k)) < 0.0001 ? $"{Math.Round(k):0}K" : $"{k:0.##}K") + " ₫";
         }
         if (x >= 1)
-            return sign + "$" + Math.Round(usd, 2).ToString("0.##", CultureInfo.InvariantCulture);
-        return sign + "$" + usd.ToString("0.##", CultureInfo.InvariantCulture);
+            return sign + Math.Round(vnd, 0).ToString("N0", CultureInfo.InvariantCulture) + " ₫";
+        return sign + vnd.ToString("0.##", CultureInfo.InvariantCulture) + " ₫";
     }
 
     private static string ShortName(string name, int max = 22)

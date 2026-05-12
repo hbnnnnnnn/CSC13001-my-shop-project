@@ -67,9 +67,9 @@ public sealed class ProductListItem
 
     public string RatingText => $"{Rating:0.0} ({ReviewCount})";
 
-    public string PriceText => $"${Price:0}";
+    public string PriceText => $"{Price:N0} ₫";
 
-    public string? CompareAtText => CompareAtPrice is { } c && c > Price ? $"${c:0}" : null;
+    public string? CompareAtText => CompareAtPrice is { } c && c > Price ? $"{c:N0} ₫" : null;
 
     public bool ShowCompareAt => CompareAtText is not null;
 

@@ -119,9 +119,9 @@
                     FontWeight="Bold"
                     Foreground="{StaticResource ShellTextStrongBrush}"
                 >
-                    <Run Text="LUMINA " />
+                    <Run Text="MY " />
                     <Run
-                        Text="HAVEN"
+                        Text="SHOP"
                         Foreground="{StaticResource ShellAccentBrush}"
                         FontWeight="Light"
                     />

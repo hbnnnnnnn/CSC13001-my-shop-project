@@ -608,6 +608,96 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
 
+                        <!-- ── Error Banner ── -->
+                        <Border
+                            Visibility="{Binding HasError}"
+                            Background="#FFFEF2F2"
+                            BorderBrush="#FFFECACA"
+                            BorderThickness="1"
+                            CornerRadius="10"
+                            Padding="16,12"
+                            Margin="24,16,24,0"
+                        >
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <FontIcon
+                                    Glyph="&#xE7BA;"
+                                    FontSize="16"
+                                    Foreground="#FFEF4444"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,12,0"
+                                />
+                                <TextBlock
+                                    Grid.Column="1"
+                                    Text="{Binding ErrorMessage}"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    Foreground="#FFEF4444"
+                                    VerticalAlignment="Center"
+                                    TextWrapping="Wrap"
+                                />
+                            </Grid>
+                        </Border>
+
+                        <!-- ── Empty State: First time (no orders at all) ── -->
+                        <StackPanel
+                            Visibility="{Binding ShowFirstTimeEmpty}"
+                            HorizontalAlignment="Center"
+                            Spacing="8"
+                            Padding="0,48"
+                        >
+                            <FontIcon
+                                Glyph="&#xE8C7;"
+                                FontSize="48"
+                                Foreground="#FFD1D5DB"
+                                HorizontalAlignment="Center"
+                            />
+                            <TextBlock
+                                Text="Chưa có đơn hàng nào"
+                                FontSize="16"
+                                FontWeight="SemiBold"
+                                Foreground="#FF6B7280"
+                                HorizontalAlignment="Center"
+                            />
+                            <TextBlock
+                                Text="Bắt đầu bằng cách tạo đơn hàng đầu tiên!"
+                                FontSize="13"
+                                Foreground="#FF9CA3AF"
+                                HorizontalAlignment="Center"
+                            />
+                        </StackPanel>
+
+                        <!-- ── Empty State: Filter/search returned no results ── -->
+                        <StackPanel
+                            Visibility="{Binding ShowNoResults}"
+                            HorizontalAlignment="Center"
+                            Spacing="8"
+                            Padding="0,48"
+                        >
+                            <FontIcon
+                                Glyph="&#xE721;"
+                                FontSize="48"
+                                Foreground="#FFD1D5DB"
+                                HorizontalAlignment="Center"
+                            />
+                            <TextBlock
+                                Text="Không tìm thấy đơn hàng phù hợp"
+                                FontSize="16"
+                                FontWeight="SemiBold"
+                                Foreground="#FF6B7280"
+                                HorizontalAlignment="Center"
+                            />
+                            <TextBlock
+                                Text="Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm"
+                                FontSize="13"
+                                Foreground="#FF9CA3AF"
+                                HorizontalAlignment="Center"
+                            />
+                        </StackPanel>
+
                         <!-- ── Pagination Footer ── -->
                         <Border
                             BorderBrush="{StaticResource ShellBorderBrush}"

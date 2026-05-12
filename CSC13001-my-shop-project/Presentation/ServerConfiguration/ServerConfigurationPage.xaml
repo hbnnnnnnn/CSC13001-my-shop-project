@@ -182,8 +182,8 @@
 
             <Grid Margin="40">
                 <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="22">
-                    <Run Text="LUMINA " Foreground="White" FontWeight="Bold" />
-                    <Run Text="HAVEN" Foreground="{StaticResource BrandColor}" FontWeight="Light" />
+                    <Run Text="MY " Foreground="White" FontWeight="Bold" />
+                    <Run Text="SHOP" Foreground="{StaticResource BrandColor}" FontWeight="Light" />
                 </TextBlock>
 
                 <StackPanel VerticalAlignment="Bottom" Spacing="16">
@@ -467,7 +467,7 @@
                                             <TextBox
                                                 x:Name="DatabaseInput"
                                                 Style="{StaticResource AuthFieldTextBoxStyle}"
-                                                PlaceholderText="luminahaven_db"
+                                                PlaceholderText="myshop_db"
                                                 VerticalAlignment="Center"
                                                 Text="{Binding Database, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                 Tag="Database"
