@@ -7,7 +7,7 @@ const cacheService = require("../utils/cache.util.js");
 
 // Column names we expect (lowercased for resilient matching)
 const REQUIRED_FIELDS = ["sku", "name", "price", "stock"];
-const OPTIONAL_FIELDS = ["description", "supplier", "category_name"];
+const OPTIONAL_FIELDS = ["description", "supplier", "category_name", "images"];
 const ALL_FIELDS = [...REQUIRED_FIELDS, ...OPTIONAL_FIELDS];
 
 /**
@@ -45,7 +45,39 @@ function validateRow(row) {
     return `Invalid stock: "${row.stock}" (must be a non-negative integer)`;
   }
 
+  // Validate images URLs if provided
+  if (row.images && String(row.images).trim() !== "") {
+    const imageUrls = String(row.images)
+      .split(",")
+      .map((url) => url.trim())
+      .filter((url) => url !== "");
+
+    for (const url of imageUrls) {
+      try {
+        new URL(url); // Validate URL format
+      } catch (e) {
+        return `Invalid image URL: "${url}" (must be a valid URL)`;
+      }
+    }
+  }
+
   return null;
+}
+
+/**
+ * Parse images from comma-separated string into array of URLs
+ */
+function parseImages(imagesString) {
+  if (!imagesString || String(imagesString).trim() === "") {
+    return null;
+  }
+
+  const urls = String(imagesString)
+    .split(",")
+    .map((url) => url.trim())
+    .filter((url) => url !== "");
+
+  return urls.length > 0 ? urls : null;
 }
 
 /**
@@ -157,6 +189,7 @@ async function importProductsFromExcel(fileBuffer) {
     description: row.description ? String(row.description).trim() : null,
     supplier: row.supplier ? String(row.supplier).trim() : null,
     category_id: row.category_id || null,
+    images: parseImages(row.images),
   }));
 
   // 5. Upsert in a single batch
