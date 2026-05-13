@@ -184,8 +184,70 @@
                             <Grid>
                                 <Border CornerRadius="16" Height="360" Background="#FFF5F3EF">
                                     <Image
-                                        Source="{Binding Product.Thumbnail, Mode=OneWay}"
+                                        Source="{Binding CurrentImage, Mode=OneWay}"
                                         Stretch="UniformToFill"
+                                    />
+                                </Border>
+                                <Button
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Center"
+                                    Margin="12,0,0,0"
+                                    Width="36"
+                                    Height="36"
+                                    Padding="0"
+                                    CornerRadius="18"
+                                    Background="#CCFFFFFF"
+                                    BorderBrush="#FFE5E2DC"
+                                    BorderThickness="1"
+                                    Command="{Binding PrevImageCommand}"
+                                    Visibility="{Binding HasMultipleImages, Converter={StaticResource BoolToVisConverter}}"
+                                >
+                                    <TextBlock
+                                        FontSize="18"
+                                        FontWeight="Bold"
+                                        Foreground="{StaticResource DetailPrimaryTextBrush}"
+                                        Text="‹"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                    />
+                                </Button>
+                                <Button
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,12,0"
+                                    Width="36"
+                                    Height="36"
+                                    Padding="0"
+                                    CornerRadius="18"
+                                    Background="#CCFFFFFF"
+                                    BorderBrush="#FFE5E2DC"
+                                    BorderThickness="1"
+                                    Command="{Binding NextImageCommand}"
+                                    Visibility="{Binding HasMultipleImages, Converter={StaticResource BoolToVisConverter}}"
+                                >
+                                    <TextBlock
+                                        FontSize="18"
+                                        FontWeight="Bold"
+                                        Foreground="{StaticResource DetailPrimaryTextBrush}"
+                                        Text="›"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                    />
+                                </Button>
+                                <Border
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Bottom"
+                                    Margin="0,0,16,16"
+                                    Background="#99000000"
+                                    CornerRadius="12"
+                                    Padding="10,4"
+                                    Visibility="{Binding HasMultipleImages, Converter={StaticResource BoolToVisConverter}}"
+                                >
+                                    <TextBlock
+                                        FontSize="11"
+                                        FontWeight="SemiBold"
+                                        Foreground="White"
+                                        Text="{Binding ImageCounterText, Mode=OneWay}"
                                     />
                                 </Border>
                                 <Border

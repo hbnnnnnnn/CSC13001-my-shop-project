@@ -1,7 +1,10 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text.Json;
+using CSC13001_my_shop_project.Models;
 using CSC13001_my_shop_project.Presentation.OrderList;
+using Microsoft.UI.Xaml.Media;
+using Windows.UI;
 
 namespace CSC13001_my_shop_project.Services;
 
@@ -137,6 +140,131 @@ public class OrderService
         );
 
         return MapOrderItem(data.GetProperty("order"));
+    }
+
+    /// <summary>
+    /// Returns up to <paramref name="take"/> most recent orders that contain the given product.
+    /// Backend has no product filter on <c>orders</c>, so this scans recent orders (CREATED_TIME DESC)
+    /// page by page and filters client-side until <paramref name="take"/> matches are found or
+    /// <paramref name="maxScan"/> orders have been inspected.
+    /// </summary>
+    public async Task<List<OrderModel>> GetRecentOrdersForProductAsync(
+        string productId,
+        int take = 5,
+        int maxScan = 200
+    )
+    {
+        if (string.IsNullOrWhiteSpace(productId))
+            return new List<OrderModel>();
+
+        var altBrush = new SolidColorBrush(Color.FromArgb(0xFF, 0xF9, 0xFA, 0xFB));
+        var transparent = new SolidColorBrush(Color.FromArgb(0x00, 0x00, 0x00, 0x00));
+
+        var matches = new List<OrderModel>();
+        const int pageSize = 50;
+        var scanned = 0;
+        var page = 1;
+
+        while (matches.Count < take && scanned < maxScan)
+        {
+            var data = await _graphql.QueryAsync(
+                @"query RecentOrdersForProduct($page: Int, $limit: Int, $sort: OrderSortInput) {
+                    orders(page: $page, limit: $limit, sort: $sort) {
+                        data {
+                            order_id
+                            created_time
+                            status
+                            customer { name }
+                            items { product_id quantity total_price }
+                        }
+                        totalPages
+                    }
+                }",
+                new
+                {
+                    page,
+                    limit = pageSize,
+                    sort = new { field = "CREATED_TIME", order = "DESC" }
+                }
+            );
+
+            var ordersEl = data.GetProperty("orders");
+            var totalPages = ordersEl.GetProperty("totalPages").GetInt32();
+            var arr = ordersEl.GetProperty("data");
+
+            foreach (var o in arr.EnumerateArray())
+            {
+                scanned++;
+
+                if (!o.TryGetProperty("items", out var itemsEl) || itemsEl.ValueKind != JsonValueKind.Array)
+                    continue;
+
+                var qty = 0;
+                long lineTotal = 0;
+                var hasMatch = false;
+                foreach (var item in itemsEl.EnumerateArray())
+                {
+                    if (!item.TryGetProperty("product_id", out var pidEl) || pidEl.ValueKind == JsonValueKind.Null)
+                        continue;
+                    var pid = pidEl.ValueKind == JsonValueKind.String
+                        ? pidEl.GetString()
+                        : pidEl.ToString();
+                    if (pid != productId) continue;
+
+                    hasMatch = true;
+                    qty += item.GetProperty("quantity").GetInt32();
+                    lineTotal += item.GetProperty("total_price").GetInt64();
+                }
+
+                if (!hasMatch) continue;
+
+                var orderId = o.GetProperty("order_id").GetString() ?? "";
+                var status = o.TryGetProperty("status", out var st) && st.ValueKind != JsonValueKind.Null
+                    ? st.GetString() ?? "Unknown"
+                    : "Unknown";
+                var customer = "—";
+                if (o.TryGetProperty("customer", out var cust) && cust.ValueKind == JsonValueKind.Object)
+                {
+                    customer = cust.TryGetProperty("name", out var cn) && cn.ValueKind != JsonValueKind.Null
+                        ? cn.GetString() ?? "—"
+                        : "—";
+                }
+                var date = FormatDate(o.TryGetProperty("created_time", out var ct) && ct.ValueKind != JsonValueKind.Null
+                    ? ct.GetString()
+                    : null);
+
+                var bg = matches.Count % 2 == 0 ? transparent : altBrush;
+
+                matches.Add(new OrderModel(
+                    orderId: $"#{orderId}",
+                    customer: customer,
+                    date: date,
+                    quantity: qty,
+                    total: $"{lineTotal:N0} ₫",
+                    status: status,
+                    rowBackground: bg
+                ));
+
+                if (matches.Count >= take) break;
+            }
+
+            if (page >= totalPages) break;
+            page++;
+        }
+
+        return matches;
+    }
+
+    private static string FormatDate(string? raw)
+    {
+        if (string.IsNullOrEmpty(raw)) return "";
+        if (DateTimeOffset.TryParse(raw, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dto))
+            return dto.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
+        if (long.TryParse(raw, out var unixMs) && unixMs > 1_000_000_000_000)
+            return DateTimeOffset.FromUnixTimeMilliseconds(unixMs).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
+        if (long.TryParse(raw, out var unixSec) && unixSec > 1_000_000_000)
+            return DateTimeOffset.FromUnixTimeSeconds(unixSec).ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
+        return raw.Length > 10 ? raw[..10] : raw;
     }
 
     // ────────────────────────────────────────────────────

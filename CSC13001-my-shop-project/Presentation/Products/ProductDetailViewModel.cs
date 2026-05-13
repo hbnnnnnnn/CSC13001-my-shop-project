@@ -5,6 +5,7 @@ using System.Net.Http;
 using CSC13001_my_shop_project.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Uno.Extensions.Navigation;
 using Windows.ApplicationModel.DataTransfer;
 
@@ -15,6 +16,7 @@ public partial class ProductDetailViewModel : ObservableObject
     private readonly INavigator _navigator;
     private readonly IProductService _productService;
     private readonly IImageUploadService _imageUpload;
+    private readonly OrderService _orderService;
     private readonly ProductDetailArgs _args;
     private ProductDto? _currentProductDto;
 
@@ -22,12 +24,14 @@ public partial class ProductDetailViewModel : ObservableObject
         INavigator navigator,
         IProductService productService,
         IImageUploadService imageUpload,
+        OrderService orderService,
         ProductDetailArgs args
     )
     {
         _navigator = navigator;
         _productService = productService;
         _imageUpload = imageUpload;
+        _orderService = orderService;
         _args = args;
         Product = ProductDtoMapping.DetailLoadingModel();
         breadcrumbs =
@@ -36,6 +40,7 @@ public partial class ProductDetailViewModel : ObservableObject
             new BreadcrumbItem { Label = "…", IsClickable = false },
         ];
         _ = LoadProductAsync();
+        _ = LoadRecentOrdersAsync();
     }
 
     [ObservableProperty]
@@ -52,6 +57,59 @@ public partial class ProductDetailViewModel : ObservableObject
 
     public ObservableCollection<OrderModel> RecentOrders { get; } = new();
 
+    private List<string> _images = new();
+    private int _imageIndex;
+
+    [ObservableProperty]
+    private BitmapImage? currentImage;
+
+    [ObservableProperty]
+    private string imageCounterText = "";
+
+    [ObservableProperty]
+    private bool hasMultipleImages;
+
+    private void ApplyImages(IEnumerable<string>? sources)
+    {
+        _images = (sources ?? Enumerable.Empty<string>())
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .ToList();
+        _imageIndex = 0;
+        UpdateCurrentImage();
+    }
+
+    private void UpdateCurrentImage()
+    {
+        if (_images.Count == 0)
+        {
+            CurrentImage = null;
+            ImageCounterText = "";
+            HasMultipleImages = false;
+            return;
+        }
+        if (_imageIndex < 0) _imageIndex = _images.Count - 1;
+        if (_imageIndex >= _images.Count) _imageIndex = 0;
+        CurrentImage = new BitmapImage(new Uri(_images[_imageIndex]));
+        ImageCounterText = $"{_imageIndex + 1} / {_images.Count}";
+        HasMultipleImages = _images.Count > 1;
+    }
+
+    [RelayCommand]
+    private void PrevImage()
+    {
+        if (_images.Count <= 1) return;
+        _imageIndex--;
+        UpdateCurrentImage();
+    }
+
+    [RelayCommand]
+    private void NextImage()
+    {
+        if (_images.Count <= 1) return;
+        _imageIndex++;
+        UpdateCurrentImage();
+    }
+
     private async Task LoadProductAsync()
     {
         try
@@ -65,6 +123,7 @@ public partial class ProductDetailViewModel : ObservableObject
                 Product = dto is null
                     ? ProductDtoMapping.DetailNotFoundModel(_args.GraphQlProductId)
                     : ProductDtoMapping.ToDetailModel(dto);
+                ApplyImages(dto?.Images);
                 Breadcrumbs =
                 [
                     new BreadcrumbItem { Label = "All Products", IsClickable = true },
@@ -84,6 +143,25 @@ public partial class ProductDetailViewModel : ObservableObject
                     new BreadcrumbItem { Label = "Error", IsClickable = false },
                 ];
             });
+        }
+    }
+
+    private async Task LoadRecentOrdersAsync()
+    {
+        try
+        {
+            var orders = await _orderService
+                .GetRecentOrdersForProductAsync(_args.GraphQlProductId, take: 5)
+                .ConfigureAwait(false);
+            App.RunOnUIThread(() =>
+            {
+                RecentOrders.Clear();
+                foreach (var o in orders) RecentOrders.Add(o);
+            });
+        }
+        catch
+        {
+            App.RunOnUIThread(() => RecentOrders.Clear());
         }
     }
 
