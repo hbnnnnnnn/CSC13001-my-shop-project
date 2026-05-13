@@ -39,6 +39,9 @@ services:
       - ./database/migrations/03_add_cost_price_to_products.sql:/docker-entrypoint-initdb.d/03_add_cost_price_to_products.sql
       - ./database/seeds/01_dummy_data.sql:/docker-entrypoint-initdb.d/04_seed.sql
       - ./database/seeds/02_update_cost_price.sql:/docker-entrypoint-initdb.d/05_update_cost_price.sql
+      - ./database/seeds/04_furniture_seed.sql:/docker-entrypoint-initdb.d/06_furniture_seed.sql
+      - ./database/seeds/05_furniture_reports_demo.sql:/docker-entrypoint-initdb.d/07_furniture_reports_demo.sql
+      - ./database/seeds/06_furniture_expand.sql:/docker-entrypoint-initdb.d/08_furniture_expand.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d myshop"]
       interval: 5s
