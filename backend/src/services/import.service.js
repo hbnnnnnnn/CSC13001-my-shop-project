@@ -115,7 +115,30 @@ async function importProductsFromExcel(fileBuffer) {
     validRows.push({ ...row, _rowNumber: rowNumber });
   }
 
-  if (validRows.length === 0) {
+  // 2.5 Detect duplicate SKUs inside the uploaded file.
+  // PostgreSQL cannot process one ON CONFLICT target row more than once
+  // in a single INSERT statement, so we keep the last occurrence and mark
+  // earlier occurrences as overwritten.
+  const rowsBySku = new Map();
+
+  for (const row of validRows) {
+    const normalizedSku = String(row.sku).trim();
+    const previousRow = rowsBySku.get(normalizedSku);
+
+    if (previousRow) {
+      errors.push({
+        row: previousRow._rowNumber,
+        sku: normalizedSku,
+        reason: `Duplicate SKU in upload: "${normalizedSku}" overwritten by row ${row._rowNumber}`,
+      });
+    }
+
+    rowsBySku.set(normalizedSku, row);
+  }
+
+  const deduplicatedRows = [...rowsBySku.values()];
+
+  if (deduplicatedRows.length === 0) {
     return {
       summary: {
         total_rows: rawRows.length,
@@ -130,7 +153,7 @@ async function importProductsFromExcel(fileBuffer) {
   // 3. Resolve category names → category IDs
   const uniqueCategoryNames = [
     ...new Set(
-      validRows
+      deduplicatedRows
         .map((r) => r.category_name)
         .filter(
           (name) =>
@@ -151,7 +174,7 @@ async function importProductsFromExcel(fileBuffer) {
 
   // Separate rows whose category_name doesn't exist
   const rowsToUpsert = [];
-  for (const row of validRows) {
+  for (const row of deduplicatedRows) {
     if (row.category_name && String(row.category_name).trim() !== "") {
       const catName = String(row.category_name).trim();
       const catId = categoryMap[catName.toLowerCase()];
